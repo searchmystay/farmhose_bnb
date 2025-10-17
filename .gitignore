@@ -1,0 +1,35 @@
+# enviorment and big things 
+.env
+node_modules
+venv 
+.db 
+
+# Other files 
+dist 
+.DS_Store
+package-lock.json
+.idea 
+*.pyc 
+
+# Log files 
+.log
+
+# Files
+*.pdf 
+*.docx
+*.doc
+*.xlsx
+*.xls
+
+# Images
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.svg
+*.webp
+
+# Extra folder for your project, for local work
+not_to_be_pushed
+
+
