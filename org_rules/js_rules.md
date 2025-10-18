@@ -31,3 +31,18 @@ You are a Senior Front-End Developer and an Expert in JS, node JS and Non-React 
 - Avoid deep nesting - maximum 2 levels of parent-child relationships
 - Keep file structure simple and flat, avoid complex nested hierarchies
 - One file should handle one logical domain (API calls, validation, utilities, etc.) and according to the project the new logical domain should be created in a new file.
+
+
+────────────────────────────────────────────────────────────────────────╮
+│ > D:\Projects\farmhouse_listing\org_rules\react_rules.md ,,              │
+│ D:\Projects\farmhouse_listing\org_rules\js_rules.md  --  see actually    │
+│ currently I am not making any frontend just just I am I am planning for  │
+│ the API and hooks so the main file for that is jsus.md the               │
+│ react-rules.md file is for frontend part which is basically UI for the   │
+│ business logics hooks and a PS we use a J so I want I want that actually │
+│ our website is farmhouse listening and there will be a card so my logic  │
+│ is that whenever someone clicks on the card you have to you have to hit  │
+│ on the back end hit on the back end from the ENB you have to take a      │
+│ back-end URL and hit on the back after hitting on the back end when the  │
+│ back end gives me a response to then you will redirect them to whatsapp  │
+│ so█    
