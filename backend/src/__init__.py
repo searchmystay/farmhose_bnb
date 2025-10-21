@@ -11,6 +11,6 @@ def create_app():
          allow_headers=["Content-Type", "Authorization"],
          methods=["GET", "POST", "OPTIONS", "PUT", "DELETE", "PATCH"],
          max_age=3600
-         )
+     )
 
     return app
