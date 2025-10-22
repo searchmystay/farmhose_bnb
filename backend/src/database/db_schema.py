@@ -101,7 +101,13 @@ def get_farmhouse_schema() -> Dict:
                 "bsonType": "array",
                 "description": "List of available amenities",
                 "items": {
-                    "bsonType": "string"
+                    "bsonType": "object",
+                    "description": "Amenity object with dynamic keys",
+                    "additionalProperties": {
+                        "bsonType": "string",
+                        "enum": ["true", "false"],
+                        "description": "Availability status as string"
+                    }
                 }
             },
             "credit_balance": {
