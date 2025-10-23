@@ -1,6 +1,7 @@
 from flask import Flask
 from flask_cors import CORS
 from src.routes.website_routes import website_bp
+from src.routes.admin_routes import admin_bp
 
 
 def create_app():
@@ -15,5 +16,6 @@ def create_app():
      )
 
     app.register_blueprint(website_bp)
+    app.register_blueprint(admin_bp)
 
     return app
