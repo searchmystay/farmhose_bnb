@@ -1,1 +1,31 @@
 number,name_of_part,description_of_part,is_completed
+1,Database Setup & Schema,Setup MongoDB connection and apply farmhouse schema with validation rules,true
+2,Backend API Structure,Create Flask app structure with routes folder and basic error handling,false
+3,File Upload System,Implement document upload functionality for Aadhar PAN and property documents,false
+4,Farmhouse Registration API,Create backend API endpoints for farmhouse owner registration and document submission,false
+5,Admin Authentication System,Implement admin login/logout functionality with session management,false
+6,Admin Dashboard Backend,Create API endpoints for admin dashboard data (pending approvals revenue analytics),false
+7,Farmhouse Approval API,Backend endpoints for admin to approve/reject farmhouses and view documents,false
+8,Credit Management API,Backend system for admin to add credits and track farmhouse credit balance,false
+9,Public Farmhouse Listing API,Create API endpoints to fetch approved farmhouses with search and filter capabilities,false
+10,Lead Generation API,Implement lead tracking system and credit deduction logic for contact attempts,false
+11,WhatsApp Integration Backend,Backend logic to validate credit balance and generate WhatsApp redirect URLs,false
+12,Analytics & Reports API,Create endpoints for admin analytics (revenue leads popular farmhouses),false
+13,Frontend Project Setup,Initialize React app with Vite and setup routing structure,false
+14,UI Component Library,Create reusable components (buttons forms cards modals) following design system,false
+15,Farmhouse Registration Form,Frontend form for farmhouse owners to register with document upload interface,false
+16,Admin Login Page,Create admin authentication interface with form validation,false
+17,Admin Dashboard UI,Build admin dashboard showing key metrics pending approvals and quick actions,false
+18,Farmhouse Management Interface,Admin interface to view pending approvals document viewer and approval workflow,false
+19,Credit Management Interface,Admin UI to add credits view credit history and manage farmhouse balances,false
+20,Public Homepage Design,Create attractive homepage with farmhouse grid layout and search functionality,false
+21,Farmhouse Detail Page,Detailed view page showing farmhouse info photos amenities and contact button,false
+22,Search & Filter Interface,Advanced search interface with location amenities price range filters,false
+23,Analytics Dashboard UI,Admin analytics interface with charts graphs and detailed reports,false
+24,WhatsApp Contact Integration,Frontend integration for WhatsApp redirect with user confirmation flow,false
+25,Responsive Design Implementation,Ensure all pages work seamlessly on mobile tablet and desktop devices,false
+26,Error Handling & Validation,Implement comprehensive error handling and form validation across the application,false
+27,API Integration & Testing,Connect frontend to backend APIs and test all user workflows end-to-end,false
+28,Data Seeding & Demo Content,Create sample farmhouse data and admin accounts for testing and demo purposes,false
+29,Performance Optimization,Optimize loading times image compression and implement lazy loading,false
+30,Final Testing & Bug Fixes,Comprehensive testing of all features and fixing any discovered issues,false
