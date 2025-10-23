@@ -8,8 +8,8 @@ number,name_of_part,description_of_part,is_completed
 7,Farmhouse Approval API,Backend endpoints for admin to approve/reject farmhouses and view documents,false
 8,Credit Management API,Backend system for admin to add credits and track farmhouse credit balance,false
 9,Public Farmhouse Listing API,Create API endpoints to fetch approved farmhouses with search and filter capabilities,true
-10,Lead Generation API,Implement lead tracking system and credit deduction logic for contact attempts,false
-11,WhatsApp Integration Backend,Backend logic to validate credit balance and generate WhatsApp redirect URLs,false
+10,Lead Generation API,Implement lead tracking system and credit deduction logic for contact attempts,true
+11,WhatsApp Integration Backend,Backend logic to validate credit balance and generate WhatsApp redirect URLs,true
 12,Analytics & Reports API,Create endpoints for admin analytics (revenue leads popular farmhouses),false
 13,Frontend Project Setup,Initialize React app with Vite and setup routing structure,false
 14,UI Component Library,Create reusable components (buttons forms cards modals) following design system,false
