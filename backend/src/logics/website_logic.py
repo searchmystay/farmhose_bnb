@@ -3,8 +3,7 @@ from src.utils.exception_handler import handle_exceptions
 
 
 @handle_exceptions
-def get_approved_farmhouses():
-    query_filter = {"status": "active", "type": "farmhouse"}
+def get_approved_properties_by_type(query_filter):
     projection = {
         "_id": 1,
         "title": 1,
@@ -15,14 +14,14 @@ def get_approved_farmhouses():
         "images": 1
     }
     
-    farmhouses_list = db_find_many("farmhouses", query_filter, projection)
+    properties_list = db_find_many("farmhouses", query_filter, projection)
     
-    processed_farmhouses = []
-    for farmhouse in farmhouses_list:
-        processed_farmhouse = process_farmhouse_for_listing(farmhouse)
-        processed_farmhouses.append(processed_farmhouse)
+    processed_properties = []
+    for property_data in properties_list:
+        processed_property = process_farmhouse_for_listing(property_data)
+        processed_properties.append(processed_property)
     
-    return processed_farmhouses
+    return processed_properties
 
 
 @handle_exceptions  
@@ -53,3 +52,17 @@ def process_farmhouse_for_listing(farmhouse_data):
     }
     
     return processed_data
+
+
+@handle_exceptions
+def get_approved_farmhouses():
+    query_filter = {"status": "active", "type": "farmhouse"}
+    farmhouses_list = get_approved_properties_by_type(query_filter)
+    return farmhouses_list
+
+
+@handle_exceptions
+def get_approved_bnbs():
+    query_filter = {"status": "active", "type": "bnb"}
+    bnbs_list = get_approved_properties_by_type(query_filter)
+    return bnbs_list
