@@ -13,7 +13,7 @@ def list_farmhouses():
     
     response_data = {
         "success": True,
-        "data": farmhouses_data,
+        "backend_data": farmhouses_data,
     }
     
     return jsonify(response_data)
@@ -26,7 +26,7 @@ def list_bnbs():
     
     response_data = {
         "success": True,
-        "data": bnbs_data,
+        "backend_data": bnbs_data,
     }
     
     return jsonify(response_data)
@@ -40,7 +40,7 @@ def get_property_detail(property_id):
     
     response_data = {
         "success": True,
-        "data": property_data
+        "backend_data": property_data
     }
     
     return jsonify(response_data)
