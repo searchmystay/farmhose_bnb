@@ -1,5 +1,7 @@
-from src.database.db_common_operations import db_find_many, db_find_one
+from src.database.db_common_operations import db_find_many, db_find_one, db_insert_one, db_update_one
 from src.utils.exception_handler import handle_exceptions, AppException
+from src.logics.cloudfare_bucket import upload_farmhouse_image_to_r2, upload_farmhouse_document_to_r2
+from bson import ObjectId
 
 
 @handle_exceptions
@@ -29,7 +31,7 @@ def build_complete_address(location_data):
 @handle_exceptions
 def process_property_for_detail(property_data):
     property_id = str(property_data.get("_id"))
-    title = property_data.get("title", "")
+    name = property_data.get("name", "")
     full_description = property_data.get("description", "")
     images = property_data.get("images", [])
     amenities_data = property_data.get("amenities", [])
@@ -42,7 +44,7 @@ def process_property_for_detail(property_data):
     
     processed_data = {
         "id": property_id,
-        "title": title,
+        "name": name,
         "description": full_description,
         "images": images,
         "amenities": all_amenities,
@@ -68,7 +70,7 @@ def extract_available_amenities(amenities_data):
 @handle_exceptions  
 def process_farmhouse_for_listing(farmhouse_data):
     farmhouse_id = str(farmhouse_data.get("_id"))
-    title = farmhouse_data.get("title", "")
+    name = farmhouse_data.get("name", "")
     full_description = farmhouse_data.get("description", "")
     images = farmhouse_data.get("images", [])
     amenities_data = farmhouse_data.get("amenities", [])
@@ -83,7 +85,7 @@ def process_farmhouse_for_listing(farmhouse_data):
     
     processed_data = {
         "id": farmhouse_id,
-        "title": title,
+        "name": name,
         "description": truncated_description,
         "images": images,
         "amenities": available_amenities
@@ -96,7 +98,7 @@ def process_farmhouse_for_listing(farmhouse_data):
 def get_approved_properties_by_type(query_filter):
     projection = {
         "_id": 1,
-        "title": 1,
+        "name": 1,
         "description": 1,
         "images": 1,
         "amenities": 1
@@ -117,7 +119,7 @@ def get_property_details(property_id):
     query_filter = {"_id": property_id, "status": "active"}
     projection = {
         "_id": 1,
-        "title": 1,
+        "name": 1,
         "description": 1,
         "images": 1,
         "amenities": 1,
@@ -146,3 +148,86 @@ def get_approved_bnbs():
     query_filter = {"status": "active", "type": "bnb"}
     bnbs_list = get_approved_properties_by_type(query_filter)
     return bnbs_list
+
+
+@handle_exceptions
+def validate_farmhouse_data(farmhouse_data):
+    required_fields = ["name", "description", "type", "location", "contact_info", "amenities"]
+    
+    for field in required_fields:
+        if field not in farmhouse_data or not farmhouse_data[field]:
+            raise AppException(f"Missing required field: {field}")
+    
+    location_fields = ["address", "city", "state", "pincode"]
+    location_data = farmhouse_data.get("location", {})
+    
+    for loc_field in location_fields:
+        if loc_field not in location_data or not location_data[loc_field]:
+            raise AppException(f"Missing location field: {loc_field}")
+    
+    return True
+
+
+@handle_exceptions
+def upload_farmhouse_images(image_files, farmhouse_id):
+    uploaded_images = []
+    
+    for index, image_file in enumerate(image_files):
+        if image_file and image_file.filename:
+            image_url = upload_farmhouse_image_to_r2(image_file, farmhouse_id, index)
+            uploaded_images.append(image_url)
+    
+    return uploaded_images
+
+
+@handle_exceptions
+def upload_farmhouse_documents(document_files, farmhouse_id):
+    uploaded_documents = []
+    document_types = ["aadhar", "pan", "property_docs"]
+    
+    for index, document_file in enumerate(document_files):
+        doc_type = document_types[index] if index < len(document_types) else f"document_{index}"
+        document_url = upload_farmhouse_document_to_r2(document_file, farmhouse_id, doc_type)
+        uploaded_documents.append(document_url)
+    
+    return uploaded_documents
+
+
+@handle_exceptions
+def update_farmhouse_db_with_file_urls(farmhouse_id, image_urls, document_urls):
+    update_data = {
+        "images": image_urls,
+        "documents": document_urls
+    }
+    
+    query_filter = {"_id": ObjectId(farmhouse_id)}
+    update_result = db_update_one("farmhouses", query_filter, {"$set": update_data})
+    
+    return update_result
+
+
+@handle_exceptions
+def register_farmhouse(farmhouse_data, image_files, document_files):
+    validate_farmhouse_data(farmhouse_data)
+    
+    farmhouse_record = {
+        "name": farmhouse_data.get("name"),
+        "description": farmhouse_data.get("description"),
+        "type": farmhouse_data.get("type"),
+        "location": farmhouse_data.get("location"),
+        "contact_info": farmhouse_data.get("contact_info"),
+        "amenities": farmhouse_data.get("amenities"),
+        "status": "pending_approval",
+        "images": [],
+        "documents": [],
+        "credit_balance": 0
+    }
+    
+    insert_result = db_insert_one("farmhouses", farmhouse_record)
+    farmhouse_id = str(insert_result.inserted_id)
+    
+    uploaded_images = upload_farmhouse_images(image_files, farmhouse_id)
+    uploaded_documents = upload_farmhouse_documents(document_files, farmhouse_id)
+    update_farmhouse_db_with_file_urls(farmhouse_id, uploaded_images, uploaded_documents)
+    
+    return True

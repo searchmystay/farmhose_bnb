@@ -9,7 +9,7 @@ def get_farmhouse_schema() -> Dict:
                 "bsonType": "objectId",
                 "description": "Unique identifier for the farmhouse"
             },
-            "title": {
+            "name": {
                 "bsonType": "string",
                 "description": "Name/title of the farmhouse",
                 "minLength": 3,
@@ -117,7 +117,7 @@ def get_farmhouse_schema() -> Dict:
             "status": {
                 "bsonType": "string",
                 "description": "Status of the farmhouse listing",
-                "enum": ["pending", "active", "inactive"]
+                "enum": ["pending_approval", "active", "inactive"]
             },
             "created_at": {
                 "bsonType": "date",

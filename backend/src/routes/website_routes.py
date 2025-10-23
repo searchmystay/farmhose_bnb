@@ -1,9 +1,9 @@
 from flask import Blueprint, jsonify, request
-from src.logics.website_logic import get_approved_farmhouses, get_approved_bnbs, get_property_details
-from src.utils.exception_handler import handle_route_exceptions
+from src.logics.website_logic import get_approved_farmhouses, get_approved_bnbs, get_property_details, register_farmhouse
+from src.utils.exception_handler import handle_route_exceptions, AppException
 from bson import ObjectId
 
-website_bp = Blueprint('website', __name__, url_prefix='/api/website')
+website_bp = Blueprint('website', __name__)
 
 
 @website_bp.route('/farmhouse-list', methods=['GET'])
@@ -44,3 +44,23 @@ def get_property_detail(property_id):
     }
     
     return jsonify(response_data)
+
+
+@website_bp.route('/register-farmhouse', methods=['POST'])
+@handle_route_exceptions
+def register_farmhouse_route():
+    farmhouse_data = request.get_json()
+    image_files = request.files.getlist('images')
+    document_files = request.files.getlist('documents')
+    
+    if not farmhouse_data and image_files and document_files:
+        raise AppException("No Complete data provided")
+    
+    register_farmhouse(farmhouse_data, image_files, document_files)
+    
+    response_data = {
+        "success": True,
+        "message": "Farmhouse registered successfully",
+    }
+    
+    return jsonify(response_data), 200
