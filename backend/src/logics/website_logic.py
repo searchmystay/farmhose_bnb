@@ -37,11 +37,9 @@ def process_property_for_detail(property_data):
     images = property_data.get("images", [])
     amenities_data = property_data.get("amenities", [])
     location_data = property_data.get("location", {})
-    contact_info = property_data.get("contact_info", {})
     
     all_amenities = extract_all_amenities(amenities_data)
     complete_address = build_complete_address(location_data)
-    whatsapp_link = property_data.get("whatsapp_link", "")
     
     processed_data = {
         "id": property_id,
@@ -49,8 +47,7 @@ def process_property_for_detail(property_data):
         "description": full_description,
         "images": images,
         "amenities": all_amenities,
-        "address": complete_address,
-        "whatsapp_link": whatsapp_link
+        "address": complete_address
     }
     
     return processed_data
@@ -124,8 +121,7 @@ def get_property_details(property_id):
         "description": 1,
         "images": 1,
         "amenities": 1,
-        "location": 1,
-        "whatsapp_link": 1
+        "location": 1
     }
     
     property_data = db_find_one("farmhouses", query_filter, projection)
