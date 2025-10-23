@@ -9,3 +9,5 @@ R2_ENDPOINT_URL = "https://your-account-id.r2.cloudflarestorage.com"
 R2_BUCKET_NAME = "farmhouse-listing-bucket"
 R2_ACCESS_KEY_ID = os.getenv('R2_ACCESS_KEY_ID')
 R2_SECRET_ACCESS_KEY = os.getenv('R2_SECRET_ACCESS_KEY')
+
+LEAD_COST_RUPEES = 40

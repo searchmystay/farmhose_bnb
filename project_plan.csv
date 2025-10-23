@@ -1,8 +1,8 @@
 number,name_of_part,description_of_part,is_completed
 1,Database Setup & Schema,Setup MongoDB connection and apply farmhouse schema with validation rules,true
 2,Backend API Structure,Create route blueprints and integrate error handling with existing Flask app,true
-3,File Upload System,Implement document upload functionality for Aadhar PAN and property documents,false
-4,Farmhouse Registration API,Create backend API endpoints for farmhouse owner registration and document submission,false
+3,File Upload System,Implement document upload functionality for Aadhar PAN and property documents,true
+4,Farmhouse Registration API,Create backend API endpoints for farmhouse owner registration and document submission,true
 5,Admin Authentication System,Implement admin login/logout functionality with session management,false
 6,Admin Dashboard Backend,Create API endpoints for admin dashboard data (pending approvals revenue analytics),false
 7,Farmhouse Approval API,Backend endpoints for admin to approve/reject farmhouses and view documents,false

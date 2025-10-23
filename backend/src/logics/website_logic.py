@@ -1,6 +1,7 @@
 from src.database.db_common_operations import db_find_many, db_find_one, db_insert_one, db_update_one
 from src.utils.exception_handler import handle_exceptions, AppException
 from src.logics.cloudfare_bucket import upload_farmhouse_image_to_r2, upload_farmhouse_document_to_r2
+from src.config import LEAD_COST_RUPEES
 from bson import ObjectId
 
 
@@ -40,7 +41,7 @@ def process_property_for_detail(property_data):
     
     all_amenities = extract_all_amenities(amenities_data)
     complete_address = build_complete_address(location_data)
-    whatsapp_link = contact_info.get("whatsapp_link", "")
+    whatsapp_link = property_data.get("whatsapp_link", "")
     
     processed_data = {
         "id": property_id,
@@ -124,7 +125,7 @@ def get_property_details(property_id):
         "images": 1,
         "amenities": 1,
         "location": 1,
-        "contact_info.whatsapp_link": 1
+        "whatsapp_link": 1
     }
     
     property_data = db_find_one("farmhouses", query_filter, projection)
@@ -152,7 +153,7 @@ def get_approved_bnbs():
 
 @handle_exceptions
 def validate_farmhouse_data(farmhouse_data):
-    required_fields = ["name", "description", "type", "location", "contact_info", "amenities"]
+    required_fields = ["name", "description", "type", "location", "whatsapp_link", "amenities"]
     
     for field in required_fields:
         if field not in farmhouse_data or not farmhouse_data[field]:
@@ -215,7 +216,7 @@ def register_farmhouse(farmhouse_data, image_files, document_files):
         "description": farmhouse_data.get("description"),
         "type": farmhouse_data.get("type"),
         "location": farmhouse_data.get("location"),
-        "contact_info": farmhouse_data.get("contact_info"),
+        "whatsapp_link": farmhouse_data.get("whatsapp_link"),
         "amenities": farmhouse_data.get("amenities"),
         "status": "pending_approval",
         "images": [],
@@ -230,4 +231,49 @@ def register_farmhouse(farmhouse_data, image_files, document_files):
     uploaded_documents = upload_farmhouse_documents(document_files, farmhouse_id)
     update_farmhouse_db_with_file_urls(farmhouse_id, uploaded_images, uploaded_documents)
     
-    return True
+    return 
+
+
+@handle_exceptions
+def check_farmhouse_credit_balance(farmhouse_id):
+    query_filter = {"_id": ObjectId(farmhouse_id), "status": "active"}
+    projection = {"credit_balance": 1, "whatsapp_link": 1}
+    farmhouse_data = db_find_one("farmhouses", query_filter, projection)
+    
+    if not farmhouse_data:
+        raise AppException("Farmhouse not found or not active")
+    
+    current_balance = farmhouse_data.get("credit_balance", 0)
+    whatsapp_link = farmhouse_data.get("whatsapp_link", "")
+    
+    return current_balance, whatsapp_link
+
+
+@handle_exceptions
+def deduct_lead_cost_from_farmhouse(farmhouse_id):
+    current_balance, whatsapp_link = check_farmhouse_credit_balance(farmhouse_id)
+    
+    if current_balance < LEAD_COST_RUPEES:
+        raise AppException("Insufficient credit balance for this farmhouse")
+    
+    new_balance = current_balance - LEAD_COST_RUPEES
+    update_data = {"credit_balance": new_balance}
+    
+    query_filter = {"_id": ObjectId(farmhouse_id)}
+    update_result = db_update_one("farmhouses", query_filter, {"$set": update_data})
+    
+    return new_balance, whatsapp_link
+
+
+@handle_exceptions
+def process_whatsapp_contact(farmhouse_id):
+    new_balance, whatsapp_link = deduct_lead_cost_from_farmhouse(farmhouse_id)
+    
+    if not whatsapp_link:
+        raise AppException("WhatsApp link not available for this farmhouse")
+    
+    contact_result = {
+        "whatsapp_link": whatsapp_link,
+    }
+    
+    return contact_result
