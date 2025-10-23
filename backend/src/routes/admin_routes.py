@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify, request, make_response
-from src.logics.admin_logics import process_admin_login, get_pending_properties, get_pending_property_details, approve_pending_property
+from src.logics.admin_logics import process_admin_login, get_pending_properties, get_pending_property_details, approve_pending_property, reject_pending_property
 from src.logics.admin_auth import super_admin_required
 from src.utils.exception_handler import handle_route_exceptions
 
@@ -80,6 +80,20 @@ def approve_property_route(property_id):
     response_data = {
         "success": True,
         "message": "Property approved successfully",
+    }
+    
+    return jsonify(response_data), 200
+
+
+@admin_bp.route('/reject_property/<property_id>', methods=['DELETE'])
+@super_admin_required
+@handle_route_exceptions
+def reject_property_route(property_id):
+    reject_pending_property(property_id)
+    
+    response_data = {
+        "success": True,
+        "message": "Property rejected and deleted successfully",
     }
     
     return jsonify(response_data), 200

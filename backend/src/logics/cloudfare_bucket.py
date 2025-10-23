@@ -55,3 +55,24 @@ def upload_farmhouse_document_to_r2(file_storage, farmhouse_id, doc_type):
     
     public_url = upload_file_to_r2(file_storage, file_key)
     return public_url
+
+
+@handle_exceptions
+def delete_farmhouse_folder_from_r2(farmhouse_id):
+    s3_client = create_s3_client()
+    folder_prefix = f"farmhouse/{farmhouse_id}/"
+    
+    objects_to_delete = s3_client.list_objects_v2(
+        Bucket=R2_BUCKET_NAME,
+        Prefix=folder_prefix
+    )
+    
+    if 'Contents' in objects_to_delete:
+        delete_keys = [{'Key': obj['Key']} for obj in objects_to_delete['Contents']]
+        
+        s3_client.delete_objects(
+            Bucket=R2_BUCKET_NAME,
+            Delete={'Objects': delete_keys}
+        )
+    
+    return True

@@ -1,7 +1,8 @@
 from src.logics.admin_auth import authenticate_super_admin
 from src.utils.exception_handler import handle_exceptions, AppException
-from src.database.db_common_operations import db_find_many, db_find_one, db_update_one
+from src.database.db_common_operations import db_find_many, db_find_one, db_update_one, db_delete_one
 from src.logics.website_logic import process_property_for_detail
+from src.logics.cloudfare_bucket import delete_farmhouse_folder_from_r2
 from bson import ObjectId
 
 
@@ -81,4 +82,17 @@ def approve_pending_property(property_id):
     update_data = {"status": "active"}
     db_update_one("farmhouses", query_filter, {"$set": update_data})
     
+    return True
+
+
+@handle_exceptions
+def reject_pending_property(property_id):
+    query_filter = {"_id": ObjectId(property_id), "status": "pending_approval"}
+    property_exists = db_find_one("farmhouses", query_filter, {"_id": 1})
+    
+    if not property_exists:
+        raise AppException("Pending property not found")
+    
+    delete_farmhouse_folder_from_r2(property_id)
+    db_delete_one("farmhouses", query_filter)
     return True
