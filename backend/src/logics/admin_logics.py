@@ -1,6 +1,6 @@
 from src.logics.admin_auth import authenticate_super_admin
 from src.utils.exception_handler import handle_exceptions, AppException
-from src.database.db_common_operations import db_find_many, db_find_one
+from src.database.db_common_operations import db_find_many, db_find_one, db_update_one
 from src.logics.website_logic import process_property_for_detail
 from bson import ObjectId
 
@@ -68,3 +68,17 @@ def get_pending_property_details(property_id):
     
     processed_property = process_property_for_detail(property_data)
     return processed_property
+
+
+@handle_exceptions
+def approve_pending_property(property_id):
+    query_filter = {"_id": ObjectId(property_id), "status": "pending_approval"}
+    property_exists = db_find_one("farmhouses", query_filter, {"_id": 1})
+    
+    if not property_exists:
+        raise AppException("Pending property not found")
+    
+    update_data = {"status": "active"}
+    db_update_one("farmhouses", query_filter, {"$set": update_data})
+    
+    return True

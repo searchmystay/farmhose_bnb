@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify, request, make_response
-from src.logics.admin_logics import process_admin_login, get_pending_properties, get_pending_property_details
+from src.logics.admin_logics import process_admin_login, get_pending_properties, get_pending_property_details, approve_pending_property
 from src.logics.admin_auth import super_admin_required
 from src.utils.exception_handler import handle_route_exceptions
 
@@ -66,6 +66,20 @@ def get_pending_property_details_route(property_id):
         "success": True,
         "message": "Pending property details retrieved successfully",
         "backend_data": property_details
+    }
+    
+    return jsonify(response_data), 200
+
+
+@admin_bp.route('/approve_property/<property_id>', methods=['POST'])
+@super_admin_required
+@handle_route_exceptions
+def approve_property_route(property_id):
+    approve_pending_property(property_id)
+    
+    response_data = {
+        "success": True,
+        "message": "Property approved successfully",
     }
     
     return jsonify(response_data), 200
