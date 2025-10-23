@@ -1,5 +1,6 @@
 from flask import Blueprint, jsonify, request, make_response
-from src.logics.admin_logics import process_admin_login
+from src.logics.admin_logics import process_admin_login, get_pending_properties, get_pending_property_details
+from src.logics.admin_auth import super_admin_required
 from src.utils.exception_handler import handle_route_exceptions
 
 
@@ -36,3 +37,35 @@ def admin_login():
     )
     
     return response
+
+
+@admin_bp.route('/pending_properties', methods=['GET'])
+@super_admin_required
+@handle_route_exceptions
+def get_pending_properties_route():
+    pending_properties = get_pending_properties()
+    
+    response_data = {
+        "success": True,
+        "message": "Pending properties retrieved successfully",
+        "backend_data": {
+            "properties": pending_properties,
+        }
+    }
+    
+    return jsonify(response_data), 200
+
+
+@admin_bp.route('/pending_property/<property_id>', methods=['GET'])
+@super_admin_required
+@handle_route_exceptions
+def get_pending_property_details_route(property_id):
+    property_details = get_pending_property_details(property_id)
+    
+    response_data = {
+        "success": True,
+        "message": "Pending property details retrieved successfully",
+        "backend_data": property_details
+    }
+    
+    return jsonify(response_data), 200
