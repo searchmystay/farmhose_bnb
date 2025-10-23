@@ -47,7 +47,6 @@ def get_pending_properties_route():
     
     response_data = {
         "success": True,
-        "message": "Pending properties retrieved successfully",
         "backend_data": {
             "properties": pending_properties,
         }
@@ -64,7 +63,6 @@ def get_pending_property_details_route(property_id):
     
     response_data = {
         "success": True,
-        "message": "Pending property details retrieved successfully",
         "backend_data": property_details
     }
     
