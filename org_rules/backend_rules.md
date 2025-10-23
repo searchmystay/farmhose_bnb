@@ -17,7 +17,7 @@
 - Never write any other single word of comment, like changes, Updated, or any logic explanation.
 - Always write correct, best practice, bug-free, and fully functional code following DRY principles
 - Always write code that is easy to read, understand and maintain
-- Never write the try except block, always use the exception handler decorator defined in the utilities directory.
+- Never write the try except block, always use the handle_exceptions decorator defined in the utils directory.
 - Never handle the error with if case and return statements, always raise the error with AppException and Exception. 
 - Name the functions and variables in a way that is easy to understand and maintain.
 - While writing code, make sure to write functions between 10-20 lines of code.
