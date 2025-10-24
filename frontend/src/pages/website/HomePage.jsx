@@ -61,11 +61,61 @@ const POPULAR_FARMHOUSES = [
 ]
 
 const POPULAR_BNBS = [
-  { id: 1, name: "Cozy Corner BnB", location: "Jaipur", image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=300&h=200&fit=crop", price: "₹1,800" },
-  { id: 2, name: "Heritage House", location: "Jaipur", image: "https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?w=300&h=200&fit=crop", price: "₹2,200" },
-  { id: 3, name: "Garden View BnB", location: "Jaipur", image: "https://images.unsplash.com/photo-1565623833408-d77e39b88af6?w=300&h=200&fit=crop", price: "₹1,500" },
-  { id: 4, name: "City Center Stay", location: "Jaipur", image: "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?w=300&h=200&fit=crop", price: "₹2,000" },
-  { id: 5, name: "Traditional BnB", location: "Jaipur", image: "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=300&h=200&fit=crop", price: "₹1,700" }
+  {
+    id: 1,
+    name: "Cozy Heritage Homestay",
+    description: "Charming traditional homestay in the heart of Pink City with warm hospitality, home-cooked meals, and authentic Rajasthani cultural experience.",
+    images: [
+      "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=400&h=250&fit=crop",
+      "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=400&h=250&fit=crop",
+      "https://images.unsplash.com/photo-1586611292717-f828b167408c?w=400&h=250&fit=crop"
+    ],
+    amenities: ["WiFi", "Breakfast", "AC", "Parking", "Local Guide"]
+  },
+  {
+    id: 2,
+    name: "Royal Heritage House",
+    description: "Luxurious heritage property with traditional architecture, antique furnishings, and modern amenities for a royal experience in Jaipur.",
+    images: [
+      "https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?w=400&h=250&fit=crop",
+      "https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=400&h=250&fit=crop",
+      "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=400&h=250&fit=crop"
+    ],
+    amenities: ["WiFi", "Heritage Decor", "Butler Service", "Courtyard", "Cultural Tours"]
+  },
+  {
+    id: 3,
+    name: "Garden View Retreat",
+    description: "Peaceful retreat surrounded by lush gardens and flowering plants. Ideal for nature lovers seeking tranquility within the bustling city.",
+    images: [
+      "https://images.unsplash.com/photo-1565623833408-d77e39b88af6?w=400&h=250&fit=crop",
+      "https://images.unsplash.com/photo-1600047509358-9dc75507daeb?w=400&h=250&fit=crop",
+      "https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=400&h=250&fit=crop"
+    ],
+    amenities: ["WiFi", "Garden Access", "Balcony", "Bird Watching", "Meditation Area"]
+  },
+  {
+    id: 4,
+    name: "Modern City Center Stay",
+    description: "Contemporary accommodation in the heart of Jaipur with modern amenities and easy access to major attractions, markets, and restaurants.",
+    images: [
+      "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?w=400&h=250&fit=crop",
+      "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=400&h=250&fit=crop",
+      "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=400&h=250&fit=crop"
+    ],
+    amenities: ["WiFi", "Kitchen", "AC", "Elevator", "City View"]
+  },
+  {
+    id: 5,
+    name: "Traditional Rajasthani BnB",
+    description: "Authentic Rajasthani experience with traditional decor, local cuisine, and cultural activities. Perfect for immersing in local heritage and traditions.",
+    images: [
+      "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=400&h=250&fit=crop",
+      "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=400&h=250&fit=crop",
+      "https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=400&h=250&fit=crop"
+    ],
+    amenities: ["WiFi", "Traditional Decor", "Local Cuisine", "Folk Music", "Handicraft Tours"]
+  }
 ]
 
 const TESTIMONIALS = [
@@ -143,33 +193,39 @@ function HeroSection() {
 function FarmhouseCard({ property }) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentImageIndex((prev) => (prev + 1) % property.images.length)
-    }, 3000)
+  const images = property.images || [property.image]
 
-    return () => clearInterval(interval)
-  }, [property.images.length])
+  useEffect(() => {
+    if (images.length > 1) {
+      const interval = setInterval(() => {
+        setCurrentImageIndex((prev) => (prev + 1) % images.length)
+      }, 3000)
+
+      return () => clearInterval(interval)
+    }
+  }, [images.length])
 
   return (
     <div className="bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-300 w-80 flex-shrink-0 overflow-hidden">
       <div className="relative h-48 overflow-hidden">
         <img 
-          src={property.images[currentImageIndex]} 
+          src={images[currentImageIndex]} 
           alt={`${property.name} - Image ${currentImageIndex + 1}`} 
           className="w-full h-48 object-cover transition-opacity duration-500"
         />
         
-        <div className="absolute bottom-3 left-1/2 transform -translate-x-1/2 flex space-x-1.5">
-          {property.images.map((_, index) => (
-            <div
-              key={index}
-              className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${
-                index === currentImageIndex ? 'bg-white scale-125' : 'bg-white/50'
-              }`}
-            />
-          ))}
-        </div>
+        {images.length > 1 && (
+          <div className="absolute bottom-3 left-1/2 transform -translate-x-1/2 flex space-x-1.5">
+            {images.map((_, index) => (
+              <div
+                key={index}
+                className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${
+                  index === currentImageIndex ? 'bg-white scale-125' : 'bg-white/50'
+                }`}
+              />
+            ))}
+          </div>
+        )}
       </div>
 
       <div className="p-4 flex flex-col">
@@ -177,7 +233,7 @@ function FarmhouseCard({ property }) {
         <p className="text-gray-600 text-sm mb-3 leading-relaxed line-clamp-3">{property.description}</p>
         
         <div className="flex flex-wrap gap-1.5">
-          {property.amenities.map((amenity, index) => (
+          {property.amenities && property.amenities.map((amenity, index) => (
             <span
               key={index}
               className="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded-md font-medium"
@@ -239,7 +295,7 @@ function FarmhouseCarousel({ title, properties }) {
   }, [startIndex])
 
   return (
-    <section className="py-12 bg-gray-50">
+    <section className="py-6 bg-gray-50">
       <div className="container mx-auto px-4">
         <h2 className="text-2xl font-bold text-gray-900 mb-8">{title}</h2>
         
@@ -376,8 +432,10 @@ function HomePage() {
 
       <div className="min-h-screen bg-white">
         <HeroSection />
-        <FarmhouseCarousel title="Popular Farmhouses in Jaipur" properties={POPULAR_FARMHOUSES} />
-        <PropertySection title="Popular BnB in Jaipur" properties={POPULAR_BNBS} />
+        <div className="pt-8 bg-gray-50">
+          <FarmhouseCarousel title="Popular Farmhouses in Jaipur" properties={POPULAR_FARMHOUSES} />
+        </div>
+        <FarmhouseCarousel title="Popular BnB in Jaipur" properties={POPULAR_BNBS} />
         <TestimonialsSection />
         <Footer />
       </div>
