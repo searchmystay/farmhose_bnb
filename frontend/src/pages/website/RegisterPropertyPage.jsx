@@ -84,6 +84,13 @@ const RegisterPropertyPage = () => {
     caretaker_on_site: false
   });
 
+  const [uploadData, setUploadData] = useState({
+    propertyImages: [],
+    propertyDocuments: [],
+    aadhaarCard: null,
+    panCard: null
+  });
+
   // Handle input changes for basic info
   const handleBasicInfoChange = (e) => {
     const { name, value } = e.target;
@@ -121,38 +128,39 @@ const RegisterPropertyPage = () => {
     }));
   };
 
-  // Handle step 1 next button
   const handleStep1Next = (e) => {
     e.preventDefault();
     console.log('Basic Info:', basicInfo);
     setCurrentStep(2);
   };
 
-  // Handle step 2 next button
   const handleStep2Next = (e) => {
     e.preventDefault();
-    console.log('Essential Amenities:', essentialAmenities);
     setCurrentStep(3);
   };
 
   const handleStep3Next = (e) => {
     e.preventDefault();
-    console.log('Experience Amenities:', experienceAmenities);
     setCurrentStep(4);
   };
 
-  const handleStep4Submit = (e) => {
+  const handleStep4Next = (e) => {
     e.preventDefault();
-    console.log('Additional Amenities:', additionalAmenities);
-    console.log('All Form Data:', {
-      basicInfo,
-      essentialAmenities,
-      experienceAmenities,
-      additionalAmenities
-    });
+    setCurrentStep(5);
   };
 
-  // Handle previous button
+  const handleFileUpload = (e, fileType) => {
+    const files = Array.from(e.target.files);
+    setUploadData(prev => ({
+      ...prev,
+      [fileType]: fileType === 'propertyImages' || fileType === 'propertyDocuments' ? files : files[0]
+    }));
+  };
+
+  const handleFinalSubmit = (e) => {
+    e.preventDefault();
+  };
+
   const handlePrevious = () => {
     if (currentStep > 1) {
       setCurrentStep(currentStep - 1);
@@ -174,11 +182,11 @@ const RegisterPropertyPage = () => {
 
   // Render the progress indicator
   const renderProgressIndicator = () => {
-    const progressPercent = (currentStep / 4) * 100;
+    const progressPercent = (currentStep / 5) * 100;
     return (
       <div className="mb-8">
         <div className="flex items-center justify-between text-sm text-gray-500 mb-2">
-          <span>Step {currentStep} of 4</span>
+          <span>Step {currentStep} of 5</span>
           <span>{progressPercent}% Complete</span>
         </div>
         <div className="w-full bg-gray-200 rounded-full h-2">
@@ -230,7 +238,6 @@ const RegisterPropertyPage = () => {
     </div>
   );
 
-  // Render step 1: basic information form
   const renderStep1BasicInfo = () => (
     <form onSubmit={handleStep1Next} className="space-y-6">
       <div>
@@ -338,7 +345,6 @@ const RegisterPropertyPage = () => {
     </form>
   );
 
-  // Render step 2: essential amenities
   const renderStep2EssentialAmenities = () => (
     <form onSubmit={handleStep2Next} className="space-y-12">
       <div className="space-y-6">
@@ -534,7 +540,7 @@ const RegisterPropertyPage = () => {
   );
 
   const renderStep4AdditionalAmenities = () => (
-    <form onSubmit={handleStep4Submit} className="space-y-12">
+    <form onSubmit={handleStep4Next} className="space-y-12">
       <div className="space-y-6">
         <div className="border-b pb-4">
           <h2 className="text-xl font-semibold text-gray-900 mb-2">Pet & Family Friendly</h2>
@@ -586,6 +592,93 @@ const RegisterPropertyPage = () => {
         </button>
         <button
           type="submit"
+          className="px-8 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-all font-medium"
+        >
+          Next Step
+        </button>
+      </div>
+    </form>
+  );
+
+  const renderFileUploadSection = (fileType, label, accept, multiple = false) => (
+    <div className="space-y-2">
+      <label className="block text-sm font-medium text-gray-700">{label}</label>
+      <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg hover:border-green-400 transition-colors">
+        <div className="space-y-1 text-center">
+          <svg className="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+            <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+          <div className="flex text-sm text-gray-600">
+            <label className="relative cursor-pointer bg-white rounded-md font-medium text-green-600 hover:text-green-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-green-500">
+              <span>Upload files</span>
+              <input
+                type="file"
+                className="sr-only"
+                accept={accept}
+                multiple={multiple}
+                onChange={(e) => handleFileUpload(e, fileType)}
+              />
+            </label>
+            <p className="pl-1">or drag and drop</p>
+          </div>
+          <p className="text-xs text-gray-500">
+            {accept.includes('image') ? 'PNG, JPG, JPEG up to 2MB each' : 
+             accept.includes('.pdf,.doc,.docx') ? 'PDF, DOC, DOCX up to 10MB each' : 
+             'PDF up to 5MB (both sides with clear images)'}
+          </p>
+        </div>
+      </div>
+      {uploadData[fileType] && (
+        <div className="mt-2">
+          {Array.isArray(uploadData[fileType]) ? (
+            <p className="text-sm text-green-600">{uploadData[fileType].length} files selected</p>
+          ) : (
+            <p className="text-sm text-green-600">{uploadData[fileType].name}</p>
+          )}
+        </div>
+      )}
+    </div>
+  );
+
+  const renderStep5DocumentUpload = () => (
+    <form onSubmit={handleFinalSubmit} className="space-y-8">
+      <div className="space-y-6">
+        <div className="border-b pb-4">
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">Property Images</h2>
+          <p className="text-gray-600">Upload high-quality images of your property</p>
+        </div>
+        {renderFileUploadSection('propertyImages', 'Property Images (Multiple)', 'image/*', true)}
+      </div>
+
+      <div className="space-y-6">
+        <div className="border-b pb-4">
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">Property Documents</h2>
+          <p className="text-gray-600">Upload property-related legal documents</p>
+        </div>
+        {renderFileUploadSection('propertyDocuments', 'Property Documents (Multiple)', '.pdf,.doc,.docx', true)}
+      </div>
+
+      <div className="space-y-6">
+        <div className="border-b pb-4">
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">Identity Documents</h2>
+          <p className="text-gray-600">Upload your Aadhaar and PAN card for verification</p>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {renderFileUploadSection('aadhaarCard', 'Aadhaar Card (PDF only)', '.pdf')}
+          {renderFileUploadSection('panCard', 'PAN Card (PDF only)', '.pdf')}
+        </div>
+      </div>
+
+      <div className="flex justify-between pt-6 border-t">
+        <button
+          type="button"
+          onClick={handlePrevious}
+          className="px-6 py-3 text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors font-medium"
+        >
+          Previous
+        </button>
+        <button
+          type="submit"
           className="px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all font-medium"
         >
           Submit Registration
@@ -613,6 +706,7 @@ const RegisterPropertyPage = () => {
           {currentStep === 2 && renderStep2EssentialAmenities()}
           {currentStep === 3 && renderStep3ExperienceAmenities()}
           {currentStep === 4 && renderStep4AdditionalAmenities()}
+          {currentStep === 5 && renderStep5DocumentUpload()}
         </div>
       </div>
     </div>
