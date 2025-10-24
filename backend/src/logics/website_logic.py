@@ -218,7 +218,8 @@ def register_farmhouse(farmhouse_data, image_files, document_files):
         "status": "pending_approval",
         "images": [],
         "documents": [],
-        "credit_balance": 0
+        "credit_balance": 0,
+        "favourite": False
     }
     
     insert_result = db_insert_one("farmhouses", farmhouse_record)
@@ -291,74 +292,13 @@ def process_whatsapp_contact(farmhouse_id):
 
 
 @handle_exceptions
-def select_top_five_with_random_ties(properties_list):
-    if len(properties_list) <= 5:
-        return properties_list
-    
-    click_counts = {}
-    for prop in properties_list:
-        click_count = prop.get("click_count", 0)
-        if click_count not in click_counts:
-            click_counts[click_count] = []
-        click_counts[click_count].append(prop)
-    
-    sorted_click_counts = sorted(click_counts.keys(), reverse=True)
-    selected_properties = []
-    
-    for click_count in sorted_click_counts:
-        properties_with_same_count = click_counts[click_count]
-        random.shuffle(properties_with_same_count)
-        
-        remaining_slots = 5 - len(selected_properties)
-        if remaining_slots <= 0:
-            break
-            
-        if len(properties_with_same_count) <= remaining_slots:
-            selected_properties.extend(properties_with_same_count)
-        else:
-            selected_properties.extend(properties_with_same_count[:remaining_slots])
-    
-    return selected_properties
+def get_fav_properties():
+    farmhouse_filter = {"status": "active", "type": "farmhouse", "favourite": True}
+    favourite_farmhouses = get_approved_properties_by_type(farmhouse_filter)
+    bnb_filter = {"status": "active", "type": "bnb", "favourite": True}
+    bnb_farmhouses = get_approved_properties_by_type(bnb_filter)
 
-
-@handle_exceptions
-def get_top_properties_by_type(property_type):
-    query_filter = {"status": "active", "type": property_type}
-    
-    projection = {
-        "_id": 1,
-        "name": 1,
-        "description": 1,
-        "images": 1,
-        "amenities": 1,
-        "click_count": 1
-    }
-    
-    pipeline = [
-        {"$match": query_filter},
-        {"$project": projection},
-        {"$addFields": {"click_count": {"$ifNull": ["$click_count", 0]}}},
-        {"$sort": {"click_count": -1}},
-        {"$limit": 100}
-    ]
-    
-    properties_results = db_aggregate("farmhouses", pipeline)
-    top_properties = select_top_five_with_random_ties(properties_results)
-    
-    processed_properties = []
-    for property_data in top_properties:
-        processed_property = process_farmhouse_for_listing(property_data)
-        processed_properties.append(processed_property)
-    
-    return processed_properties
-
-
-@handle_exceptions
-def get_top_properties_by_clicks():
-    top_farmhouses = get_top_properties_by_type("farmhouse")
-    top_bnbs = get_top_properties_by_type("bnb")
-    
     return {
-        "top_farmhouses": top_farmhouses,
-        "top_bnbs": top_bnbs
+        'top_farmhouse': favourite_farmhouses,
+        'top_bnb': bnb_farmhouses
     }

@@ -119,6 +119,11 @@ def get_farmhouse_schema() -> Dict:
                 "description": "Status of the farmhouse listing",
                 "enum": ["pending_approval", "active", "inactive"]
             },
+            "favourite": {
+                "bsonType": "bool",
+                "description": "Mark farmhouse as favourite for popular listings",
+                "enum": ["true", "false"],
+            },
             "created_at": {
                 "bsonType": "date",
                 "description": "Timestamp when farmhouse was first created"
