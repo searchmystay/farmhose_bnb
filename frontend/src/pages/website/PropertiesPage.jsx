@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Helmet } from 'react-helmet-async'
+import Footer from '../../components/Footer'
 
 // Dummy data for properties (same as HomePage but more properties)
 const allProperties = [
@@ -373,6 +374,8 @@ function PropertiesPage({ propertyType = 'both' } = {}) {
             </div>
           </div>
         </section>
+
+        <Footer />
       </div>
     </>
   )
