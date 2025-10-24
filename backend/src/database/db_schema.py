@@ -42,18 +42,6 @@ def get_farmhouse_schema() -> Dict:
                         "minLength": 10,
                         "maxLength": 200
                     },
-                    "city": {
-                        "bsonType": "string",
-                        "description": "City where property is located",
-                        "minLength": 2,
-                        "maxLength": 50
-                    },
-                    "state": {
-                        "bsonType": "string",
-                        "description": "State where property is located",
-                        "minLength": 2,
-                        "maxLength": 50
-                    },
                     "pincode": {
                         "bsonType": "string",
                         "description": "Postal code of the property",
