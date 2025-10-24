@@ -1,7 +1,7 @@
 from flask import Blueprint, jsonify, request, make_response
-from src.logics.admin_logics import process_admin_login, get_pending_properties, get_pending_property_details, approve_pending_property, reject_pending_property
+from src.logics.admin_logics import process_admin_login, get_pending_properties, get_pending_property_details, approve_pending_property, reject_pending_property, add_credit_balance
 from src.logics.admin_auth import super_admin_required
-from src.utils.exception_handler import handle_route_exceptions
+from src.utils.exception_handler import handle_route_exceptions, AppException
 
 
 admin_bp = Blueprint('admin', __name__)
@@ -92,6 +92,26 @@ def reject_property_route(property_id):
     response_data = {
         "success": True,
         "message": "Property rejected and deleted successfully",
+    }
+    
+    return jsonify(response_data), 200
+
+
+@admin_bp.route('/add_credit/<property_id>', methods=['POST'])
+@super_admin_required
+@handle_route_exceptions
+def add_credit_balance_route(property_id):
+    request_data = request.get_json()
+    credit_amount = request_data.get("credit_amount")
+    
+    if not credit_amount or credit_amount <= 0:
+        raise AppException("Valid credit amount is required")
+    
+    add_credit_balance(property_id, credit_amount)
+    
+    response_data = {
+        "success": True,
+        "message": "Credit balance added successfully",
     }
     
     return jsonify(response_data), 200

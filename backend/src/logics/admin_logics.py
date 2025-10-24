@@ -129,3 +129,21 @@ def reject_pending_property(property_id):
     delete_farmhouse_folder_from_r2(property_id)
     db_delete_one("farmhouses", query_filter)
     return True
+
+
+@handle_exceptions
+def add_credit_balance(property_id, credit_amount):
+    query_filter = {"_id": ObjectId(property_id)}
+    
+    property_exists = db_find_one("farmhouses", query_filter, {"_id": 1, "credit_balance": 1})
+    
+    if not property_exists:
+        raise AppException("Property not found")
+    
+    current_balance = property_exists.get("credit_balance", 0)
+    new_balance = current_balance + credit_amount
+    
+    update_data = {"credit_balance": new_balance}
+    db_update_one("farmhouses", query_filter, {"$set": update_data})
+    
+    return True
