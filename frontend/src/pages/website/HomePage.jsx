@@ -366,12 +366,96 @@ function TestimonialCard({ testimonial }) {
 
 // Component for testimonials section
 function TestimonialsSection() {
+  const testimonials = [
+    {
+      name: "Arjun Malhotra",
+      location: "Delhi",
+      text: "This platform is incredibly trustworthy! Every farmhouse is thoroughly verified before listing. I found exactly what was promised - no hidden surprises or fraud. The quality assurance is exceptional.",
+      rating: 5,
+      verified: true
+    },
+    {
+      name: "Sneha Patel",
+      location: "Mumbai", 
+      text: "Finally, a reliable website for farmhouse bookings! The verification process gives me complete confidence. All properties are genuine and match the descriptions perfectly. Outstanding service quality.",
+      rating: 5,
+      verified: true
+    },
+    {
+      name: "Vikram Singh",
+      location: "Bangalore",
+      text: "Best platform for verified farmhouse rentals! No fraudulent listings, everything is authenticated. The website's commitment to quality and transparency is remarkable. Highly trusted by travelers.",
+      rating: 5,
+      verified: true
+    },
+    {
+      name: "Kavita Sharma",
+      location: "Pune",
+      text: "Exceptional verification standards! This website ensures every property owner is legitimate and properties are exactly as advertised. Safe, secure, and completely fraud-free experience every time.",
+      rating: 5,
+      verified: true
+    }
+  ]
+
   return (
-    <section className="py-16 bg-white">
+    <section className="py-12 bg-gray-50">
       <div className="container mx-auto px-4">
-        <h2 className="text-3xl font-bold text-center text-gray-900 mb-12">What Our Guests Say</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {TESTIMONIALS.map(testimonial => <TestimonialCard key={testimonial.id} testimonial={testimonial} />)}
+        <div className="text-center mb-10">
+          <h2 className="text-3xl font-bold text-gray-900 mb-3">Trusted by Thousands</h2>
+          <p className="text-gray-600 max-w-2xl mx-auto">
+            Join thousands of satisfied travelers who trust our verified platform for authentic farmhouse and BnB experiences
+          </p>
+        </div>
+        
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {testimonials.map((testimonial, index) => (
+            <div key={index} className="bg-white p-5 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-300">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex">
+                  {[...Array(testimonial.rating)].map((_, i) => (
+                    <svg key={i} className="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.719c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                    </svg>
+                  ))}
+                </div>
+                {testimonial.verified && (
+                  <span className="bg-green-100 text-green-700 text-xs px-2 py-1 rounded-full font-medium">
+                    Verified
+                  </span>
+                )}
+              </div>
+              
+              <p className="text-gray-700 text-sm mb-4 leading-relaxed">"{testimonial.text}"</p>
+              
+              <div className="border-t pt-3">
+                <p className="font-medium text-gray-900 text-sm">{testimonial.name}</p>
+                <p className="text-gray-500 text-xs">{testimonial.location}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+        
+        <div className="text-center mt-8">
+          <div className="flex items-center justify-center space-x-6 text-sm text-gray-600">
+            <div className="flex items-center">
+              <svg className="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+              </svg>
+              100% Verified Properties
+            </div>
+            <div className="flex items-center">
+              <svg className="w-5 h-5 text-blue-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+              </svg>
+              Fraud-Free Platform
+            </div>
+            <div className="flex items-center">
+              <svg className="w-5 h-5 text-purple-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              Quality Assured
+            </div>
+          </div>
         </div>
       </div>
     </section>
