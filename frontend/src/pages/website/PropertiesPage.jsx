@@ -292,18 +292,13 @@ const FarmhouseCard = ({ property }) => {
   )
 }
 
-function PropertiesPage({ 
-  propertyType = 'both', 
-  customTitle = null,
-  customDescription = null 
-} = {}) {
+function PropertiesPage({ propertyType = 'both' } = {}) {
   const [checkInDate, setCheckInDate] = useState('')
   const [checkOutDate, setCheckOutDate] = useState('')
   const [searchLocation, setSearchLocation] = useState('')
   const [filteredProperties, setFilteredProperties] = useState(allProperties)
 
   const getTitle = () => {
-    if (customTitle) return customTitle
     switch (propertyType) {
       case 'farmhouse':
         return 'Farmhouses'
@@ -316,7 +311,6 @@ function PropertiesPage({
   }
 
   const getDescription = () => {
-    if (customDescription) return customDescription
     switch (propertyType) {
       case 'farmhouse':
         return 'Discover serene farmhouses perfect for peaceful getaways and nature retreats'
