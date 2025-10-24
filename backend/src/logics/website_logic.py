@@ -312,9 +312,8 @@ def select_top_five_with_random_ties(properties_list):
 
 
 @handle_exceptions
-def get_top_properties_by_clicks():
-    farmhouse_filter = {"status": "active", "type": "farmhouse"}
-    bnb_filter = {"status": "active", "type": "bnb"}
+def get_top_properties_by_type(property_type):
+    query_filter = {"status": "active", "type": property_type}
     
     projection = {
         "_id": 1,
@@ -325,41 +324,31 @@ def get_top_properties_by_clicks():
         "click_count": 1
     }
     
-    farmhouse_pipeline = [
-        {"$match": farmhouse_filter},
+    pipeline = [
+        {"$match": query_filter},
         {"$project": projection},
         {"$addFields": {"click_count": {"$ifNull": ["$click_count", 0]}}},
         {"$sort": {"click_count": -1}},
         {"$limit": 100}
     ]
     
-    bnb_pipeline = [
-        {"$match": bnb_filter},
-        {"$project": projection},
-        {"$addFields": {"click_count": {"$ifNull": ["$click_count", 0]}}},
-        {"$sort": {"click_count": -1}},
-        {"$limit": 100}
-    ]
+    properties_results = db_aggregate("farmhouses", pipeline)
+    top_properties = select_top_five_with_random_ties(properties_results)
     
-    farmhouse_results = db_aggregate("farmhouses", farmhouse_pipeline)
-    bnb_results = db_aggregate("farmhouses", bnb_pipeline)
+    processed_properties = []
+    for property_data in top_properties:
+        processed_property = process_farmhouse_for_listing(property_data)
+        processed_properties.append(processed_property)
     
-    top_farmhouses = select_top_five_with_random_ties(farmhouse_results)
-    top_bnbs = select_top_five_with_random_ties(bnb_results)
+    return processed_properties
+
+
+@handle_exceptions
+def get_top_properties_by_clicks():
+    top_farmhouses = get_top_properties_by_type("farmhouse")
+    top_bnbs = get_top_properties_by_type("bnb")
     
-    processed_farmhouses = []
-    for farmhouse_data in top_farmhouses:
-        processed_farmhouse = process_farmhouse_for_listing(farmhouse_data)
-        processed_farmhouses.append(processed_farmhouse)
-    
-    processed_bnbs = []
-    for bnb_data in top_bnbs:
-        processed_bnb = process_farmhouse_for_listing(bnb_data)
-        processed_bnbs.append(processed_bnb)
-    
-    top_properties_result = {
-        "top_farmhouses": processed_farmhouses,
-        "top_bnbs": processed_bnbs
+    return {
+        "top_farmhouses": top_farmhouses,
+        "top_bnbs": top_bnbs
     }
-    
-    return top_properties_result
