@@ -257,9 +257,18 @@ def deduct_lead_cost_from_farmhouse(farmhouse_id):
         raise AppException("Contact information is currently unavailable for this farmhouse")
     
     new_balance = current_balance - LEAD_COST_RUPEES
-    update_data = {
-        "$set": {"credit_balance": new_balance},
-    }
+
+    if new_balance < MINIMUM_BALANCE_THRESHOLD:
+        update_data = {
+            "$set": {
+                "credit_balance": new_balance,
+                "status": "inactive"
+            }
+        }
+    else:
+        update_data = {
+            "$set": {"credit_balance": new_balance},
+        }
     
     query_filter = {"_id": ObjectId(farmhouse_id)}
     db_update_one("farmhouses", query_filter, update_data)
