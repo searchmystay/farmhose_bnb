@@ -9,8 +9,8 @@ function Footer() {
           </div>
           <div className="text-center">
             <h4 className="font-semibold mb-2 text-sm">Contact Info</h4>
-            <p className="text-gray-400 text-sm">info@searchmystay.com</p>
-            <p className="text-gray-400 text-sm">+91 9999999999</p>
+            <p className="text-gray-400 text-sm">Searchmystay07@gmail.com</p>
+            <p className="text-gray-400 text-sm">+91 820 966 5356</p>
           </div>
         </div>
         <div className="border-t border-gray-800 mt-6 pt-4 text-center text-gray-400 text-xs">
