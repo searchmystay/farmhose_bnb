@@ -1,5 +1,6 @@
 import { Helmet } from 'react-helmet-async'
 import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import Footer from '../../components/Footer'
 
 // Mock data constants - replace with API calls later
@@ -121,6 +122,8 @@ const POPULAR_BNBS = [
 
 // Component for full-screen hero with scrolling background
 function HeroSection() {
+  const navigate = useNavigate()
+  
   const backgroundImages = [
     "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=1200&h=800&fit=crop&auto=format",
     "https://images.unsplash.com/photo-1583608205776-bfd35f0d9f83?w=1200&h=800&fit=crop&auto=format",
@@ -164,10 +167,16 @@ function HeroSection() {
           Escape to serene locations and create unforgettable memories
         </p>
         <div className="flex gap-4 mb-12">
-          <button className="bg-white text-gray-900 px-10 py-4 rounded-full text-lg font-medium hover:bg-gray-100 transition-all duration-200">
+          <button 
+            onClick={() => navigate('/farmhouse')}
+            className="bg-white text-gray-900 px-10 py-4 rounded-full text-lg font-medium hover:bg-gray-100 transition-all duration-200"
+          >
             Farmhouse
           </button>
-          <button className="bg-gray-900/50 backdrop-blur text-white border border-white/30 px-10 py-4 rounded-full text-lg font-medium hover:bg-gray-900/70 transition-all duration-200">
+          <button 
+            onClick={() => navigate('/bnb')}
+            className="bg-gray-900/50 backdrop-blur text-white border border-white/30 px-10 py-4 rounded-full text-lg font-medium hover:bg-gray-900/70 transition-all duration-200"
+          >
             BnB
           </button>
         </div>

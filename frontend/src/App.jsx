@@ -12,7 +12,8 @@ function App() {
         <div className="font-sans antialiased">
           <Routes>
             <Route path="/" element={<HomePage />} />
-            <Route path="/properties" element={<PropertiesPage />} />
+            <Route path="/farmhouse" element={<PropertiesPage propertyType="farmhouse" />} />
+            <Route path="/bnb" element={<PropertiesPage propertyType="bnb" />} />
             <Route path="/admin" element={<AdminLogin />} />
             <Route path="/admin/dashboard" element={<AdminDashboard />} />
           </Routes>

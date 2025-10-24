@@ -297,7 +297,7 @@ function PropertiesPage({ propertyType = 'both' } = {}) {
   const [checkInDate, setCheckInDate] = useState('')
   const [checkOutDate, setCheckOutDate] = useState('')
   const [searchLocation, setSearchLocation] = useState('')
-  const [filteredProperties, setFilteredProperties] = useState(allProperties)
+  const [properties, setProperties] = useState(allProperties)
 
   const getTitle = () => {
     switch (propertyType) {
@@ -349,7 +349,7 @@ function PropertiesPage({ propertyType = 'both' } = {}) {
           onCheckOutChange={setCheckOutDate}
           onSearch={handleSearch}
           onFilterClick={handleFilterClick}
-          resultCount={filteredProperties.length}
+          resultCount={properties.length}
         />
 
         {/* Heading Section */}
@@ -368,7 +368,7 @@ function PropertiesPage({ propertyType = 'both' } = {}) {
         <section className="py-12 bg-gray-50">
           <div className="container mx-auto px-4">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 justify-items-center">
-              {filteredProperties.map(property => (
+              {properties.map(property => (
                 <FarmhouseCard key={property.id} property={property} />
               ))}
             </div>
