@@ -39,6 +39,34 @@ const RegisterPropertyPage = () => {
     bathtub: false
   });
 
+  const [experienceAmenities, setExperienceAmenities] = useState({
+    private_lawn_garden: false,
+    swimming_pool: false,
+    outdoor_seating_area: false,
+    bonfire_setup: false,
+    barbecue_setup: false,
+    terrace_balcony: false,
+    kitchen_access_self_cooking: false,
+    in_house_meals_available: false,
+    dining_table: false,
+    indoor_games: false,
+    outdoor_games: false,
+    pool_table: false,
+    music_system: false,
+    board_games: false,
+    bicycle_access: false,
+    movie_projector: false,
+    jacuzzi: false,
+    private_bar_setup: false,
+    farm_view_nature_view: false,
+    open_shower_outdoor_bath: false,
+    gazebo_cabana_seating: false,
+    hammock: false,
+    high_tea_setup: false,
+    event_space_small_gatherings: false,
+    private_chef_on_request: false
+  });
+
   // Handle input changes for basic info
   const handleBasicInfoChange = (e) => {
     const { name, value } = e.target;
@@ -46,8 +74,15 @@ const RegisterPropertyPage = () => {
   };
 
   // Handle boolean toggle changes for amenities
-  const handleToggleChange = (name) => {
+  const handleEssentialToggleChange = (name) => {
     setEssentialAmenities(prev => ({
+      ...prev,
+      [name]: !prev[name]
+    }));
+  };
+
+  const handleExperienceToggleChange = (name) => {
+    setExperienceAmenities(prev => ({
       ...prev,
       [name]: !prev[name]
     }));
@@ -73,7 +108,12 @@ const RegisterPropertyPage = () => {
   const handleStep2Next = (e) => {
     e.preventDefault();
     console.log('Essential Amenities:', essentialAmenities);
-    // Will move to step 3 later
+    setCurrentStep(3);
+  };
+
+  const handleStep3Next = (e) => {
+    e.preventDefault();
+    console.log('Experience Amenities:', experienceAmenities);
   };
 
   // Handle previous button
@@ -140,7 +180,7 @@ const RegisterPropertyPage = () => {
       </div>
       <button
         type="button"
-        onClick={() => handleToggleChange(name)}
+        onClick={() => handleEssentialToggleChange(name)}
         className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 ${
           essentialAmenities[name] ? 'bg-green-600' : 'bg-gray-200'
         }`}
@@ -332,6 +372,109 @@ const RegisterPropertyPage = () => {
     </form>
   );
 
+  const renderExperienceToggleSwitch = (name, label, description) => (
+    <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+      <div className="flex-1">
+        <h3 className="font-medium text-gray-900">{label}</h3>
+        <p className="text-sm text-gray-500 mt-1">{description}</p>
+      </div>
+      <button
+        type="button"
+        onClick={() => handleExperienceToggleChange(name)}
+        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 ${
+          experienceAmenities[name] ? 'bg-green-600' : 'bg-gray-200'
+        }`}
+      >
+        <span
+          className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+            experienceAmenities[name] ? 'translate-x-6' : 'translate-x-1'
+          }`}
+        />
+      </button>
+    </div>
+  );
+
+  const renderStep3ExperienceAmenities = () => (
+    <form onSubmit={handleStep3Next} className="space-y-12">
+      <div className="space-y-6">
+        <div className="border-b pb-4">
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">Outdoor & Garden</h2>
+          <p className="text-gray-600">Outdoor spaces and garden facilities</p>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {renderExperienceToggleSwitch('private_lawn_garden', 'Private Lawn/Garden', 'Private outdoor space for relaxation')}
+          {renderExperienceToggleSwitch('swimming_pool', 'Swimming Pool', 'Pool for recreation and exercise')}
+          {renderExperienceToggleSwitch('outdoor_seating_area', 'Outdoor Seating', 'Chairs and tables for outdoor relaxation')}
+          {renderExperienceToggleSwitch('bonfire_setup', 'Bonfire Setup', 'Area for evening gatherings and warmth')}
+          {renderExperienceToggleSwitch('barbecue_setup', 'Barbecue Setup', 'Outdoor cooking and grilling area')}
+          {renderExperienceToggleSwitch('terrace_balcony', 'Terrace/Balcony', 'Outdoor views and fresh air space')}
+        </div>
+      </div>
+
+      <div className="space-y-6">
+        <div className="border-b pb-4">
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">Food & Dining</h2>
+          <p className="text-gray-600">Cooking and dining facilities</p>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {renderExperienceToggleSwitch('kitchen_access_self_cooking', 'Kitchen Access', 'Self-cooking facilities available')}
+          {renderExperienceToggleSwitch('in_house_meals_available', 'In-house Meals', 'Meals provided by the property')}
+          {renderExperienceToggleSwitch('dining_table', 'Dining Table', 'Comfortable eating space')}
+        </div>
+      </div>
+
+      <div className="space-y-6">
+        <div className="border-b pb-4">
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">Entertainment & Activities</h2>
+          <p className="text-gray-600">Games and recreational activities</p>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {renderExperienceToggleSwitch('indoor_games', 'Indoor Games', 'Carrom, chess, ludo for entertainment')}
+          {renderExperienceToggleSwitch('outdoor_games', 'Outdoor Games', 'Cricket, badminton, football available')}
+          {renderExperienceToggleSwitch('pool_table', 'Pool Table', 'Billiards for recreational gaming')}
+          {renderExperienceToggleSwitch('music_system', 'Music System', 'Speakers for playing music')}
+          {renderExperienceToggleSwitch('board_games', 'Board Games', 'Group entertainment and fun')}
+          {renderExperienceToggleSwitch('bicycle_access', 'Bicycle Access', 'Bikes for exploring and exercise')}
+          {renderExperienceToggleSwitch('movie_projector', 'Movie Projector', 'Watching films and entertainment')}
+        </div>
+      </div>
+
+      <div className="space-y-6">
+        <div className="border-b pb-4">
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">Experience & Luxury Add-ons</h2>
+          <p className="text-gray-600">Premium experiences and luxury amenities</p>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {renderExperienceToggleSwitch('jacuzzi', 'Jacuzzi', 'Luxury relaxation and therapeutic bathing')}
+          {renderExperienceToggleSwitch('private_bar_setup', 'Private Bar Setup', 'Drinks and cocktail preparation area')}
+          {renderExperienceToggleSwitch('farm_view_nature_view', 'Farm/Nature View', 'Scenic and peaceful surroundings')}
+          {renderExperienceToggleSwitch('open_shower_outdoor_bath', 'Open Shower/Outdoor Bath', 'Unique bathing experience')}
+          {renderExperienceToggleSwitch('gazebo_cabana_seating', 'Gazebo/Cabana Seating', 'Comfortable outdoor relaxation')}
+          {renderExperienceToggleSwitch('hammock', 'Hammock', 'Leisurely swinging and relaxation')}
+          {renderExperienceToggleSwitch('high_tea_setup', 'High-tea Setup', 'Elegant tea time experience')}
+          {renderExperienceToggleSwitch('event_space_small_gatherings', 'Event Space', 'Small gatherings and celebrations')}
+          {renderExperienceToggleSwitch('private_chef_on_request', 'Private Chef', 'Personalized dining on request')}
+        </div>
+      </div>
+
+      <div className="flex justify-between pt-6 border-t">
+        <button
+          type="button"
+          onClick={handlePrevious}
+          className="px-6 py-3 text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors font-medium"
+        >
+          Previous
+        </button>
+        <button
+          type="submit"
+          className="px-8 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-all font-medium"
+        >
+          Next Step
+        </button>
+      </div>
+    </form>
+  );
+
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-4">
       <div className="max-w-2xl mx-auto">
@@ -349,6 +492,7 @@ const RegisterPropertyPage = () => {
           {renderProgressIndicator()}
           {currentStep === 1 && renderStep1BasicInfo()}
           {currentStep === 2 && renderStep2EssentialAmenities()}
+          {currentStep === 3 && renderStep3ExperienceAmenities()}
         </div>
       </div>
     </div>
