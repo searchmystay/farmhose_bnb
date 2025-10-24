@@ -1,132 +1,8 @@
 import { useState, useEffect } from 'react'
 import { Helmet } from 'react-helmet-async'
+import { useFarmhouseList, useBnbList } from '../../hooks/usePropertyData'
 import Footer from '../../components/Footer'
 
-// Dummy data for properties (same as HomePage but more properties)
-const allProperties = [
-  {
-    id: 1,
-    type: 'farmhouse',
-    name: 'Sunset Valley Farmhouse',
-    images: [
-      'https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=400',
-      'https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=400',
-      'https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=400',
-    ],
-    amenities: ['WiFi', 'Pool', 'Garden', 'Parking'],
-    description: 'Success doesn’t come overnight; it’s built through consistency, patience, and learning from failures. Every small step forward counts, even when progress feels slow.'
-  },
-  {
-    id: 2,
-    type: 'farmhouse',
-    name: 'Green Acres Retreat',
-    images: [
-      'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=400',
-      'https://images.unsplash.com/photo-1572120360610-d971b9d7767c?w=400',
-      'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=400'
-    ],
-    amenities: ['WiFi', 'Kitchen', 'Garden', 'BBQ'],
-    description: 'Success doesn’t come overnight; it’s built through consistency, patience, and learning from failures. Every small step forward counts, even when progress feels slow.'
-  },
-  {
-    id: 3,
-    type: 'farmhouse',
-    name: 'Riverside Farm Stay',
-    images: [
-      'https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=400',
-      'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=400',
-      'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=400'
-    ],
-    amenities: ['WiFi', 'River View', 'Fishing', 'Parking'],
-    description: 'Success doesn’t come overnight; it’s built through consistency, patience, and learning from failures. Every small step forward counts, even when progress feels slow.'
-  },
-  {
-    id: 4,
-    type: 'farmhouse',
-    name: 'Mountain View Farmhouse',
-    images: [
-      'https://images.unsplash.com/photo-1448630360428-65456885c650?w=400',
-      'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=400',
-      'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=400'
-    ],
-    amenities: ['WiFi', 'Mountain View', 'Garden', 'Parking'],
-    description: 'Success doesn’t come overnight; it’s built through consistency, patience, and learning from failures. Every small step forward counts, even when progress feels slow.'
-  },
-  {
-    id: 5,
-    type: 'farmhouse',
-    name: 'Organic Farm Estate',
-    images: [
-      'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=400',
-      'https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=400',
-      'https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=400'
-    ],
-    amenities: ['WiFi', 'Organic Garden', 'Wine Tour', 'Kitchen'],
-    description: 'Success doesn’t come overnight; it’s built through consistency, patience, and learning from failures. Every small step forward counts, even when progress feels slow.'
-  },
-  {
-    id: 6,
-    type: 'bnb',
-    name: 'Cozy Hill Station BnB',
-    images: [
-      'https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?w=400',
-      'https://images.unsplash.com/photo-1586611292717-f828b167408c?w=400',
-      'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=400'
-    ],
-    amenities: ['WiFi', 'Breakfast', 'Balcony', 'AC'],
-    description: 'Success doesn’t come overnight; it’s built through consistency, patience, and learning from failures. Every small step forward counts, even when progress feels slow.'
-  },
-  {
-    id: 7,
-    type: 'bnb',
-    name: 'Heritage BnB Villa',
-    images: [
-      'https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=400',
-      'https://images.unsplash.com/photo-1615874694520-474822394e73?w=400',
-      'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=400'
-    ],
-    amenities: ['WiFi', 'Breakfast', 'Beach Access', 'Parking'],
-    description: 'Success doesn’t come overnight; it’s built through consistency, patience, and learning from failures. Every small step forward counts, even when progress feels slow.'
-  },
-  {
-    id: 8,
-    type: 'bnb',
-    name: 'Modern BnB Retreat',
-    images: [
-      'https://images.unsplash.com/photo-1520637736862-4d197d17c88a?w=400',
-      'https://images.unsplash.com/photo-1566665797739-1674de7a421a?w=400',
-      'https://images.unsplash.com/photo-1512918728675-ed5a9ecdebfd?w=400'
-    ],
-    amenities: ['WiFi', 'Breakfast', 'Gym', 'Spa'],
-    description: 'Success doesn’t come overnight; it’s built through consistency, patience, and learning from failures. Every small step forward counts, even when progress feels slow.'
-  },
-  {
-    id: 9,
-    type: 'bnb',
-    name: 'Lake View BnB',
-    images: [
-      'https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?w=400',
-      'https://images.unsplash.com/photo-1493809842364-78817add7ffb?w=400',
-      'https://images.unsplash.com/photo-1566665797739-1674de7a421a?w=400'
-    ],
-    amenities: ['WiFi', 'Breakfast', 'Lake View', 'Boating'],
-    guests: 4,
-    bedrooms: 2,
-    description: 'Success doesn’t come overnight; it’s built through consistency, patience, and learning from failures. Every small step forward counts, even when progress feels slow.'
-  },
-  {
-    id: 10,
-    type: 'bnb',
-    name: 'Boutique BnB Haven',
-    images: [
-      'https://images.unsplash.com/photo-1586611292717-f828b167408c?w=400',
-      'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=400',
-      'https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?w=400'
-    ],
-    amenities: ['WiFi', 'Breakfast', 'Garden', 'Library'],
-    description: 'Success doesn’t come overnight; it’s built through consistency, patience, and learning from failures. Every small step forward counts, even when progress feels slow.'
-  }
-]
 
 const SearchNavbar = ({ 
   checkInDate = '',
@@ -297,7 +173,30 @@ function PropertiesPage({ propertyType = 'both' } = {}) {
   const [checkInDate, setCheckInDate] = useState('')
   const [checkOutDate, setCheckOutDate] = useState('')
   const [searchLocation, setSearchLocation] = useState('')
-  const [properties, setProperties] = useState(allProperties)
+  
+  const { farmhouses, loading: farmhouseLoading, error: farmhouseError } = useFarmhouseList()
+  const { bnbs, loading: bnbLoading, error: bnbError } = useBnbList()
+  
+  const [properties, setProperties] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+
+  useEffect(() => {
+    if (propertyType === 'farmhouse') {
+      setProperties(farmhouses)
+      setLoading(farmhouseLoading)
+      setError(farmhouseError)
+    } else if (propertyType === 'bnb') {
+      setProperties(bnbs)
+      setLoading(bnbLoading)
+      setError(bnbError)
+    } else {
+      const allProperties = [...farmhouses, ...bnbs]
+      setProperties(allProperties)
+      setLoading(farmhouseLoading || bnbLoading)
+      setError(farmhouseError || bnbError)
+    }
+  }, [propertyType, farmhouses, bnbs, farmhouseLoading, bnbLoading, farmhouseError, bnbError])
 
   const getTitle = () => {
     switch (propertyType) {
