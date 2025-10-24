@@ -344,7 +344,7 @@ function PropertiesPage({
         <meta name="keywords" content="farmhouse listings, bnb properties, vacation rentals, farm stay" />
       </Helmet>
 
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-white">
         <SearchNavbar
           searchLocation={searchLocation}
           onSearchLocationChange={setSearchLocation}
@@ -358,7 +358,7 @@ function PropertiesPage({
         />
 
         {/* Heading Section */}
-        <section className="bg-white py-8 border-b border-gray-100">
+        <section className="bg-gray-50 py-12">
           <div className="container mx-auto px-4 text-center">
             <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-3">
               {getTitle()}
@@ -370,7 +370,7 @@ function PropertiesPage({
         </section>
 
         {/* Properties Grid */}
-        <section className="py-8">
+        <section className="py-12 bg-gray-50">
           <div className="container mx-auto px-4">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 justify-items-center">
               {filteredProperties.map(property => (
