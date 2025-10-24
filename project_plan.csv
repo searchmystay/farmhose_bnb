@@ -3,9 +3,9 @@ number,name_of_part,description_of_part,is_completed
 2,Backend API Structure,Create route blueprints and integrate error handling with existing Flask app,true
 3,File Upload System,Implement document upload functionality for Aadhar PAN and property documents,true
 4,Farmhouse Registration API,Create backend API endpoints for farmhouse owner registration and document submission,true
-5,Admin Authentication System,Implement admin login/logout functionality with session management,false
-6,Admin Dashboard Backend,Create API endpoints for admin dashboard data (pending approvals revenue analytics),false
-7,Farmhouse Approval API,Backend endpoints for admin to approve/reject farmhouses and view documents,false
+5,Admin Authentication System,Implement admin login/logout functionality with session management,true
+6,Admin Dashboard Backend,Create API endpoints for admin dashboard data (pending approvals revenue analytics),true
+7,Farmhouse Approval API,Backend endpoints for admin to approve/reject farmhouses and view documents,true
 8,Credit Management API,Backend system for admin to add credits and track farmhouse credit balance,false
 9,Public Farmhouse Listing API,Create API endpoints to fetch approved farmhouses with search and filter capabilities,true
 10,Lead Generation API,Implement lead tracking system and credit deduction logic for contact attempts,true
