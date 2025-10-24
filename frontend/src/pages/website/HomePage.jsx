@@ -1,12 +1,63 @@
 import { Helmet } from 'react-helmet-async'
+import { useState, useEffect } from 'react'
 
 // Mock data constants - replace with API calls later
 const POPULAR_FARMHOUSES = [
-  { id: 1, name: "Sunset Villa", location: "Jaipur", image: "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=300&h=200&fit=crop", price: "₹3,500" },
-  { id: 2, name: "Green Valley Farm", location: "Jaipur", image: "https://images.unsplash.com/photo-1583608205776-bfd35f0d9f83?w=300&h=200&fit=crop", price: "₹2,800" },
-  { id: 3, name: "Royal Heritage", location: "Jaipur", image: "https://images.unsplash.com/photo-1582268611958-ebfd161ef9cf?w=300&h=200&fit=crop", price: "₹4,200" },
-  { id: 4, name: "Peaceful Retreat", location: "Jaipur", image: "https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=300&h=200&fit=crop", price: "₹3,000" },
-  { id: 5, name: "Mountain View", location: "Jaipur", image: "https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=300&h=200&fit=crop", price: "₹3,800" }
+  {
+    id: 1,
+    name: "Royal Heritage Villa",
+    description: "Experience luxury in this stunning heritage villa featuring traditional Rajasthani architecture, spacious gardens, and modern amenities for an unforgettable stay.",
+    images: [
+      "https://images.unsplash.com/photo-1560185008-b033106af5c3?w=400&h=250&fit=crop",
+      "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=400&h=250&fit=crop",
+      "https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=400&h=250&fit=crop"
+    ],
+    amenities: ["WiFi", "Parking", "Pool", "Garden", "Kitchen"]
+  },
+  {
+    id: 2,
+    name: "Serenity Farm Retreat",
+    description: "Peaceful countryside escape with organic gardens, traditional mud houses, and panoramic views of Aravalli hills. Perfect for nature lovers.",
+    images: [
+      "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=400&h=250&fit=crop",
+      "https://images.unsplash.com/photo-1582268611958-ebfd161ef9cf?w=400&h=250&fit=crop",
+      "https://images.unsplash.com/photo-1600047509807-ba8f99d2cdde?w=400&h=250&fit=crop"
+    ],
+    amenities: ["WiFi", "Parking", "Garden", "Organic Farm", "Yoga Space"]
+  },
+  {
+    id: 3,
+    name: "Rajputana Palace Farm",
+    description: "Majestic palace-style farmhouse with regal interiors, large courtyards, and authentic Rajasthani hospitality. Ideal for grand celebrations.",
+    images: [
+      "https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=400&h=250&fit=crop",
+      "https://images.unsplash.com/photo-1590490360182-c33d57733427?w=400&h=250&fit=crop",
+      "https://images.unsplash.com/photo-1519947486511-46149fa0a254?w=400&h=250&fit=crop"
+    ],
+    amenities: ["WiFi", "Parking", "Pool", "Banquet Hall", "Catering"]
+  },
+  {
+    id: 4,
+    name: "Green Valley Farmhouse",
+    description: "Eco-friendly farmhouse surrounded by lush greenery and fruit orchards. Features solar power, rainwater harvesting, and sustainable living.",
+    images: [
+      "https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?w=400&h=250&fit=crop",
+      "https://images.unsplash.com/photo-1600047509358-9dc75507daeb?w=400&h=250&fit=crop",
+      "https://images.unsplash.com/photo-1600607687644-c7171b42498b?w=400&h=250&fit=crop"
+    ],
+    amenities: ["WiFi", "Parking", "Solar Power", "Orchard", "Cycling"]
+  },
+  {
+    id: 5,
+    name: "Desert Oasis Villa",
+    description: "Unique desert-themed farmhouse with camel safari arrangements, folk music evenings, and stunning sunset views. Experience authentic culture.",
+    images: [
+      "https://images.unsplash.com/photo-1602002418082-a4443e081dd1?w=400&h=250&fit=crop",
+      "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=250&fit=crop",
+      "https://images.unsplash.com/photo-1545558014-8692077e9b5c?w=400&h=250&fit=crop"
+    ],
+    amenities: ["WiFi", "Parking", "Camel Safari", "Folk Music", "Bonfire"]
+  }
 ]
 
 const POPULAR_BNBS = [
@@ -88,7 +139,59 @@ function HeroSection() {
   )
 }
 
-// Component for property card display
+// Component for enhanced farmhouse card with auto-changing images
+function FarmhouseCard({ property }) {
+  const [currentImageIndex, setCurrentImageIndex] = useState(0)
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentImageIndex((prev) => (prev + 1) % property.images.length)
+    }, 3000)
+
+    return () => clearInterval(interval)
+  }, [property.images.length])
+
+  return (
+    <div className="bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-300 w-80 flex-shrink-0 overflow-hidden">
+      <div className="relative h-48 overflow-hidden">
+        <img 
+          src={property.images[currentImageIndex]} 
+          alt={`${property.name} - Image ${currentImageIndex + 1}`} 
+          className="w-full h-48 object-cover transition-opacity duration-500"
+        />
+        
+        <div className="absolute bottom-3 left-1/2 transform -translate-x-1/2 flex space-x-1.5">
+          {property.images.map((_, index) => (
+            <div
+              key={index}
+              className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${
+                index === currentImageIndex ? 'bg-white scale-125' : 'bg-white/50'
+              }`}
+            />
+          ))}
+        </div>
+      </div>
+
+      <div className="p-4 flex flex-col">
+        <h3 className="font-medium text-lg mb-2 text-gray-900">{property.name}</h3>
+        <p className="text-gray-600 text-sm mb-3 leading-relaxed line-clamp-3">{property.description}</p>
+        
+        <div className="flex flex-wrap gap-1.5">
+          {property.amenities.map((amenity, index) => (
+            <span
+              key={index}
+              className="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded-md font-medium"
+            >
+              {amenity}
+            </span>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// Component for simple BnB card display
 function PropertyCard({ property }) {
   return (
     <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow min-w-72 flex-shrink-0">
@@ -106,13 +209,17 @@ function PropertyCard({ property }) {
 }
 
 // Component for scrollable property section
-function PropertySection({ title, properties }) {
+function PropertySection({ title, properties, isFarmhouse = false }) {
   return (
     <section className="py-12 bg-gray-50">
       <div className="container mx-auto px-4">
         <h2 className="text-2xl font-bold text-gray-900 mb-8">{title}</h2>
         <div className="flex space-x-6 overflow-x-auto scrollbar-hide pb-4">
-          {properties.map(property => <PropertyCard key={property.id} property={property} />)}
+          {properties.map(property => 
+            isFarmhouse ? 
+              <FarmhouseCard key={property.id} property={property} /> :
+              <PropertyCard key={property.id} property={property} />
+          )}
         </div>
       </div>
     </section>
@@ -202,7 +309,7 @@ function HomePage() {
 
       <div className="min-h-screen bg-white">
         <HeroSection />
-        <PropertySection title="Popular Farmhouses in Jaipur" properties={POPULAR_FARMHOUSES} />
+        <PropertySection title="Popular Farmhouses in Jaipur" properties={POPULAR_FARMHOUSES} isFarmhouse={true} />
         <PropertySection title="Popular BnB in Jaipur" properties={POPULAR_BNBS} />
         <TestimonialsSection />
         <Footer />
