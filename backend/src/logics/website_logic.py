@@ -74,8 +74,8 @@ def process_farmhouse_for_listing(farmhouse_data):
     amenities_data = farmhouse_data.get("amenities", [])
     description_words = full_description.split()
     
-    if len(description_words) > 50:
-        truncated_description = " ".join(description_words[:50]) + "..."
+    if len(description_words) > 20:
+        truncated_description = " ".join(description_words[:20]) + "..."
     else:
         truncated_description = full_description
     
