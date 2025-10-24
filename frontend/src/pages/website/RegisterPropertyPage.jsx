@@ -67,6 +67,23 @@ const RegisterPropertyPage = () => {
     private_chef_on_request: false
   });
 
+  const [additionalAmenities, setAdditionalAmenities] = useState({
+    pet_friendly: false,
+    child_friendly: false,
+    kids_play_area: false,
+    fenced_property: false,
+    cctv_cameras: false,
+    first_aid_kit: false,
+    fire_extinguisher: false,
+    security_guard: false,
+    private_gate_compound_wall: false,
+    daily_cleaning_available: false,
+    long_stays_allowed: false,
+    early_check_in_late_check_out: false,
+    staff_quarters_available: false,
+    caretaker_on_site: false
+  });
+
   // Handle input changes for basic info
   const handleBasicInfoChange = (e) => {
     const { name, value } = e.target;
@@ -83,6 +100,13 @@ const RegisterPropertyPage = () => {
 
   const handleExperienceToggleChange = (name) => {
     setExperienceAmenities(prev => ({
+      ...prev,
+      [name]: !prev[name]
+    }));
+  };
+
+  const handleAdditionalToggleChange = (name) => {
+    setAdditionalAmenities(prev => ({
       ...prev,
       [name]: !prev[name]
     }));
@@ -114,6 +138,18 @@ const RegisterPropertyPage = () => {
   const handleStep3Next = (e) => {
     e.preventDefault();
     console.log('Experience Amenities:', experienceAmenities);
+    setCurrentStep(4);
+  };
+
+  const handleStep4Submit = (e) => {
+    e.preventDefault();
+    console.log('Additional Amenities:', additionalAmenities);
+    console.log('All Form Data:', {
+      basicInfo,
+      essentialAmenities,
+      experienceAmenities,
+      additionalAmenities
+    });
   };
 
   // Handle previous button
@@ -475,6 +511,89 @@ const RegisterPropertyPage = () => {
     </form>
   );
 
+  const renderAdditionalToggleSwitch = (name, label, description) => (
+    <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+      <div className="flex-1">
+        <h3 className="font-medium text-gray-900">{label}</h3>
+        <p className="text-sm text-gray-500 mt-1">{description}</p>
+      </div>
+      <button
+        type="button"
+        onClick={() => handleAdditionalToggleChange(name)}
+        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 ${
+          additionalAmenities[name] ? 'bg-green-600' : 'bg-gray-200'
+        }`}
+      >
+        <span
+          className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+            additionalAmenities[name] ? 'translate-x-6' : 'translate-x-1'
+          }`}
+        />
+      </button>
+    </div>
+  );
+
+  const renderStep4AdditionalAmenities = () => (
+    <form onSubmit={handleStep4Submit} className="space-y-12">
+      <div className="space-y-6">
+        <div className="border-b pb-4">
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">Pet & Family Friendly</h2>
+          <p className="text-gray-600">Family and pet accommodation features</p>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {renderAdditionalToggleSwitch('pet_friendly', 'Pet-friendly', 'Welcoming dogs, cats and other pets')}
+          {renderAdditionalToggleSwitch('child_friendly', 'Child-friendly', 'Environment suitable for families with kids')}
+          {renderAdditionalToggleSwitch('kids_play_area', 'Kids Play Area', 'Games and activities for children')}
+          {renderAdditionalToggleSwitch('fenced_property', 'Fenced Property', 'Security and safety for pets and children')}
+        </div>
+      </div>
+
+      <div className="space-y-6">
+        <div className="border-b pb-4">
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">Safety & Security</h2>
+          <p className="text-gray-600">Security measures and safety equipment</p>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {renderAdditionalToggleSwitch('cctv_cameras', 'CCTV Cameras', 'Common areas security monitoring')}
+          {renderAdditionalToggleSwitch('first_aid_kit', 'First Aid Kit', 'Medical emergencies and basic treatment')}
+          {renderAdditionalToggleSwitch('fire_extinguisher', 'Fire Extinguisher', 'Fire safety and emergency protection')}
+          {renderAdditionalToggleSwitch('security_guard', 'Security Guard', 'Property protection and guest safety')}
+          {renderAdditionalToggleSwitch('private_gate_compound_wall', 'Private Gate/Wall', 'Privacy and security boundary')}
+        </div>
+      </div>
+
+      <div className="space-y-6">
+        <div className="border-b pb-4">
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">House Rules & Services</h2>
+          <p className="text-gray-600">Property services and accommodation policies</p>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {renderAdditionalToggleSwitch('daily_cleaning_available', 'Daily Cleaning', 'Maintain property hygiene')}
+          {renderAdditionalToggleSwitch('long_stays_allowed', 'Long Stays Allowed', 'Extended vacation or work purposes')}
+          {renderAdditionalToggleSwitch('early_check_in_late_check_out', 'Flexible Check-in/out', 'Early check-in or late check-out on request')}
+          {renderAdditionalToggleSwitch('staff_quarters_available', 'Staff Quarters', 'Property maintenance and guest services')}
+          {renderAdditionalToggleSwitch('caretaker_on_site', 'Caretaker On-site', 'Property assistance and guest support')}
+        </div>
+      </div>
+
+      <div className="flex justify-between pt-6 border-t">
+        <button
+          type="button"
+          onClick={handlePrevious}
+          className="px-6 py-3 text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors font-medium"
+        >
+          Previous
+        </button>
+        <button
+          type="submit"
+          className="px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all font-medium"
+        >
+          Submit Registration
+        </button>
+      </div>
+    </form>
+  );
+
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-4">
       <div className="max-w-2xl mx-auto">
@@ -493,6 +612,7 @@ const RegisterPropertyPage = () => {
           {currentStep === 1 && renderStep1BasicInfo()}
           {currentStep === 2 && renderStep2EssentialAmenities()}
           {currentStep === 3 && renderStep3ExperienceAmenities()}
+          {currentStep === 4 && renderStep4AdditionalAmenities()}
         </div>
       </div>
     </div>
