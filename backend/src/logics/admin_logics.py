@@ -147,3 +147,16 @@ def add_credit_balance(property_id, credit_amount):
     db_update_one("farmhouses", query_filter, {"$set": update_data})
     
     return True
+
+
+@handle_exceptions
+def mark_property_as_favourite(property_id, favourite_status):
+    query_filter = {"_id": ObjectId(property_id)}
+    property_exists = db_find_one("farmhouses", query_filter, {"_id": 1})
+    
+    if not property_exists:
+        raise AppException("Property not found")
+    
+    update_data = {"favourite": favourite_status}
+    db_update_one("farmhouses", query_filter, {"$set": update_data})
+    return True
