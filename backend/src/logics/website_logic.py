@@ -1,7 +1,7 @@
 from src.database.db_common_operations import db_find_many, db_find_one, db_insert_one, db_update_one, db_aggregate
 from src.utils.exception_handler import handle_exceptions, AppException
 from src.logics.cloudfare_bucket import upload_farmhouse_image_to_r2, upload_farmhouse_document_to_r2
-from src.config import LEAD_COST_RUPEES
+from src.config import LEAD_COST_RUPEES, MINIMUM_BALANCE_THRESHOLD
 from bson import ObjectId
 import random
 
@@ -218,8 +218,7 @@ def register_farmhouse(farmhouse_data, image_files, document_files):
         "status": "pending_approval",
         "images": [],
         "documents": [],
-        "credit_balance": 0,
-        "click_count":0
+        "credit_balance": 0
     }
     
     insert_result = db_insert_one("farmhouses", farmhouse_record)
@@ -251,13 +250,15 @@ def check_farmhouse_credit_balance(farmhouse_id):
 def deduct_lead_cost_from_farmhouse(farmhouse_id):
     current_balance, whatsapp_link = check_farmhouse_credit_balance(farmhouse_id)
     
-    if current_balance < LEAD_COST_RUPEES:
-        raise AppException("Insufficient credit balance for this farmhouse")
+    if current_balance < MINIMUM_BALANCE_THRESHOLD:
+        deactivate_data = {"$set": {"status": "inactive"}}
+        query_filter = {"_id": ObjectId(farmhouse_id)}
+        db_update_one("farmhouses", query_filter, deactivate_data)
+        raise AppException("Contact information is currently unavailable for this farmhouse")
     
     new_balance = current_balance - LEAD_COST_RUPEES
     update_data = {
         "$set": {"credit_balance": new_balance},
-        "$inc": {"click_count": 1}
     }
     
     query_filter = {"_id": ObjectId(farmhouse_id)}

@@ -114,11 +114,6 @@ def get_farmhouse_schema() -> Dict:
                 "bsonType": "number",
                 "description": "Available credit balance for lead charges (40 rupees per lead)",
             },
-            "click_count": {
-                "bsonType": "number",
-                "description": "Number of times this farmhouse has been clicked by users",
-                "minimum": 0
-            },
             "status": {
                 "bsonType": "string",
                 "description": "Status of the farmhouse listing",
