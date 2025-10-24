@@ -176,6 +176,21 @@ def get_farmhouse_schema() -> Dict:
                         "bsonType": "object",
                         "description": "Bedroom & Bathroom",
                         "properties": {
+                            "bedrooms": {
+                                "bsonType": "number",
+                                "description": "Number of bedrooms available in the property",
+                                "minimum": 0
+                            },
+                            "bathrooms": {
+                                "bsonType": "number",
+                                "description": "Number of bathrooms available in the property",
+                                "minimum": 0
+                            },
+                            "beds": {
+                                "bsonType": "number",
+                                "description": "Number of beds available in the property",
+                                "minimum": 0
+                            },
                             "bed_linens": {
                                 "bsonType": "bool",
                                 "description": "Fresh bed linens including sheets, pillowcases and blankets provided"
@@ -235,14 +250,7 @@ def get_farmhouse_schema() -> Dict:
                                 "bsonType": "bool",
                                 "description": "Terrace or balcony area for outdoor views and fresh air"
                             },
-                            "outdoor_dining_area": {
-                                "bsonType": "bool",
-                                "description": "Outdoor dining area for eating meals in open air"
-                            },
-                            "parking_inside_property": {
-                                "bsonType": "bool",
-                                "description": "Parking space available inside the property premises"
-                            }
+                        
                         }
                     },
                     
@@ -254,17 +262,9 @@ def get_farmhouse_schema() -> Dict:
                                 "bsonType": "bool",
                                 "description": "Kitchen access available for guests to cook their own meals"
                             },
-                            "cook_available_on_request": {
-                                "bsonType": "bool",
-                                "description": "Cook service available on request for meal preparation"
-                            },
                             "in_house_meals_available": {
                                 "bsonType": "bool",
                                 "description": "In-house meals provided by the property for guests"
-                            },
-                            "bbq_equipment": {
-                                "bsonType": "bool",
-                                "description": "BBQ equipment available for outdoor grilling and cooking"
                             },
                             "dining_table": {
                                 "bsonType": "bool",
