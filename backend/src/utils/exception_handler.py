@@ -33,5 +33,5 @@ def handle_route_exceptions(func):
             return jsonify({"success": False, "message": e.message}), e.status_code
         except Exception as e:
             logger.error(f"Unexpected error in {func.__name__}: {str(e)}")
-            return jsonify({"success": False, "message": "Oh no! 😱 Something went wrong on our end. Please try again later! 🌟"}), 500
+            return jsonify({"success": False, "message": "Something went wrong on our side. We're on it! Please try again soon."}), 500
     return wrapper
