@@ -253,10 +253,13 @@ def deduct_lead_cost_from_farmhouse(farmhouse_id):
         raise AppException("Insufficient credit balance for this farmhouse")
     
     new_balance = current_balance - LEAD_COST_RUPEES
-    update_data = {"credit_balance": new_balance}
+    update_data = {
+        "$set": {"credit_balance": new_balance},
+        "$inc": {"click_count": 1}
+    }
     
     query_filter = {"_id": ObjectId(farmhouse_id)}
-    update_result = db_update_one("farmhouses", query_filter, {"$set": update_data})
+    db_update_one("farmhouses", query_filter, update_data)
     
     return new_balance, whatsapp_link
 
