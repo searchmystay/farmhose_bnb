@@ -258,7 +258,7 @@ def deduct_lead_cost_from_farmhouse(farmhouse_id):
     
     new_balance = current_balance - LEAD_COST_RUPEES
 
-    if new_balance < MINIMUM_BALANCE_THRESHOLD:
+    if new_balance <= MINIMUM_BALANCE_THRESHOLD:
         update_data = {
             "$set": {
                 "credit_balance": new_balance,
