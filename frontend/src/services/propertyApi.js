@@ -31,3 +31,18 @@ export const fetchBnbList = async () => {
   
   return result
 }
+
+export const registerProperty = async (formData) => {
+  const response = await apiClient.post('/register-property', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  })
+  const result = response.data
+  
+  if (result.success === false) {
+    throw new Error(result.message || 'Failed to register property')
+  }
+  
+  return result
+}
