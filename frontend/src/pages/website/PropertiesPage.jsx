@@ -136,38 +136,37 @@ const SearchNavbar = ({
 }) => {
   const [showMobileForm, setShowMobileForm] = useState(false)
   return (
-    <div className="bg-white shadow-sm border-b border-gray-100 py-4 md:py-6">
+    <div className="bg-white shadow-sm border-b border-gray-100 py-2">
       <div className="container mx-auto px-4">
         <div className="hidden md:flex items-center justify-between">
-          <div className="text-2xl md:text-3xl font-bold text-gray-900">
+          <div className="text-2xl font-bold text-gray-900">
             SearchMyStay
           </div>
 
-          <div className="flex items-center bg-white rounded-full border border-gray-200 shadow-sm hover:shadow-md transition-shadow p-2">
-            <div className="px-4 py-2">
-              <div className="text-xs font-medium text-gray-600 mb-1">Check-in</div>
+          <div className="flex items-center bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+            <div className="px-4 py-2 border-r border-gray-200">
+              <div className="text-xs text-gray-500">Check-in</div>
               <input
                 type="date"
                 value={checkInDate}
                 onChange={(e) => onCheckInChange?.(e.target.value)}
-                className="text-sm text-gray-900 bg-transparent border-0 outline-none w-32"
+                className="text-sm text-gray-900 bg-transparent border-0 outline-none w-28 mt-0.5"
                 min={new Date().toISOString().split('T')[0]}
               />
             </div>
-            <div className="w-px h-8 bg-gray-200"></div>
-            <div className="px-4 py-2">
-              <div className="text-xs font-medium text-gray-600 mb-1">Check-out</div>
+            <div className="px-4 py-2 border-r border-gray-200">
+              <div className="text-xs text-gray-500">Check-out</div>
               <input
                 type="date"
                 value={checkOutDate}
                 onChange={(e) => onCheckOutChange?.(e.target.value)}
-                className="text-sm text-gray-900 bg-transparent border-0 outline-none w-32"
+                className="text-sm text-gray-900 bg-transparent border-0 outline-none w-28 mt-0.5"
                 min={checkInDate || new Date().toISOString().split('T')[0]}
               />
             </div>
             <button
               onClick={onSearch}
-              className="bg-gray-900 hover:bg-gray-800 text-white p-3 rounded-full transition-colors ml-2"
+              className="bg-gray-900 hover:bg-gray-800 text-white px-4 py-2 m-1 rounded-md transition-colors"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
