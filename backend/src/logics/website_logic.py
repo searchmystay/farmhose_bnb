@@ -1,9 +1,8 @@
-from src.database.db_common_operations import db_find_many, db_find_one, db_insert_one, db_update_one, db_aggregate
+from src.database.db_common_operations import db_find_many, db_find_one, db_insert_one, db_update_one
 from src.utils.exception_handler import handle_exceptions, AppException
 from src.logics.cloudfare_bucket import upload_farmhouse_image_to_r2, upload_farmhouse_document_to_r2
 from src.config import LEAD_COST_RUPEES, MINIMUM_BALANCE_THRESHOLD
 from bson import ObjectId
-import random
 
 
 @handle_exceptions
