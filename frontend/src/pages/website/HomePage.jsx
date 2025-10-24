@@ -206,7 +206,7 @@ function FarmhouseCard({ property }) {
   }, [images.length])
 
   return (
-    <div className="bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-300 w-80 flex-shrink-0 overflow-hidden">
+    <div className="bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-300 w-80 h-96 flex-shrink-0 overflow-hidden flex flex-col">
       <div className="relative h-48 overflow-hidden">
         <img 
           src={images[currentImageIndex]} 
@@ -228,11 +228,11 @@ function FarmhouseCard({ property }) {
         )}
       </div>
 
-      <div className="p-4 flex flex-col">
+      <div className="p-4 flex flex-col flex-grow">
         <h3 className="font-medium text-lg mb-2 text-gray-900">{property.name}</h3>
-        <p className="text-gray-600 text-sm mb-3 leading-relaxed line-clamp-3">{property.description}</p>
+        <p className="text-gray-600 text-sm mb-3 leading-relaxed flex-grow">{property.description}</p>
         
-        <div className="flex flex-wrap gap-1.5">
+        <div className="flex flex-wrap gap-1.5 mt-auto">
           {property.amenities && property.amenities.map((amenity, index) => (
             <span
               key={index}
