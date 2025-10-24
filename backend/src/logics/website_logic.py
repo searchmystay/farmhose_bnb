@@ -217,7 +217,8 @@ def register_farmhouse(farmhouse_data, image_files, document_files):
         "status": "pending_approval",
         "images": [],
         "documents": [],
-        "credit_balance": 0
+        "credit_balance": 0,
+        "click_count":0
     }
     
     insert_result = db_insert_one("farmhouses", farmhouse_record)
