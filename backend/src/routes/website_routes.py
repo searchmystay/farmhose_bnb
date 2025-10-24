@@ -46,9 +46,9 @@ def get_property_detail(property_id):
     return jsonify(response_data)
 
 
-@website_bp.route('/register-farmhouse', methods=['POST'])
+@website_bp.route('/register-property', methods=['POST'])
 @handle_route_exceptions
-def register_farmhouse_route():
+def register_property_route():
     farmhouse_data = request.get_json()
     image_files = request.files.getlist('images')
     document_files = request.files.getlist('documents')
