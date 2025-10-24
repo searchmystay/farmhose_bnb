@@ -118,13 +118,6 @@ const POPULAR_BNBS = [
   }
 ]
 
-const TESTIMONIALS = [
-  { id: 1, name: "Rahul Sharma", text: "Amazing farmhouse experience! Perfect for family getaway.", rating: 5 },
-  { id: 2, name: "Priya Gupta", text: "Beautiful location and excellent hospitality. Highly recommended!", rating: 5 },
-  { id: 3, name: "Amit Singh", text: "Peaceful retreat with all modern amenities. Will visit again.", rating: 5 }
-]
-
-
 // Component for full-screen hero with scrolling background
 function HeroSection() {
   const backgroundImages = [
@@ -247,23 +240,6 @@ function FarmhouseCard({ property }) {
   )
 }
 
-// Component for simple BnB card display
-function PropertyCard({ property }) {
-  return (
-    <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow min-w-72 flex-shrink-0">
-      <img src={property.image} alt={property.name} className="w-full h-48 object-cover" />
-      <div className="p-4">
-        <h3 className="font-semibold text-lg mb-1">{property.name}</h3>
-        <p className="text-gray-600 text-sm mb-2">{property.location}</p>
-        <div className="flex justify-between items-center">
-          <span className="text-green-600 font-bold">{property.price}/night</span>
-          <button className="bg-green-600 text-white px-4 py-1 rounded text-sm hover:bg-green-700 transition-colors">View</button>
-        </div>
-      </div>
-    </div>
-  )
-}
-
 // Component for infinite auto-carousel farmhouse section
 function FarmhouseCarousel({ title, properties }) {
   const [currentIndex, setCurrentIndex] = useState(0)
@@ -330,37 +306,6 @@ function FarmhouseCarousel({ title, properties }) {
         </div>
       </div>
     </section>
-  )
-}
-
-// Component for scrollable property section (for BnBs)
-function PropertySection({ title, properties }) {
-  return (
-    <section className="py-12 bg-gray-50">
-      <div className="container mx-auto px-4">
-        <h2 className="text-2xl font-bold text-gray-900 mb-8">{title}</h2>
-        <div className="flex space-x-6 overflow-x-auto scrollbar-hide pb-4">
-          {properties.map(property => 
-            <PropertyCard key={property.id} property={property} />
-          )}
-        </div>
-      </div>
-    </section>
-  )
-}
-
-// Component for testimonial card
-function TestimonialCard({ testimonial }) {
-  return (
-    <div className="bg-white rounded-lg shadow-md p-6">
-      <div className="flex items-center mb-4">
-        {[...Array(testimonial.rating)].map((_, i) => (
-          <span key={i} className="text-yellow-400">⭐</span>
-        ))}
-      </div>
-      <p className="text-gray-600 mb-4">"{testimonial.text}"</p>
-      <p className="font-semibold text-gray-900">- {testimonial.name}</p>
-    </div>
   )
 }
 
@@ -465,36 +410,21 @@ function TestimonialsSection() {
 // Component for footer
 function Footer() {
   return (
-    <footer className="bg-gray-900 text-white py-12">
-      <div className="container mx-auto px-4">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-          <div>
-            <h3 className="text-xl font-bold mb-4">FarmStay</h3>
-            <p className="text-gray-400">Discover the best farmhouses and BnBs for your perfect getaway.</p>
+    <footer className="bg-gray-900 text-white py-8">
+      <div className="container mx-auto px-4 max-w-4xl">
+        <div className="text-center md:flex md:justify-center md:items-center md:space-x-16">
+          <div className="mb-4 md:mb-0">
+            <h3 className="text-xl font-bold mb-2">SearchMyStay</h3>
+            <p className="text-gray-400 text-sm">Verified farmhouses and BnBs for your perfect getaway.</p>
           </div>
-          <div>
-            <h4 className="font-semibold mb-4">Quick Links</h4>
-            <ul className="space-y-2 text-gray-400">
-              <li><a href="#" className="hover:text-white transition-colors">About Us</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Properties</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Contact</a></li>
-            </ul>
-          </div>
-          <div>
-            <h4 className="font-semibold mb-4">Property Types</h4>
-            <ul className="space-y-2 text-gray-400">
-              <li><a href="#" className="hover:text-white transition-colors">Farmhouses</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Bed & Breakfast</a></li>
-            </ul>
-          </div>
-          <div>
-            <h4 className="font-semibold mb-4">Contact Info</h4>
-            <p className="text-gray-400">Email: info@farmstay.com</p>
-            <p className="text-gray-400">Phone: +91 9999999999</p>
+          <div className="text-center">
+            <h4 className="font-semibold mb-2 text-sm">Contact Info</h4>
+            <p className="text-gray-400 text-sm">info@searchmystay.com</p>
+            <p className="text-gray-400 text-sm">+91 9999999999</p>
           </div>
         </div>
-        <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
-          <p>&copy; 2024 FarmStay. All rights reserved.</p>
+        <div className="border-t border-gray-800 mt-6 pt-4 text-center text-gray-400 text-xs">
+          <p>&copy; 2025 SearchMyStay. All rights reserved.</p>
         </div>
       </div>
     </footer>
