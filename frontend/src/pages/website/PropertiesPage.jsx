@@ -127,7 +127,6 @@ const allProperties = [
   }
 ]
 
-// Simple SearchNavbar Component
 const SearchNavbar = ({ 
   checkInDate = '',
   onCheckInChange,
@@ -135,49 +134,108 @@ const SearchNavbar = ({
   onCheckOutChange,
   onSearch
 }) => {
+  const [showMobileForm, setShowMobileForm] = useState(false)
   return (
-    <div className="bg-white border-b border-gray-200 py-4">
+    <div className="bg-white shadow-sm border-b border-gray-100 py-4 md:py-6">
       <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between">
-          <div className="text-xl font-semibold text-gray-900">
+        <div className="hidden md:flex items-center justify-between">
+          <div className="text-2xl md:text-3xl font-bold text-gray-900">
             SearchMyStay
           </div>
 
-          <div className="flex items-center space-x-4">
-            <div>
+          <div className="flex items-center bg-white rounded-full border border-gray-200 shadow-sm hover:shadow-md transition-shadow p-2">
+            <div className="px-4 py-2">
+              <div className="text-xs font-medium text-gray-600 mb-1">Check-in</div>
               <input
                 type="date"
                 value={checkInDate}
                 onChange={(e) => onCheckInChange?.(e.target.value)}
-                className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-green-500 focus:border-green-500"
+                className="text-sm text-gray-900 bg-transparent border-0 outline-none w-32"
                 min={new Date().toISOString().split('T')[0]}
-                placeholder="Check-in"
               />
             </div>
-            <div>
+            <div className="w-px h-8 bg-gray-200"></div>
+            <div className="px-4 py-2">
+              <div className="text-xs font-medium text-gray-600 mb-1">Check-out</div>
               <input
                 type="date"
                 value={checkOutDate}
                 onChange={(e) => onCheckOutChange?.(e.target.value)}
-                className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-green-500 focus:border-green-500"
+                className="text-sm text-gray-900 bg-transparent border-0 outline-none w-32"
                 min={checkInDate || new Date().toISOString().split('T')[0]}
-                placeholder="Check-out"
               />
             </div>
             <button
               onClick={onSearch}
-              className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg text-sm font-medium transition-colors"
+              className="bg-gray-900 hover:bg-gray-800 text-white p-3 rounded-full transition-colors ml-2"
             >
-              Search
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
             </button>
           </div>
+        </div>
+
+        <div className="md:hidden">
+          <div className="flex items-center justify-between">
+            <div className="text-xl font-bold text-gray-900">
+              SearchMyStay
+            </div>
+            <button
+              onClick={() => setShowMobileForm(!showMobileForm)}
+              className="bg-gray-900 hover:bg-gray-800 text-white p-2 rounded-full transition-colors"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+            </button>
+          </div>
+
+          {showMobileForm && (
+            <div className="mt-4 bg-white rounded-xl border border-gray-200 shadow-sm p-4">
+              <div className="space-y-3">
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-2">
+                    Check-in Date
+                  </label>
+                  <input
+                    type="date"
+                    value={checkInDate}
+                    onChange={(e) => onCheckInChange?.(e.target.value)}
+                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-gray-300 focus:border-gray-300"
+                    min={new Date().toISOString().split('T')[0]}
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-2">
+                    Check-out Date
+                  </label>
+                  <input
+                    type="date"
+                    value={checkOutDate}
+                    onChange={(e) => onCheckOutChange?.(e.target.value)}
+                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-gray-300 focus:border-gray-300"
+                    min={checkInDate || new Date().toISOString().split('T')[0]}
+                  />
+                </div>
+                <button
+                  onClick={() => {
+                    onSearch()
+                    setShowMobileForm(false)
+                  }}
+                  className="w-full bg-gray-900 hover:bg-gray-800 text-white py-3 rounded-lg font-medium transition-colors"
+                >
+                  Search Properties
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>
   )
 }
 
-// FarmhouseCard Component (exactly like HomePage)
 const FarmhouseCard = ({ property }) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
 
@@ -235,14 +293,43 @@ const FarmhouseCard = ({ property }) => {
   )
 }
 
-function PropertiesPage() {
+function PropertiesPage({ 
+  propertyType = 'both', 
+  customTitle = null,
+  customDescription = null 
+} = {}) {
   const [checkInDate, setCheckInDate] = useState('')
   const [checkOutDate, setCheckOutDate] = useState('')
   const [searchLocation, setSearchLocation] = useState('')
   const [filteredProperties, setFilteredProperties] = useState(allProperties)
 
+  const getTitle = () => {
+    if (customTitle) return customTitle
+    switch (propertyType) {
+      case 'farmhouse':
+        return 'Farmhouses'
+      case 'bnb':
+        return 'Bed & Breakfast'
+      case 'both':
+      default:
+        return 'Farmhouses & BnB'
+    }
+  }
+
+  const getDescription = () => {
+    if (customDescription) return customDescription
+    switch (propertyType) {
+      case 'farmhouse':
+        return 'Discover serene farmhouses perfect for peaceful getaways and nature retreats'
+      case 'bnb':
+        return 'Experience cozy bed & breakfast accommodations with personalized hospitality'
+      case 'both':
+      default:
+        return 'Choose from our curated collection of farmhouses and bed & breakfast properties'
+    }
+  }
+
   const handleSearch = () => {
-    // Filter logic will be implemented here
     console.log('Searching with:', { searchLocation, checkInDate, checkOutDate })
   }
 
@@ -253,8 +340,8 @@ function PropertiesPage() {
   return (
     <>
       <Helmet>
-        <title>Farmhouses & BnB Properties | Find Your Perfect Stay</title>
-        <meta name="description" content="Browse our collection of premium farmhouses and bed & breakfast properties for your perfect getaway." />
+        <title>{getTitle()} Properties | Find Your Perfect Stay</title>
+        <meta name="description" content={getDescription()} />
         <meta name="keywords" content="farmhouse listings, bnb properties, vacation rentals, farm stay" />
       </Helmet>
 
@@ -270,6 +357,18 @@ function PropertiesPage() {
           onFilterClick={handleFilterClick}
           resultCount={filteredProperties.length}
         />
+
+        {/* Heading Section */}
+        <section className="bg-white py-8 border-b border-gray-100">
+          <div className="container mx-auto px-4 text-center">
+            <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-3">
+              {getTitle()}
+            </h1>
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+              {getDescription()}
+            </p>
+          </div>
+        </section>
 
         {/* Properties Grid */}
         <section className="py-8">
