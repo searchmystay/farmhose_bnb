@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify, request
-from src.logics.website_logic import get_approved_farmhouses, get_approved_bnbs, get_property_details, register_farmhouse, process_whatsapp_contact
+from src.logics.website_logic import get_approved_farmhouses, get_approved_bnbs, get_property_details, register_farmhouse, process_whatsapp_contact, get_top_properties_by_clicks
 from src.utils.exception_handler import handle_route_exceptions, AppException
 from bson import ObjectId
 
@@ -74,6 +74,19 @@ def contact_via_whatsapp(farmhouse_id):
     response_data = {
         "success": True,
         "backend_data": contact_result
+    }
+    
+    return jsonify(response_data), 200
+
+
+@website_bp.route('/top-properties', methods=['GET'])
+@handle_route_exceptions
+def get_top_properties():
+    top_properties_data = get_top_properties_by_clicks()
+    
+    response_data = {
+        "success": True,
+        "backend_data": top_properties_data
     }
     
     return jsonify(response_data), 200

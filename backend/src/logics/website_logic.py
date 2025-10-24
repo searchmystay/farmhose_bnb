@@ -1,8 +1,9 @@
-from src.database.db_common_operations import db_find_many, db_find_one, db_insert_one, db_update_one
+from src.database.db_common_operations import db_find_many, db_find_one, db_insert_one, db_update_one, db_aggregate
 from src.utils.exception_handler import handle_exceptions, AppException
 from src.logics.cloudfare_bucket import upload_farmhouse_image_to_r2, upload_farmhouse_document_to_r2
 from src.config import LEAD_COST_RUPEES
 from bson import ObjectId
+import random
 
 
 @handle_exceptions
@@ -277,3 +278,88 @@ def process_whatsapp_contact(farmhouse_id):
     }
     
     return contact_result
+
+
+@handle_exceptions
+def select_top_five_with_random_ties(properties_list):
+    if len(properties_list) <= 5:
+        return properties_list
+    
+    click_counts = {}
+    for prop in properties_list:
+        click_count = prop.get("click_count", 0)
+        if click_count not in click_counts:
+            click_counts[click_count] = []
+        click_counts[click_count].append(prop)
+    
+    sorted_click_counts = sorted(click_counts.keys(), reverse=True)
+    selected_properties = []
+    
+    for click_count in sorted_click_counts:
+        properties_with_same_count = click_counts[click_count]
+        random.shuffle(properties_with_same_count)
+        
+        remaining_slots = 5 - len(selected_properties)
+        if remaining_slots <= 0:
+            break
+            
+        if len(properties_with_same_count) <= remaining_slots:
+            selected_properties.extend(properties_with_same_count)
+        else:
+            selected_properties.extend(properties_with_same_count[:remaining_slots])
+    
+    return selected_properties
+
+
+@handle_exceptions
+def get_top_properties_by_clicks():
+    farmhouse_filter = {"status": "active", "type": "farmhouse"}
+    bnb_filter = {"status": "active", "type": "bnb"}
+    
+    projection = {
+        "_id": 1,
+        "name": 1,
+        "description": 1,
+        "images": 1,
+        "amenities": 1,
+        "click_count": 1
+    }
+    
+    farmhouse_pipeline = [
+        {"$match": farmhouse_filter},
+        {"$project": projection},
+        {"$addFields": {"click_count": {"$ifNull": ["$click_count", 0]}}},
+        {"$sort": {"click_count": -1}},
+        {"$limit": 100}
+    ]
+    
+    bnb_pipeline = [
+        {"$match": bnb_filter},
+        {"$project": projection},
+        {"$addFields": {"click_count": {"$ifNull": ["$click_count", 0]}}},
+        {"$sort": {"click_count": -1}},
+        {"$limit": 100}
+    ]
+    
+    farmhouse_results = db_aggregate("farmhouses", farmhouse_pipeline)
+    bnb_results = db_aggregate("farmhouses", bnb_pipeline)
+    
+    top_farmhouses = select_top_five_with_random_ties(farmhouse_results)
+    top_bnbs = select_top_five_with_random_ties(bnb_results)
+    
+    processed_farmhouses = []
+    for farmhouse_data in top_farmhouses:
+        processed_farmhouse = process_farmhouse_for_listing(farmhouse_data)
+        processed_farmhouses.append(processed_farmhouse)
+    
+    processed_bnbs = []
+    for bnb_data in top_bnbs:
+        processed_bnb = process_farmhouse_for_listing(bnb_data)
+        processed_bnbs.append(processed_bnb)
+    
+    top_properties_result = {
+        "top_farmhouses": processed_farmhouses,
+        "top_bnbs": processed_bnbs
+    }
+    
+    return top_properties_result
