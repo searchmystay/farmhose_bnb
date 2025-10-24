@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 
 const RegisterPropertyPage = () => {
-  const [formData, setFormData] = useState({
+  const [currentStep, setCurrentStep] = useState(1);
+  const [basicInfo, setBasicInfo] = useState({
     name: '',
     description: '',
     type: 'farmhouse',
@@ -9,15 +10,77 @@ const RegisterPropertyPage = () => {
     address: '',
     pin_code: ''
   });
+  const [essentialAmenities, setEssentialAmenities] = useState({
+    air_conditioning: false,
+    wifi_internet: false,
+    power_backup: false,
+    parking: false,
+    refrigerator: false,
+    microwave: false,
+    cooking_basics: false,
+    drinking_water: false,
+    washing_machine: false,
+    iron: false,
+    geyser_hot_water: false,
+    television: false,
+    smart_tv_ott: false,
+    wardrobe: false,
+    extra_mattress_bedding: false,
+    cleaning_supplies: false,
+    bedrooms: 1,
+    bathrooms: 1,
+    beds: 1,
+    bed_linens: false,
+    towels: false,
+    toiletries: false,
+    mirror: false,
+    hair_dryer: false,
+    attached_bathrooms: false,
+    bathtub: false
+  });
 
-  const handleInputChange = (e) => {
+  // Handle input changes for basic info
+  const handleBasicInfoChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setBasicInfo(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleNextStep = (e) => {
+  // Handle boolean toggle changes for amenities
+  const handleToggleChange = (name) => {
+    setEssentialAmenities(prev => ({
+      ...prev,
+      [name]: !prev[name]
+    }));
+  };
+
+  // Handle number input changes for amenities
+  const handleNumberChange = (e) => {
+    const { name, value } = e.target;
+    setEssentialAmenities(prev => ({
+      ...prev,
+      [name]: parseInt(value) || 0
+    }));
+  };
+
+  // Handle step 1 next button
+  const handleStep1Next = (e) => {
     e.preventDefault();
-    console.log('Basic Info:', formData);
+    console.log('Basic Info:', basicInfo);
+    setCurrentStep(2);
+  };
+
+  // Handle step 2 next button
+  const handleStep2Next = (e) => {
+    e.preventDefault();
+    console.log('Essential Amenities:', essentialAmenities);
+    // Will move to step 3 later
+  };
+
+  // Handle previous button
+  const handlePrevious = () => {
+    if (currentStep > 1) {
+      setCurrentStep(currentStep - 1);
+    }
   };
 
   // Render the process explanation section
@@ -34,22 +97,66 @@ const RegisterPropertyPage = () => {
   );
 
   // Render the progress indicator
-  const renderProgressIndicator = () => (
-    <div className="mb-8">
-      <div className="flex items-center justify-between text-sm text-gray-500 mb-2">
-        <span>Step 1 of 4</span>
-        <span>25% Complete</span>
+  const renderProgressIndicator = () => {
+    const progressPercent = (currentStep / 4) * 100;
+    return (
+      <div className="mb-8">
+        <div className="flex items-center justify-between text-sm text-gray-500 mb-2">
+          <span>Step {currentStep} of 4</span>
+          <span>{progressPercent}% Complete</span>
+        </div>
+        <div className="w-full bg-gray-200 rounded-full h-2">
+          <div className="bg-green-500 h-2 rounded-full transition-all duration-300" 
+               style={{width: `${progressPercent}%`}}></div>
+        </div>
       </div>
-      <div className="w-full bg-gray-200 rounded-full h-2">
-        <div className="bg-green-500 h-2 rounded-full transition-all duration-300" 
-             style={{width: '25%'}}></div>
-      </div>
+    );
+  };
+
+  // Render number input field for amenities
+  const renderNumberInput = (name, label, min = 0, max = 20) => (
+    <div className="space-y-2">
+      <label className="block text-sm font-medium text-gray-700">
+        {label}
+      </label>
+      <input
+        type="number"
+        name={name}
+        value={essentialAmenities[name]}
+        onChange={handleNumberChange}
+        min={min}
+        max={max}
+        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all text-center text-lg font-medium"
+      />
     </div>
   );
 
-  // Render the basic information form fields
-  const renderBasicInfoForm = () => (
-    <form onSubmit={handleNextStep} className="space-y-6">
+  // Render toggle switch for amenities
+  const renderToggleSwitch = (name, label, description) => (
+    <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+      <div className="flex-1">
+        <h3 className="font-medium text-gray-900">{label}</h3>
+        <p className="text-sm text-gray-500 mt-1">{description}</p>
+      </div>
+      <button
+        type="button"
+        onClick={() => handleToggleChange(name)}
+        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 ${
+          essentialAmenities[name] ? 'bg-green-600' : 'bg-gray-200'
+        }`}
+      >
+        <span
+          className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+            essentialAmenities[name] ? 'translate-x-6' : 'translate-x-1'
+          }`}
+        />
+      </button>
+    </div>
+  );
+
+  // Render step 1: basic information form
+  const renderStep1BasicInfo = () => (
+    <form onSubmit={handleStep1Next} className="space-y-6">
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">
           Property Name
@@ -57,8 +164,8 @@ const RegisterPropertyPage = () => {
         <input
           type="text"
           name="name"
-          value={formData.name}
-          onChange={handleInputChange}
+          value={basicInfo.name}
+          onChange={handleBasicInfoChange}
           className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
           placeholder="Enter your property name"
         />
@@ -70,8 +177,8 @@ const RegisterPropertyPage = () => {
         </label>
         <textarea
           name="description"
-          value={formData.description}
-          onChange={handleInputChange}
+          value={basicInfo.description}
+          onChange={handleBasicInfoChange}
           rows="4"
           className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all resize-none"
           placeholder="Describe your property in detail..."
@@ -84,8 +191,8 @@ const RegisterPropertyPage = () => {
         </label>
         <select
           name="type"
-          value={formData.type}
-          onChange={handleInputChange}
+          value={basicInfo.type}
+          onChange={handleBasicInfoChange}
           className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
         >
           <option value="farmhouse">Farmhouse</option>
@@ -105,8 +212,8 @@ const RegisterPropertyPage = () => {
           <input
             type="tel"
             name="phone_number"
-            value={formData.phone_number}
-            onChange={handleInputChange}
+            value={basicInfo.phone_number}
+            onChange={handleBasicInfoChange}
             className="flex-1 px-4 py-3 border border-gray-300 rounded-r-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
             placeholder="Enter your phone number"
             maxLength="10"
@@ -121,8 +228,8 @@ const RegisterPropertyPage = () => {
         <input
           type="text"
           name="address"
-          value={formData.address}
-          onChange={handleInputChange}
+          value={basicInfo.address}
+          onChange={handleBasicInfoChange}
           className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
           placeholder="Enter your property address"
         />
@@ -135,8 +242,8 @@ const RegisterPropertyPage = () => {
         <input
           type="text"
           name="pin_code"
-          value={formData.pin_code}
-          onChange={handleInputChange}
+          value={basicInfo.pin_code}
+          onChange={handleBasicInfoChange}
           className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
           placeholder="Enter pin code"
           maxLength="6"
@@ -144,20 +251,85 @@ const RegisterPropertyPage = () => {
         />
       </div>
 
-      {renderActionButtons()}
+      <div className="flex justify-end pt-6 border-t">
+        <button
+          type="submit"
+          className="px-8 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-all font-medium"
+        >
+          Next Step
+        </button>
+      </div>
     </form>
   );
 
-  // Render the action buttons at bottom
-  const renderActionButtons = () => (
-    <div className="flex justify-end pt-6 border-t">
-      <button
-        type="submit"
-        className="px-8 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-all font-medium"
-      >
-        Next Step
-      </button>
-    </div>
+  // Render step 2: essential amenities
+  const renderStep2EssentialAmenities = () => (
+    <form onSubmit={handleStep2Next} className="space-y-12">
+      <div className="space-y-6">
+        <div className="border-b pb-4">
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">Core Amenities</h2>
+          <p className="text-gray-600">Essential facilities and services</p>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {renderToggleSwitch('air_conditioning', 'Air Conditioning', 'Temperature control system')}
+          {renderToggleSwitch('wifi_internet', 'Wi-Fi Internet', 'Internet connection for guests')}
+          {renderToggleSwitch('power_backup', 'Power Backup', 'Inverter or generator during outages')}
+          {renderToggleSwitch('parking', 'Parking', 'Free or private parking space')}
+          {renderToggleSwitch('refrigerator', 'Refrigerator', 'For storing food and beverages')}
+          {renderToggleSwitch('microwave', 'Microwave', 'For heating and cooking food')}
+          {renderToggleSwitch('cooking_basics', 'Cooking Basics', 'Utensils, oil, salt and spices')}
+          {renderToggleSwitch('drinking_water', 'Drinking Water', 'Clean water supply')}
+          {renderToggleSwitch('washing_machine', 'Washing Machine', 'For laundry needs')}
+          {renderToggleSwitch('iron', 'Iron & Board', 'For clothing care')}
+          {renderToggleSwitch('geyser_hot_water', 'Hot Water', 'Geyser for bathing and washing')}
+          {renderToggleSwitch('television', 'Television', 'For entertainment')}
+          {renderToggleSwitch('smart_tv_ott', 'Smart TV with OTT', 'Netflix, Prime, etc.')}
+          {renderToggleSwitch('wardrobe', 'Wardrobe', 'Closet space for clothes')}
+          {renderToggleSwitch('extra_mattress_bedding', 'Extra Bedding', 'Additional mattress and bedding')}
+          {renderToggleSwitch('cleaning_supplies', 'Cleaning Supplies', 'Cleaning materials provided')}
+        </div>
+      </div>
+
+      <div className="space-y-6">
+        <div className="border-b pb-4">
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">Bedroom & Bathroom</h2>
+          <p className="text-gray-600">Room details and bathroom amenities</p>
+        </div>
+
+        <div className="grid grid-cols-3 gap-4 p-4 bg-blue-50 rounded-lg">
+          {renderNumberInput('bedrooms', 'Bedrooms', 1, 10)}
+          {renderNumberInput('bathrooms', 'Bathrooms', 1, 10)}
+          {renderNumberInput('beds', 'Beds', 1, 20)}
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {renderToggleSwitch('bed_linens', 'Bed Linens', 'Fresh sheets, pillowcases and blankets')}
+          {renderToggleSwitch('towels', 'Towels', 'Clean towels for bathing')}
+          {renderToggleSwitch('toiletries', 'Toiletries', 'Soap, shampoo, toothpaste')}
+          {renderToggleSwitch('mirror', 'Mirror', 'For grooming in bathroom/bedroom')}
+          {renderToggleSwitch('hair_dryer', 'Hair Dryer', 'For drying hair after bath')}
+          {renderToggleSwitch('attached_bathrooms', 'Attached Bathrooms', 'Private bathrooms with bedrooms')}
+          {renderToggleSwitch('bathtub', 'Bathtub', 'For relaxing baths')}
+        </div>
+      </div>
+
+      <div className="flex justify-between pt-6 border-t">
+        <button
+          type="button"
+          onClick={handlePrevious}
+          className="px-6 py-3 text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors font-medium"
+        >
+          Previous
+        </button>
+        <button
+          type="submit"
+          className="px-8 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-all font-medium"
+        >
+          Next Step
+        </button>
+      </div>
+    </form>
   );
 
   return (
@@ -175,7 +347,8 @@ const RegisterPropertyPage = () => {
 
           {renderProcessExplanation()}
           {renderProgressIndicator()}
-          {renderBasicInfoForm()}
+          {currentStep === 1 && renderStep1BasicInfo()}
+          {currentStep === 2 && renderStep2EssentialAmenities()}
         </div>
       </div>
     </div>
