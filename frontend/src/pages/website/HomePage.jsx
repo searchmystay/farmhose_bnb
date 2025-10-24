@@ -208,17 +208,84 @@ function PropertyCard({ property }) {
   )
 }
 
-// Component for scrollable property section
-function PropertySection({ title, properties, isFarmhouse = false }) {
+// Component for infinite auto-carousel farmhouse section
+function FarmhouseCarousel({ title, properties }) {
+  const [currentIndex, setCurrentIndex] = useState(0)
+  const [isTransitioning, setIsTransitioning] = useState(true)
+
+  const extendedProperties = [...properties, ...properties, ...properties]
+  const startIndex = properties.length 
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentIndex(prev => prev + 1)
+    }, 4000)
+
+    return () => clearInterval(interval)
+  }, [])
+
+  useEffect(() => {
+    if (currentIndex >= startIndex + properties.length) {
+      setTimeout(() => {
+        setIsTransitioning(false)
+        setCurrentIndex(startIndex)
+        setTimeout(() => setIsTransitioning(true), 50)
+      }, 700) 
+    }
+  }, [currentIndex, startIndex, properties.length])
+
+  useEffect(() => {
+    setCurrentIndex(startIndex)
+  }, [startIndex])
+
+  return (
+    <section className="py-12 bg-gray-50">
+      <div className="container mx-auto px-4">
+        <h2 className="text-2xl font-bold text-gray-900 mb-8">{title}</h2>
+        
+        <div className="relative overflow-hidden">
+          <div 
+            className={`flex gap-6 ${isTransitioning ? 'transition-transform duration-700 ease-in-out' : ''}`}
+            style={{
+              transform: `translateX(-${currentIndex * (320 + 24)}px)`,
+              width: `${extendedProperties.length * (320 + 24)}px`
+            }}
+          >
+            {extendedProperties.map((property, index) => (
+              <div key={`${property.id}-${index}`} className="flex-shrink-0">
+                <FarmhouseCard property={property} />
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="flex justify-center mt-8 space-x-2">
+          {properties.map((_, index) => (
+            <button
+              key={index}
+              onClick={() => setCurrentIndex(startIndex + index)}
+              className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                (currentIndex - startIndex) % properties.length === index
+                  ? 'bg-green-600 scale-125' 
+                  : 'bg-gray-300 hover:bg-gray-400'
+              }`}
+            />
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+}
+
+// Component for scrollable property section (for BnBs)
+function PropertySection({ title, properties }) {
   return (
     <section className="py-12 bg-gray-50">
       <div className="container mx-auto px-4">
         <h2 className="text-2xl font-bold text-gray-900 mb-8">{title}</h2>
         <div className="flex space-x-6 overflow-x-auto scrollbar-hide pb-4">
           {properties.map(property => 
-            isFarmhouse ? 
-              <FarmhouseCard key={property.id} property={property} /> :
-              <PropertyCard key={property.id} property={property} />
+            <PropertyCard key={property.id} property={property} />
           )}
         </div>
       </div>
@@ -309,7 +376,7 @@ function HomePage() {
 
       <div className="min-h-screen bg-white">
         <HeroSection />
-        <PropertySection title="Popular Farmhouses in Jaipur" properties={POPULAR_FARMHOUSES} isFarmhouse={true} />
+        <FarmhouseCarousel title="Popular Farmhouses in Jaipur" properties={POPULAR_FARMHOUSES} />
         <PropertySection title="Popular BnB in Jaipur" properties={POPULAR_BNBS} />
         <TestimonialsSection />
         <Footer />
