@@ -95,7 +95,6 @@ const RegisterPropertyPage = () => {
 
   const [validationErrors, setValidationErrors] = useState({});
 
-  // Handle input changes for basic info
   const handleBasicInfoChange = (e) => {
     const { name, value } = e.target;
     setBasicInfo(prev => ({ ...prev, [name]: value }));
@@ -127,7 +126,6 @@ const RegisterPropertyPage = () => {
     }));
   };
 
-  // Handle number input changes for amenities
   const handleNumberChange = (e) => {
     const { name, value } = e.target;
     setEssentialAmenities(prev => ({
