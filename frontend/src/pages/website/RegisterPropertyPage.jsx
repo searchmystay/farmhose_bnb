@@ -94,6 +94,7 @@ const RegisterPropertyPage = () => {
   });
 
   const [validationErrors, setValidationErrors] = useState({});
+  const [isRegistrationComplete, setIsRegistrationComplete] = useState(false);
 
   const handleBasicInfoChange = (e) => {
     const { name, value } = e.target;
@@ -233,6 +234,95 @@ const RegisterPropertyPage = () => {
     return errors;
   };
 
+  const clearAllStates = () => {
+    setBasicInfo({
+      name: '',
+      description: '',
+      type: 'farmhouse',
+      phone_number: '',
+      address: '',
+      pin_code: ''
+    });
+    setEssentialAmenities({
+      air_conditioning: false,
+      wifi_internet: false,
+      power_backup: false,
+      parking: false,
+      refrigerator: false,
+      microwave: false,
+      cooking_basics: false,
+      drinking_water: false,
+      washing_machine: false,
+      iron: false,
+      geyser_hot_water: false,
+      television: false,
+      smart_tv_ott: false,
+      wardrobe: false,
+      extra_mattress_bedding: false,
+      cleaning_supplies: false,
+      bedrooms: 1,
+      bathrooms: 1,
+      beds: 1,
+      bed_linens: false,
+      towels: false,
+      toiletries: false,
+      mirror: false,
+      hair_dryer: false,
+      attached_bathrooms: false,
+      bathtub: false
+    });
+    setExperienceAmenities({
+      private_lawn_garden: false,
+      swimming_pool: false,
+      outdoor_seating_area: false,
+      bonfire_setup: false,
+      barbecue_setup: false,
+      terrace_balcony: false,
+      kitchen_access_self_cooking: false,
+      in_house_meals_available: false,
+      dining_table: false,
+      indoor_games: false,
+      outdoor_games: false,
+      pool_table: false,
+      music_system: false,
+      board_games: false,
+      bicycle_access: false,
+      movie_projector: false,
+      jacuzzi: false,
+      private_bar_setup: false,
+      farm_view_nature_view: false,
+      open_shower_outdoor_bath: false,
+      gazebo_cabana_seating: false,
+      hammock: false,
+      high_tea_setup: false,
+      event_space_small_gatherings: false,
+      private_chef_on_request: false
+    });
+    setAdditionalAmenities({
+      pet_friendly: false,
+      child_friendly: false,
+      kids_play_area: false,
+      fenced_property: false,
+      cctv_cameras: false,
+      first_aid_kit: false,
+      fire_extinguisher: false,
+      security_guard: false,
+      private_gate_compound_wall: false,
+      daily_cleaning_available: false,
+      long_stays_allowed: false,
+      early_check_in_late_check_out: false,
+      staff_quarters_available: false,
+      caretaker_on_site: false
+    });
+    setUploadData({
+      propertyImages: [],
+      propertyDocuments: [],
+      aadhaarCard: null,
+      panCard: null
+    });
+    setValidationErrors({});
+  };
+
   const handleFinalSubmit = async (e) => {
     e.preventDefault();
     
@@ -255,6 +345,8 @@ const RegisterPropertyPage = () => {
       };
       
       await submitRegistration(registrationData);
+      clearAllStates();
+      setIsRegistrationComplete(true);
     } catch (error) {
       console.error('Registration failed:', error.message);
     }
@@ -856,29 +948,77 @@ const RegisterPropertyPage = () => {
     </form>
   );
 
-  return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4">
-      <div className="max-w-2xl mx-auto">
-        <div className="bg-white rounded-xl shadow-lg p-8">
-          <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">
-              Register Your Property
+  const handleGoToHome = () => {
+    window.location.href = '/';
+  };
+
+  const renderSuccessMessage = () => (
+    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="max-w-md mx-auto bg-white rounded-xl shadow-lg p-8">
+        <div className="text-center space-y-6">
+          <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-green-100">
+            <svg className="h-8 w-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+            </svg>
+          </div>
+          
+          <div className="space-y-3">
+            <h1 className="text-3xl font-bold text-gray-900">
+              Registration Successful!
             </h1>
+            <p className="text-lg text-gray-600">
+              Thank you for registering your property with us.
+            </p>
             <p className="text-gray-600">
-              Basic Information
+              We will review your property details and revert back to you regarding your property soon.
+            </p>
+            <p className="text-sm text-gray-500">
+              Our team will contact you within 24-48 hours for verification and next steps.
             </p>
           </div>
-
-          {renderProcessExplanation()}
-          {renderProgressIndicator()}
-          {currentStep === 1 && renderStep1BasicInfo()}
-          {currentStep === 2 && renderStep2EssentialAmenities()}
-          {currentStep === 3 && renderStep3ExperienceAmenities()}
-          {currentStep === 4 && renderStep4AdditionalAmenities()}
-          {currentStep === 5 && renderStep5DocumentUpload()}
+          
+          <div className="pt-6">
+            <button
+              onClick={handleGoToHome}
+              className="w-full px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all font-medium"
+            >
+              Go to Home Page
+            </button>
+          </div>
         </div>
       </div>
     </div>
+  );
+
+  return (
+    <>
+      {isRegistrationComplete ? (
+        renderSuccessMessage()
+      ) : (
+        <div className="min-h-screen bg-gray-50 py-8 px-4">
+          <div className="max-w-2xl mx-auto">
+            <div className="bg-white rounded-xl shadow-lg p-8">
+              <div className="text-center mb-8">
+                <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                  Register Your Property
+                </h1>
+                <p className="text-gray-600">
+                  Basic Information
+                </p>
+              </div>
+
+              {renderProcessExplanation()}
+              {renderProgressIndicator()}
+              {currentStep === 1 && renderStep1BasicInfo()}
+              {currentStep === 2 && renderStep2EssentialAmenities()}
+              {currentStep === 3 && renderStep3ExperienceAmenities()}
+              {currentStep === 4 && renderStep4AdditionalAmenities()}
+              {currentStep === 5 && renderStep5DocumentUpload()}
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 };
 
