@@ -193,10 +193,21 @@ def upload_farmhouse_documents(document_files, farmhouse_id):
 
 
 @handle_exceptions
-def update_farmhouse_db_with_file_urls(farmhouse_id, image_urls, document_urls):
+def upload_identity_documents(aadhaar_card, pan_card, farmhouse_id):
+    if aadhaar_card and aadhaar_card.filename:
+        aadhaar_url = upload_farmhouse_document_to_r2(aadhaar_card, farmhouse_id, "aadhaar")
+    
+    if pan_card and pan_card.filename:
+        pan_url = upload_farmhouse_document_to_r2(pan_card, farmhouse_id, "pan")
+    
+    return aadhaar_url, pan_url
+
+
+@handle_exceptions
+def update_farmhouse_db_with_file_urls(farmhouse_id, image_urls, documents_data):
     update_data = {
         "images": image_urls,
-        "documents": document_urls
+        "documents": documents_data
     }
     
     query_filter = {"_id": ObjectId(farmhouse_id)}
@@ -305,12 +316,18 @@ def register_property(farmhouse_data, property_images, property_documents, aadha
     insert_result = db_insert_one("farmhouses", farmhouse_record)
     farmhouse_id = str(insert_result.inserted_id)
     
-    # Handle file uploads later (for now just save the basic data)
-    # uploaded_images = upload_farmhouse_images(property_images, farmhouse_id)
-    # uploaded_documents = upload_farmhouse_documents(property_documents, farmhouse_id)
-    # update_farmhouse_db_with_file_urls(farmhouse_id, uploaded_images, uploaded_documents)
+    uploaded_images = upload_farmhouse_images(property_images, farmhouse_id)
+    uploaded_property_documents = upload_farmhouse_documents(property_documents, farmhouse_id)
+    aadhaar_url, pan_url= upload_identity_documents(aadhaar_card, pan_card, farmhouse_id)
     
-    return 
+    documents_data = {
+        "property_docs": uploaded_property_documents,
+        "aadhar_card": aadhaar_url,
+        "pan_card": pan_url 
+    }
+    
+    update_farmhouse_db_with_file_urls(farmhouse_id, uploaded_images, documents_data)
+    return farmhouse_id 
 
 
 @handle_exceptions

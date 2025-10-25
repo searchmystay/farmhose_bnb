@@ -52,7 +52,6 @@ def upload_farmhouse_document_to_r2(file_storage, farmhouse_id, doc_type):
     filename = secure_filename(file_storage.filename)
     file_extension = get_file_extension(filename)
     file_key = f"farmhouse/{farmhouse_id}/documents/{doc_type}.{file_extension}"
-    
     public_url = upload_file_to_r2(file_storage, file_key)
     return public_url
 
