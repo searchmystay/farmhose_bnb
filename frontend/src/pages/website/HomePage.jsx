@@ -342,7 +342,7 @@ function PropertyRegistrationSection() {
             onClick={() => navigate('/register-property')}
             className="bg-green-600 text-white px-12 py-5 rounded-full text-xl font-medium hover:bg-green-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
           >
-            Add Your Property
+            Register Your Property
           </button>
         </div>
       </div>
