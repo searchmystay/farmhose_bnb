@@ -205,10 +205,45 @@ const RegisterPropertyPage = () => {
       ...prev,
       [fileType]: fileType === 'propertyImages' || fileType === 'propertyDocuments' ? files : files[0]
     }));
+    
+    if (validationErrors[fileType]) {
+      setValidationErrors(prev => ({ ...prev, [fileType]: '' }));
+    }
+  };
+
+  const validateFileUploads = () => {
+    const errors = {};
+    
+    if (!uploadData.propertyImages || uploadData.propertyImages.length === 0) {
+      errors.propertyImages = 'Property images are required';
+    }
+    
+    if (!uploadData.propertyDocuments || uploadData.propertyDocuments.length === 0) {
+      errors.propertyDocuments = 'Property documents are required';
+    }
+    
+    if (!uploadData.aadhaarCard) {
+      errors.aadhaarCard = 'Aadhaar card is required';
+    }
+    
+    if (!uploadData.panCard) {
+      errors.panCard = 'Bank card is required';
+    }
+    
+    return errors;
   };
 
   const handleFinalSubmit = async (e) => {
     e.preventDefault();
+    
+    const errors = validateFileUploads();
+    
+    if (Object.keys(errors).length > 0) {
+      setValidationErrors(errors);
+      return;
+    }
+    
+    setValidationErrors({});
     
     try {
       const registrationData = {
@@ -691,8 +726,14 @@ const RegisterPropertyPage = () => {
 
   const renderFileUploadSection = (fileType, label, accept, multiple = false) => (
     <div className="space-y-2">
-      <label className="block text-sm font-medium text-gray-700">{label}</label>
-      <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg hover:border-green-400 transition-colors">
+      <label className="block text-sm font-medium text-gray-700">
+        {label} <span className="text-red-500">*</span>
+      </label>
+      <div className={`mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-dashed rounded-lg transition-colors ${
+        validationErrors[fileType] 
+          ? 'border-red-300 hover:border-red-400' 
+          : 'border-gray-300 hover:border-green-400'
+      }`}>
         <div className="space-y-1 text-center">
           <svg className="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
             <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -725,6 +766,9 @@ const RegisterPropertyPage = () => {
             <p className="text-sm text-green-600">{uploadData[fileType].name}</p>
           )}
         </div>
+      )}
+      {validationErrors[fileType] && (
+        <p className="mt-1 text-sm text-red-600">{validationErrors[fileType]}</p>
       )}
     </div>
   );
@@ -781,11 +825,11 @@ const RegisterPropertyPage = () => {
       <div className="space-y-6">
         <div className="border-b pb-4">
           <h2 className="text-xl font-semibold text-gray-900 mb-2">Identity Documents</h2>
-          <p className="text-gray-600">Upload your Aadhaar and PAN card for verification</p>
+          <p className="text-gray-600">Upload your Aadhaar and Bank card for verification</p>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {renderFileUploadSection('aadhaarCard', 'Aadhaar Card (PDF only)', '.pdf')}
-          {renderFileUploadSection('panCard', 'PAN Card (PDF only)', '.pdf')}
+          {renderFileUploadSection('panCard', 'Bank Card (PDF only)', '.pdf')}
         </div>
       </div>
 
