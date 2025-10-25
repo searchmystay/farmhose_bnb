@@ -3,6 +3,8 @@ from src.utils.exception_handler import handle_exceptions, AppException
 from src.logics.cloudfare_bucket import upload_farmhouse_image_to_r2, upload_farmhouse_document_to_r2
 from src.config import LEAD_COST_RUPEES, MINIMUM_BALANCE_THRESHOLD
 from bson import ObjectId
+from datetime import datetime
+import pytz
 
 
 @handle_exceptions
@@ -204,29 +206,109 @@ def update_farmhouse_db_with_file_urls(farmhouse_id, image_urls, document_urls):
 
 
 @handle_exceptions
-def register_farmhouse(farmhouse_data, image_files, document_files):
-    validate_farmhouse_data(farmhouse_data)
+def process_amenities_data(essential_amenities, experience_amenities, additional_amenities):
+    category_mappings = {
+        "core_amenities": {
+            "source": essential_amenities,
+            "fields": ["air_conditioning", "wifi_internet", "power_backup", "parking", 
+                      "refrigerator", "microwave", "cooking_basics", "drinking_water", 
+                      "washing_machine", "iron", "geyser_hot_water", "television", 
+                      "smart_tv_ott", "wardrobe", "extra_mattress_bedding", "cleaning_supplies"]
+        },
+        "bedroom_bathroom": {
+            "source": essential_amenities,
+            "fields": ["bedrooms", "bathrooms", "beds", "bed_linens", "towels", 
+                      "toiletries", "mirror", "hair_dryer", "attached_bathrooms", "bathtub"]
+        },
+        "outdoor_garden": {
+            "source": experience_amenities,
+            "fields": ["private_lawn_garden", "swimming_pool", "outdoor_seating_area", 
+                      "bonfire_setup", "barbecue_setup", "terrace_balcony"]
+        },
+        "food_dining": {
+            "source": experience_amenities,
+            "fields": ["kitchen_access_self_cooking", "in_house_meals_available", "dining_table"]
+        },
+        "entertainment_activities": {
+            "source": experience_amenities,
+            "fields": ["indoor_games", "outdoor_games", "pool_table", "music_system", 
+                      "board_games", "bicycle_access", "movie_projector"]
+        },
+        "experience_luxury_addons": {
+            "source": experience_amenities,
+            "fields": ["jacuzzi", "private_bar_setup", "farm_view_nature_view", 
+                      "open_shower_outdoor_bath", "gazebo_cabana_seating", "hammock", 
+                      "high_tea_setup", "event_space_small_gatherings", "private_chef_on_request"]
+        },
+        "pet_family_friendly": {
+            "source": additional_amenities,
+            "fields": ["pet_friendly", "child_friendly", "kids_play_area", "fenced_property"]
+        },
+        "safety_security": {
+            "source": additional_amenities,
+            "fields": ["cctv_cameras", "first_aid_kit", "fire_extinguisher", 
+                      "security_guard", "private_gate_compound_wall"]
+        },
+        "house_rules_services": {
+            "source": additional_amenities,
+            "fields": ["daily_cleaning_available", "long_stays_allowed", 
+                      "early_check_in_late_check_out", "staff_quarters_available", "caretaker_on_site"]
+        }
+    }
+    
+    processed_amenities = {}
+    
+    for category_name, config in category_mappings.items():
+        source_data = config["source"]
+        fields = config["fields"]
+        
+        category_data = {}
+        for field in fields:
+            category_data[field] = source_data[field]
+        
+        processed_amenities[category_name] = category_data
+    
+    return processed_amenities
+
+
+@handle_exceptions
+def register_property(farmhouse_data, property_images, property_documents, aadhaar_card, pan_card):
+    amenities = process_amenities_data(
+        farmhouse_data.get("essential_amenities", {}),
+        farmhouse_data.get("experience_amenities", {}),
+        farmhouse_data.get("additional_amenities", {})
+    )
+
+    location = {
+        "address": farmhouse_data.get("address", ""),
+        "pin_code": farmhouse_data.get("pin_code", "")
+    }
+    
+    ist_timezone = pytz.timezone('Asia/Kolkata')
+    current_time = datetime.now(ist_timezone).replace(tzinfo=None)
     
     farmhouse_record = {
         "name": farmhouse_data.get("name"),
-        "description": farmhouse_data.get("description"),
+        "description":  farmhouse_data.get("description", ""),
         "type": farmhouse_data.get("type"),
-        "location": farmhouse_data.get("location"),
-        "whatsapp_link": farmhouse_data.get("whatsapp_link"),
-        "amenities": farmhouse_data.get("amenities"),
+        "location": location,
+        "phone_number": farmhouse_data.get("phone_number"), 
+        "amenities": amenities,
         "status": "pending_approval",
         "images": [],
-        "documents": [],
         "credit_balance": 0,
-        "favourite": False
+        "favourite": False,
+        "created_at": current_time,
+        "updated_at": current_time
     }
     
     insert_result = db_insert_one("farmhouses", farmhouse_record)
     farmhouse_id = str(insert_result.inserted_id)
     
-    uploaded_images = upload_farmhouse_images(image_files, farmhouse_id)
-    uploaded_documents = upload_farmhouse_documents(document_files, farmhouse_id)
-    update_farmhouse_db_with_file_urls(farmhouse_id, uploaded_images, uploaded_documents)
+    # Handle file uploads later (for now just save the basic data)
+    # uploaded_images = upload_farmhouse_images(property_images, farmhouse_id)
+    # uploaded_documents = upload_farmhouse_documents(property_documents, farmhouse_id)
+    # update_farmhouse_db_with_file_urls(farmhouse_id, uploaded_images, uploaded_documents)
     
     return 
 

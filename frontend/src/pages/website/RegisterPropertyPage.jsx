@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
+import { usePropertyRegistration } from '../../hooks/usePropertyData';
 
 const RegisterPropertyPage = () => {
   const [currentStep, setCurrentStep] = useState(1);
+  const { submitRegistration, loading, error, success, resetState } = usePropertyRegistration();
   const [basicInfo, setBasicInfo] = useState({
     name: '',
     description: '',
@@ -157,8 +159,22 @@ const RegisterPropertyPage = () => {
     }));
   };
 
-  const handleFinalSubmit = (e) => {
+  const handleFinalSubmit = async (e) => {
     e.preventDefault();
+    
+    try {
+      const registrationData = {
+        basicInfo,
+        essentialAmenities,
+        experienceAmenities,
+        additionalAmenities,
+        uploadData
+      };
+      
+      await submitRegistration(registrationData);
+    } catch (error) {
+      console.error('Registration failed:', error.message);
+    }
   };
 
   const handlePrevious = () => {
@@ -642,6 +658,37 @@ const RegisterPropertyPage = () => {
 
   const renderStep5DocumentUpload = () => (
     <form onSubmit={handleFinalSubmit} className="space-y-8">
+      {error && (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+          <div className="flex">
+            <div className="text-red-400">
+              <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+              </svg>
+            </div>
+            <div className="ml-3">
+              <h3 className="text-sm font-medium text-red-800">Registration Error</h3>
+              <p className="mt-2 text-sm text-red-700">{error}</p>
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {success && (
+        <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+          <div className="flex">
+            <div className="text-green-400">
+              <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+              </svg>
+            </div>
+            <div className="ml-3">
+              <h3 className="text-sm font-medium text-green-800">Registration Successful!</h3>
+              <p className="mt-2 text-sm text-green-700">Your property has been submitted for review. We'll contact you soon!</p>
+            </div>
+          </div>
+        </div>
+      )}
       <div className="space-y-6">
         <div className="border-b pb-4">
           <h2 className="text-xl font-semibold text-gray-900 mb-2">Property Images</h2>
@@ -679,9 +726,14 @@ const RegisterPropertyPage = () => {
         </button>
         <button
           type="submit"
-          className="px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all font-medium"
+          disabled={loading}
+          className={`px-8 py-3 rounded-lg focus:ring-2 focus:ring-offset-2 transition-all font-medium ${
+            loading 
+              ? 'bg-gray-400 text-white cursor-not-allowed' 
+              : 'bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500'
+          }`}
         >
-          Submit Registration
+          {loading ? 'Submitting...' : 'Submit Registration'}
         </button>
       </div>
     </form>

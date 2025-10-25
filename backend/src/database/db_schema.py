@@ -3,7 +3,7 @@ from typing import Dict
 def get_farmhouse_schema() -> Dict:
     return {
         "bsonType": "object",
-        "required": ["name", "description", "type", "whatsapp_link", "location", "documents", "credit_balance", "status", "created_at", "updated_at"],
+        "required": ["name", "description", "type", "phone_number", "location", "credit_balance", "status", "created_at", "updated_at"],
         "properties": {
             "_id": {
                 "bsonType": "objectId",
@@ -26,15 +26,15 @@ def get_farmhouse_schema() -> Dict:
                 "description": "Type of property - farmhouse or bnb",
                 "enum": ["farmhouse", "bnb"]
             },
-            "whatsapp_link": {
+            "phone_number": {
                 "bsonType": "string",
-                "description": "WhatsApp contact link for property owner",
-                "pattern": "^https://wa.me/[0-9]{10,15}$"
+                "description": "Phone number for property owner",
+                "pattern": "^[0-9]{10}$"
             },
             "location": {
                 "bsonType": "object",
                 "description": "Property location details",
-                "required": ["address", "city", "state", "pincode"],
+                "required": ["address", "pin_code"],
                 "properties": {
                     "address": {
                         "bsonType": "string",
@@ -42,7 +42,7 @@ def get_farmhouse_schema() -> Dict:
                         "minLength": 10,
                         "maxLength": 200
                     },
-                    "pincode": {
+                    "pin_code": {
                         "bsonType": "string",
                         "description": "Postal code of the property",
                         "pattern": "^[0-9]{6}$"
@@ -429,7 +429,6 @@ def get_farmhouse_schema() -> Dict:
             "favourite": {
                 "bsonType": "bool",
                 "description": "Mark farmhouse as favourite for popular listings",
-                "enum": ["true", "false"],
             },
             "created_at": {
                 "bsonType": "date",

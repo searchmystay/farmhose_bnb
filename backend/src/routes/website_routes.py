@@ -1,7 +1,8 @@
 from flask import Blueprint, jsonify, request
-from src.logics.website_logic import get_approved_farmhouses, get_approved_bnbs, get_property_details, register_farmhouse, process_whatsapp_contact, get_fav_properties
+from src.logics.website_logic import get_approved_farmhouses, get_approved_bnbs, get_property_details, register_property, process_whatsapp_contact, get_fav_properties
 from src.utils.exception_handler import handle_route_exceptions, AppException
 from bson import ObjectId
+import json
 
 website_bp = Blueprint('website', __name__)
 
@@ -49,18 +50,42 @@ def get_property_detail(property_id):
 @website_bp.route('/register-property', methods=['POST'])
 @handle_route_exceptions
 def register_property_route():
-    farmhouse_data = request.get_json()
-    image_files = request.files.getlist('images')
-    document_files = request.files.getlist('documents')
+    name = request.form.get('name')
+    description = request.form.get('description')
+    property_type = request.form.get('type')
+    phone_number = request.form.get('phone_number')
+    address = request.form.get('address')
+    pin_code = request.form.get('pin_code')
     
-    if not farmhouse_data and image_files and document_files:
-        raise AppException("No Complete data provided")
+    essential_amenities = json.loads(request.form.get('essentialAmenities', '{}'))
+    experience_amenities = json.loads(request.form.get('experienceAmenities', '{}'))
+    additional_amenities = json.loads(request.form.get('additionalAmenities', '{}'))
+
+    property_images = request.files.getlist('propertyImages')
+    property_documents = request.files.getlist('propertyDocuments')
+    aadhaar_card = request.files.get('aadhaarCard')
+    pan_card = request.files.get('panCard')
     
-    register_farmhouse(farmhouse_data, image_files, document_files)
+    farmhouse_data = {
+        "name": name,
+        "description": description,
+        "type": property_type,
+        "phone_number": phone_number,
+        "address": address,
+        "pin_code": pin_code,
+        "essential_amenities": essential_amenities,
+        "experience_amenities": experience_amenities,
+        "additional_amenities": additional_amenities
+    }
+    
+    if not name or not description or not property_type:
+        raise AppException("Basic information is required")
+    
+    register_property(farmhouse_data, property_images, property_documents, aadhaar_card, pan_card)
     
     response_data = {
         "success": True,
-        "message": "Farmhouse registered successfully",
+        "message": "Property registered successfully",
     }
     
     return jsonify(response_data), 200
