@@ -334,16 +334,29 @@ def register_property(farmhouse_data, property_images, property_documents, aadha
 
 
 @handle_exceptions
+def generate_whatsapp_url(phone_number):
+    if not phone_number:
+        raise AppException("Phone number not avilable")
+    
+    clean_number = ''.join(filter(str.isdigit, phone_number))
+    number = f"91{clean_number}"
+    
+    whatsapp_url = f"https://wa.me/{number}"
+    return whatsapp_url
+
+
+@handle_exceptions
 def check_farmhouse_credit_balance(farmhouse_id):
     query_filter = {"_id": ObjectId(farmhouse_id), "status": "active"}
-    projection = {"credit_balance": 1, "whatsapp_link": 1}
+    projection = {"credit_balance": 1, "phone_number": 1}
     farmhouse_data = db_find_one("farmhouses", query_filter, projection)
     
     if not farmhouse_data:
         raise AppException("Farmhouse not found or not active")
     
     current_balance = farmhouse_data.get("credit_balance", 0)
-    whatsapp_link = farmhouse_data.get("whatsapp_link", "")
+    phone_number = farmhouse_data.get("phone_number", "")
+    whatsapp_link = generate_whatsapp_url(phone_number)
     
     return current_balance, whatsapp_link
 
