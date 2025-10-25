@@ -1,6 +1,6 @@
 import boto3
 from werkzeug.utils import secure_filename
-from src.config import R2_ENDPOINT_URL, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, R2_BUCKET_NAME
+from src.config import R2_ENDPOINT_URL, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, R2_BUCKET_NAME, R2_PUBLIC_URL
 from src.utils.exception_handler import handle_exceptions
 
 
@@ -30,10 +30,10 @@ def upload_file_to_r2(file_storage, file_key):
         file_storage,
         R2_BUCKET_NAME,
         file_key,
-        ExtraArgs={"ACL": "public-read", "ContentType": file_storage.mimetype}
+        ExtraArgs={"ContentType": file_storage.mimetype}
     )
     
-    public_url = f"{R2_ENDPOINT_URL.rstrip('/')}/{R2_BUCKET_NAME}/{file_key}"
+    public_url = f"{R2_PUBLIC_URL}/{file_key}"
     return public_url
 
 

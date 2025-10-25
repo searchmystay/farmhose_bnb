@@ -7,6 +7,7 @@ DATABASE_NAME = os.getenv('DATABASE_NAME', 'farmhouse_listing')
 
 R2_ENDPOINT_URL = "https://aaddbda4e129b5df368b56070cfeb027.r2.cloudflarestorage.com"
 R2_BUCKET_NAME = "farmhouse-listing-bucket"
+R2_PUBLIC_URL = "https://pub-b4a38eaa745f44c4bac6b1f606453d02.r2.dev"
 R2_ACCESS_KEY_ID = os.getenv('R2_ACCESS_KEY_ID')
 R2_SECRET_ACCESS_KEY = os.getenv('R2_SECRET_ACCESS_KEY')
 
