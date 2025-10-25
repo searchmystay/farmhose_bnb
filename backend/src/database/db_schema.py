@@ -19,7 +19,7 @@ def get_farmhouse_schema() -> Dict:
                 "bsonType": "string", 
                 "description": "Detailed description of the farmhouse",
                 "minLength": 10,
-                "maxLength": 1000
+                "maxLength": 2000
             },
             "type": {
                 "bsonType": "string",
@@ -39,7 +39,6 @@ def get_farmhouse_schema() -> Dict:
                     "address": {
                         "bsonType": "string",
                         "description": "Full address of the property",
-                        "minLength": 10,
                         "maxLength": 200
                     },
                     "pin_code": {

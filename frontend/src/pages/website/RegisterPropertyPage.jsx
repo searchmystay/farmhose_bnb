@@ -93,10 +93,16 @@ const RegisterPropertyPage = () => {
     panCard: null
   });
 
+  const [validationErrors, setValidationErrors] = useState({});
+
   // Handle input changes for basic info
   const handleBasicInfoChange = (e) => {
     const { name, value } = e.target;
     setBasicInfo(prev => ({ ...prev, [name]: value }));
+    
+    if (validationErrors[name]) {
+      setValidationErrors(prev => ({ ...prev, [name]: '' }));
+    }
   };
 
   // Handle boolean toggle changes for amenities
@@ -130,8 +136,52 @@ const RegisterPropertyPage = () => {
     }));
   };
 
+  const validateBasicInfo = () => {
+    const errors = {};
+    
+    if (!basicInfo.name.trim()) {
+      errors.name = 'Property name is required';
+    }
+    
+    if (!basicInfo.description.trim()) {
+      errors.description = 'Description is required';
+    } else if (basicInfo.description.trim().split(/\s+/).length < 10) {
+      errors.description = 'Description must have at least 10 words';
+    }
+    
+    if (!basicInfo.type) {
+      errors.type = 'Property type is required';
+    }
+    
+    if (!basicInfo.phone_number.trim()) {
+      errors.phone_number = 'Phone number is required';
+    } else if (!/^\d{10}$/.test(basicInfo.phone_number.trim())) {
+      errors.phone_number = 'Phone number must contain only numbers and be exactly 10 digits';
+    }
+    
+    if (!basicInfo.address.trim()) {
+      errors.address = 'Address is required';
+    }
+    
+    if (!basicInfo.pin_code.trim()) {
+      errors.pin_code = 'Pin code is required';
+    } else if (!/^\d{6}$/.test(basicInfo.pin_code.trim())) {
+      errors.pin_code = 'Pin code must contain only numbers and be exactly 6 digits';
+    }
+    
+    return errors;
+  };
+
   const handleStep1Next = (e) => {
     e.preventDefault();
+    const errors = validateBasicInfo();
+    
+    if (Object.keys(errors).length > 0) {
+      setValidationErrors(errors);
+      return;
+    }
+    
+    setValidationErrors({});
     console.log('Basic Info:', basicInfo);
     setCurrentStep(2);
   };
@@ -265,9 +315,14 @@ const RegisterPropertyPage = () => {
           name="name"
           value={basicInfo.name}
           onChange={handleBasicInfoChange}
-          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
+          className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:border-transparent transition-all ${
+            validationErrors.name ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-green-500'
+          }`}
           placeholder="Enter your property name"
         />
+        {validationErrors.name && (
+          <p className="mt-1 text-sm text-red-600">{validationErrors.name}</p>
+        )}
       </div>
 
       <div>
@@ -279,9 +334,14 @@ const RegisterPropertyPage = () => {
           value={basicInfo.description}
           onChange={handleBasicInfoChange}
           rows="4"
-          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all resize-none"
-          placeholder="Describe your property in detail..."
+          className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:border-transparent transition-all resize-none ${
+            validationErrors.description ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-green-500'
+          }`}
+          placeholder="Describe your property in detail (minimum 10 words)..."
         />
+        {validationErrors.description && (
+          <p className="mt-1 text-sm text-red-600">{validationErrors.description}</p>
+        )}
       </div>
 
       <div>
@@ -313,11 +373,16 @@ const RegisterPropertyPage = () => {
             name="phone_number"
             value={basicInfo.phone_number}
             onChange={handleBasicInfoChange}
-            className="flex-1 px-4 py-3 border border-gray-300 rounded-r-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
-            placeholder="Enter your phone number"
+            className={`flex-1 px-4 py-3 border rounded-r-lg focus:ring-2 focus:border-transparent transition-all ${
+              validationErrors.phone_number ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-green-500'
+            }`}
+            placeholder="Enter your 10-digit phone number"
             maxLength="10"
           />
         </div>
+        {validationErrors.phone_number && (
+          <p className="mt-1 text-sm text-red-600">{validationErrors.phone_number}</p>
+        )}
       </div>
 
       <div>
@@ -329,9 +394,14 @@ const RegisterPropertyPage = () => {
           name="address"
           value={basicInfo.address}
           onChange={handleBasicInfoChange}
-          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
+          className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:border-transparent transition-all ${
+            validationErrors.address ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-green-500'
+          }`}
           placeholder="Enter your property address"
         />
+        {validationErrors.address && (
+          <p className="mt-1 text-sm text-red-600">{validationErrors.address}</p>
+        )}
       </div>
 
       <div>
@@ -343,11 +413,16 @@ const RegisterPropertyPage = () => {
           name="pin_code"
           value={basicInfo.pin_code}
           onChange={handleBasicInfoChange}
-          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
-          placeholder="Enter pin code"
+          className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:border-transparent transition-all ${
+            validationErrors.pin_code ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-green-500'
+          }`}
+          placeholder="Enter 6-digit pin code"
           maxLength="6"
           pattern="[0-9]{6}"
         />
+        {validationErrors.pin_code && (
+          <p className="mt-1 text-sm text-red-600">{validationErrors.pin_code}</p>
+        )}
       </div>
 
       <div className="flex justify-end pt-6 border-t">
