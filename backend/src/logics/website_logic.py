@@ -182,10 +182,10 @@ def upload_farmhouse_images(image_files, farmhouse_id):
 @handle_exceptions
 def upload_farmhouse_documents(document_files, farmhouse_id):
     uploaded_documents = []
-    document_types = ["aadhar", "pan", "property_docs"]
     
-    for index, document_file in enumerate(document_files):
-        doc_type = document_types[index] if index < len(document_types) else f"document_{index}"
+    for document_file in document_files:
+        original_filename = document_file.filename
+        doc_type = original_filename.rsplit('.', 1)[0]  
         document_url = upload_farmhouse_document_to_r2(document_file, farmhouse_id, doc_type)
         uploaded_documents.append(document_url)
     
@@ -194,6 +194,9 @@ def upload_farmhouse_documents(document_files, farmhouse_id):
 
 @handle_exceptions
 def upload_identity_documents(aadhaar_card, pan_card, farmhouse_id):
+    aadhaar_url = None
+    pan_url = None
+    
     if aadhaar_card and aadhaar_card.filename:
         aadhaar_url = upload_farmhouse_document_to_r2(aadhaar_card, farmhouse_id, "aadhaar")
     
@@ -317,8 +320,8 @@ def register_property(farmhouse_data, property_images, property_documents, aadha
     farmhouse_id = str(insert_result.inserted_id)
     
     uploaded_images = upload_farmhouse_images(property_images, farmhouse_id)
-    uploaded_property_documents = upload_farmhouse_documents(property_documents, farmhouse_id)
     aadhaar_url, pan_url= upload_identity_documents(aadhaar_card, pan_card, farmhouse_id)
+    uploaded_property_documents = upload_farmhouse_documents(property_documents, farmhouse_id)
     
     documents_data = {
         "property_docs": uploaded_property_documents,
