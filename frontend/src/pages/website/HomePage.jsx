@@ -319,6 +319,37 @@ function FarmhouseCarousel({ title, properties }) {
   )
 }
 
+// Component for property registration call-to-action section
+function PropertyRegistrationSection() {
+  const navigate = useNavigate()
+
+  return (
+    <section className="py-16 bg-white">
+      <div className="container mx-auto px-4">
+        <div className="max-w-5xl mx-auto text-center">
+          <h2 className="text-4xl md:text-5xl font-light text-gray-900 mb-6 tracking-tight">
+            List Your Property
+          </h2>
+          <p className="text-xl text-gray-600 mb-4 max-w-3xl mx-auto leading-relaxed">
+            Share your beautiful farmhouse or BnB with travelers seeking authentic experiences
+          </p>
+          <p className="text-lg text-gray-500 mb-12 max-w-2xl mx-auto">
+            Join our trusted community of property owners
+          </p>
+          
+          
+          <button
+            onClick={() => navigate('/register-property')}
+            className="bg-green-600 text-white px-12 py-5 rounded-full text-xl font-medium hover:bg-green-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+          >
+            Add Your Property
+          </button>
+        </div>
+      </div>
+    </section>
+  )
+}
+
 // Component for testimonials section
 function TestimonialsSection() {
   const testimonials = [
@@ -437,6 +468,7 @@ function HomePage() {
           <FarmhouseCarousel title="Popular Farmhouses in Jaipur" properties={POPULAR_FARMHOUSES} />
         </div>
         <FarmhouseCarousel title="Popular BnB in Jaipur" properties={POPULAR_BNBS} />
+        <PropertyRegistrationSection />
         <TestimonialsSection />
         <Footer />
       </div>

@@ -358,7 +358,6 @@ const RegisterPropertyPage = () => {
     }
   };
 
-  // Render the process explanation section
   const renderProcessExplanation = () => (
     <div className="bg-gradient-to-r from-green-50 to-blue-50 p-6 rounded-lg mb-8">
       <h2 className="text-xl font-semibold text-gray-800 mb-3">
@@ -371,7 +370,6 @@ const RegisterPropertyPage = () => {
     </div>
   );
 
-  // Render the progress indicator
   const renderProgressIndicator = () => {
     const progressPercent = (currentStep / 5) * 100;
     return (
@@ -388,7 +386,6 @@ const RegisterPropertyPage = () => {
     );
   };
 
-  // Render number input field for amenities
   const renderNumberInput = (name, label, min = 0, max = 20) => (
     <div className="space-y-2">
       <label className="block text-sm font-medium text-gray-700">
@@ -406,7 +403,6 @@ const RegisterPropertyPage = () => {
     </div>
   );
 
-  // Render toggle switch for amenities
   const renderToggleSwitch = (name, label, description) => (
     <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
       <div className="flex-1">
