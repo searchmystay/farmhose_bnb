@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { usePropertyRegistration } from '../../hooks/usePropertyData';
 
 const RegisterPropertyPage = () => {
@@ -95,6 +95,14 @@ const RegisterPropertyPage = () => {
 
   const [validationErrors, setValidationErrors] = useState({});
   const [isRegistrationComplete, setIsRegistrationComplete] = useState(false);
+
+  useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      left: 0,
+      behavior: 'smooth'
+    });
+  }, [currentStep]);
 
   const handleBasicInfoChange = (e) => {
     const { name, value } = e.target;
@@ -359,7 +367,7 @@ const RegisterPropertyPage = () => {
   };
 
   const renderProcessExplanation = () => (
-    <div className="bg-gradient-to-r from-green-50 to-blue-50 p-6 rounded-lg mb-8">
+    <div className="bg-blue-50 bg-gradient-to-r from-green-50 to-blue-50 p-6 rounded-lg mb-8">
       <h2 className="text-xl font-semibold text-gray-800 mb-3">
         How Registration Works
       </h2>
