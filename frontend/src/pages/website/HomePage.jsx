@@ -142,7 +142,7 @@ function FarmhouseCard({ property }) {
 }
 
 // Component for infinite auto-carousel farmhouse section
-function FarmhouseCarousel({ title, properties }) {
+function FarmhouseCarousel({ title, properties, loading, error }) {
   const [currentIndex, setCurrentIndex] = useState(0)
   const [isTransitioning, setIsTransitioning] = useState(true)
 
@@ -150,15 +150,17 @@ function FarmhouseCarousel({ title, properties }) {
   const startIndex = properties.length 
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentIndex(prev => prev + 1)
-    }, 4000)
+    if (properties.length > 0) {
+      const interval = setInterval(() => {
+        setCurrentIndex(prev => prev + 1)
+      }, 4000)
 
-    return () => clearInterval(interval)
-  }, [])
+      return () => clearInterval(interval)
+    }
+  }, [properties.length])
 
   useEffect(() => {
-    if (currentIndex >= startIndex + properties.length) {
+    if (currentIndex >= startIndex + properties.length && properties.length > 0) {
       setTimeout(() => {
         setIsTransitioning(false)
         setCurrentIndex(startIndex)
@@ -168,43 +170,62 @@ function FarmhouseCarousel({ title, properties }) {
   }, [currentIndex, startIndex, properties.length])
 
   useEffect(() => {
-    setCurrentIndex(startIndex)
-  }, [startIndex])
+    if (properties.length > 0) {
+      setCurrentIndex(startIndex)
+    }
+  }, [startIndex, properties.length])
 
   return (
     <section className="py-6 bg-gray-50">
       <div className="container mx-auto px-4">
         <h2 className="text-2xl font-bold text-gray-900 mb-8">{title}</h2>
         
-        <div className="relative overflow-hidden">
-          <div 
-            className={`flex gap-6 ${isTransitioning ? 'transition-transform duration-700 ease-in-out' : ''}`}
-            style={{
-              transform: `translateX(-${currentIndex * (320 + 24)}px)`,
-              width: `${extendedProperties.length * (320 + 24)}px`
-            }}
-          >
-            {extendedProperties.map((property, index) => (
-              <div key={`${property.id}-${index}`} className="flex-shrink-0">
-                <FarmhouseCard property={property} />
-              </div>
-            ))}
+        {loading ? (
+          <div className="flex justify-center items-center py-16">
+            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
+            <p className="ml-3 text-gray-600">Loading...</p>
           </div>
-        </div>
+        ) : error ? (
+          <div className="flex justify-center items-center py-16">
+            <p className="text-red-600">Error: {error}</p>
+          </div>
+        ) : properties.length === 0 ? (
+          <div className="flex justify-center items-center py-16">
+            <p className="text-gray-600">No properties available</p>
+          </div>
+        ) : (
+          <>
+            <div className="relative overflow-hidden">
+              <div 
+                className={`flex gap-6 ${isTransitioning ? 'transition-transform duration-700 ease-in-out' : ''}`}
+                style={{
+                  transform: `translateX(-${currentIndex * (320 + 24)}px)`,
+                  width: `${extendedProperties.length * (320 + 24)}px`
+                }}
+              >
+                {extendedProperties.map((property, index) => (
+                  <div key={`${property.id || property.name}-${index}`} className="flex-shrink-0">
+                    <FarmhouseCard property={property} />
+                  </div>
+                ))}
+              </div>
+            </div>
 
-        <div className="flex justify-center mt-8 space-x-2">
-          {properties.map((_, index) => (
-            <button
-              key={index}
-              onClick={() => setCurrentIndex(startIndex + index)}
-              className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                (currentIndex - startIndex) % properties.length === index
-                  ? 'bg-green-600 scale-125' 
-                  : 'bg-gray-300 hover:bg-gray-400'
-              }`}
-            />
-          ))}
-        </div>
+            <div className="flex justify-center mt-8 space-x-2">
+              {properties.map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => setCurrentIndex(startIndex + index)}
+                  className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                    (currentIndex - startIndex) % properties.length === index
+                      ? 'bg-green-600 scale-125' 
+                      : 'bg-gray-300 hover:bg-gray-400'
+                  }`}
+                />
+              ))}
+            </div>
+          </>
+        )}
       </div>
     </section>
   )
@@ -358,23 +379,21 @@ function HomePage() {
       <div className="min-h-screen bg-white">
         <HeroSection />
         
-        {loading ? (
-          <div className="py-16 text-center bg-gray-50">
-            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
-            <p className="mt-2 text-gray-600">Loading popular properties...</p>
-          </div>
-        ) : error ? (
-          <div className="py-16 text-center bg-gray-50">
-            <p className="text-red-600">Error loading properties: {error}</p>
-          </div>
-        ) : (
-          <>
-            <div className="pt-8 bg-gray-50">
-              <FarmhouseCarousel title="Popular Farmhouses in Jaipur" properties={topFarmhouses} />
-            </div>
-            <FarmhouseCarousel title="Popular BnB in Jaipur" properties={topBnbs} />
-          </>
-        )}
+        <div className="pt-8 bg-gray-50">
+          <FarmhouseCarousel 
+            title="Popular Farmhouses in Jaipur" 
+            properties={topFarmhouses} 
+            loading={loading} 
+            error={error} 
+          />
+        </div>
+        
+        <FarmhouseCarousel 
+          title="Popular BnB in Jaipur" 
+          properties={topBnbs} 
+          loading={loading} 
+          error={error} 
+        />
         
         <PropertyRegistrationSection />
         <TestimonialsSection />
