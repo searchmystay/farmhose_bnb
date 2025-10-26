@@ -174,11 +174,13 @@ function PropertiesPage({ propertyType = 'both' } = {}) {
   const [checkOutDate, setCheckOutDate] = useState('')
   const [searchLocation, setSearchLocation] = useState('')
   
-  const { farmhouses, loading: farmhouseLoading, error: farmhouseError } = useFarmhouseList()
-  const { bnbs, loading: bnbLoading, error: bnbError } = useBnbList()
+  const shouldFetchFarmhouses = propertyType === 'farmhouse' || propertyType === 'both'
+  const shouldFetchBnbs = propertyType === 'bnb' || propertyType === 'both'
+  const { farmhouses, loading: farmhouseLoading, error: farmhouseError } = useFarmhouseList(shouldFetchFarmhouses)
+  const { bnbs, loading: bnbLoading, error: bnbError } = useBnbList(shouldFetchBnbs)
   
   const [properties, setProperties] = useState([])
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
 
   useEffect(() => {

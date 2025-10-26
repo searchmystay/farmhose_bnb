@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react'
 import { fetchFarmhouseList, fetchBnbList, registerProperty } from '../services/propertyApi'
 
-export const useFarmhouseList = () => {
+export const useFarmhouseList = (shouldFetch = false) => {
   const [farmhouses, setFarmhouses] = useState([])
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
 
   const loadFarmhouses = async () => {
@@ -23,15 +23,17 @@ export const useFarmhouseList = () => {
   }
 
   useEffect(() => {
-    loadFarmhouses()
-  }, [])
+    if (shouldFetch) {
+      loadFarmhouses()
+    }
+  }, [shouldFetch])
 
   return { farmhouses, loading, error, refetch: loadFarmhouses }
 }
 
-export const useBnbList = () => {
+export const useBnbList = (shouldFetch = false) => {
   const [bnbs, setBnbs] = useState([])
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
 
   const loadBnbs = async () => {
@@ -51,8 +53,10 @@ export const useBnbList = () => {
   }
 
   useEffect(() => {
-    loadBnbs()
-  }, [])
+    if (shouldFetch) {
+      loadBnbs()
+    }
+  }, [shouldFetch])
 
   return { bnbs, loading, error, refetch: loadBnbs }
 }
