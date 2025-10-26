@@ -32,21 +32,80 @@ def build_complete_address(location_data):
 
 
 @handle_exceptions
+def format_amenity_name(raw_name):
+    special_mappings = {
+        "wifi_internet": "WiFi Internet",
+        "smart_tv_ott": "Smart TV OTT",
+        "cctv_cameras": "CCTV Cameras",
+        "ac": "AC",
+        "air_conditioning": "Air Conditioning",
+        "geyser_hot_water": "Geyser Hot Water",
+        "tv": "TV",
+        "ott": "OTT"
+    }
+    
+    if raw_name in special_mappings:
+        return special_mappings[raw_name]
+    
+    formatted_name = raw_name.replace("_", " ").title()
+    return formatted_name
+
+
+@handle_exceptions
+def format_category_name(raw_category):
+    category_mappings = {
+        "core_amenities": "Core Amenities",
+        "bedroom_bathroom": "Bedroom & Bathroom", 
+        "outdoor_garden": "Outdoor & Garden",
+        "food_dining": "Food & Dining",
+        "entertainment_activities": "Entertainment & Activities",
+        "pet_family_friendly": "Pet & Family Friendly",
+        "safety_security": "Safety & Security",
+        "experience_luxury_addons": "Experience & Luxury",
+        "house_rules_services": "House Rules & Services"
+    }
+    
+    formatted_category = category_mappings.get(raw_category, raw_category.replace("_", " ").title())
+    return formatted_category
+
+
+@handle_exceptions
+def format_amenities_for_display(raw_amenities_data):
+    formatted_amenities = {}
+    
+    for category_key, category_data in raw_amenities_data.items():
+        formatted_category_name = format_category_name(category_key)
+        formatted_category_items = {}
+        
+        for amenity_key, amenity_value in category_data.items():
+            if amenity_value:
+                formatted_amenity_name = format_amenity_name(amenity_key)
+                formatted_category_items[formatted_amenity_name] = amenity_value
+        
+        if formatted_category_items:
+            formatted_amenities[formatted_category_name] = formatted_category_items
+    
+    return formatted_amenities
+
+
+@handle_exceptions
 def process_property_for_detail(property_data):
     property_id = str(property_data.get("_id"))
     name = property_data.get("name", "")
     full_description = property_data.get("description", "")
     images = property_data.get("images", [])
-    amenities_data = property_data.get("amenities", {})
+    raw_amenities_data = property_data.get("amenities", {})
     location_data = property_data.get("location", {})
     phone_number = property_data.get("phone_number", "")
+    
+    formatted_amenities = format_amenities_for_display(raw_amenities_data)
     
     processed_data = {
         "_id": property_id,
         "name": name,
         "description": full_description,
         "images": images,
-        "amenities": amenities_data,
+        "amenities": formatted_amenities,
         "location": location_data,
         "phone_number": phone_number
     }
