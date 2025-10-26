@@ -410,3 +410,4 @@ def get_fav_properties():
         'top_farmhouse': favourite_farmhouses,
         'top_bnb': bnb_farmhouses
     }
+
