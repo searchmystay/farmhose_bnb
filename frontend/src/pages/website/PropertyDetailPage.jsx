@@ -64,17 +64,11 @@ function PropertyDetailPage() {
   const renderAmenitiesDropdown = () => {
     if (!property?.amenities) return null
 
-    const amenityCategories = [
-      { key: 'core_amenities', title: 'Core Amenities', data: property.amenities.core_amenities },
-      { key: 'bedroom_bathroom', title: 'Bedroom & Bathroom', data: property.amenities.bedroom_bathroom },
-      { key: 'outdoor_garden', title: 'Outdoor & Garden', data: property.amenities.outdoor_garden },
-      { key: 'food_dining', title: 'Food & Dining', data: property.amenities.food_dining },
-      { key: 'entertainment_activities', title: 'Entertainment & Activities', data: property.amenities.entertainment_activities },
-      { key: 'pet_family_friendly', title: 'Pet & Family Friendly', data: property.amenities.pet_family_friendly },
-      { key: 'safety_security', title: 'Safety & Security', data: property.amenities.safety_security },
-      { key: 'experience_luxury_addons', title: 'Experience & Luxury', data: property.amenities.experience_luxury_addons },
-      { key: 'house_rules_services', title: 'House Rules & Services', data: property.amenities.house_rules_services }
-    ]
+    const amenityCategories = Object.entries(property.amenities || {}).map(([key, data]) => ({
+      key,
+      title: key,
+      data
+    }))
 
     const getAvailableAmenities = (categoryData) => {
       if (!categoryData) return []
@@ -178,7 +172,7 @@ function PropertyDetailPage() {
   }
 
   const renderPropertyInfo = () => {
-    const maxLength = 200
+    const maxLength = 1000
     const description = property.description || ''
     const shouldTruncate = description.length > maxLength
     const displayDescription = showFullDescription || !shouldTruncate 
