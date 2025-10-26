@@ -94,13 +94,11 @@ export const useTopProperties = () => {
 
 export const usePropertyRegistration = () => {
   const [loading, setLoading] = useState(false)
-  const [error, setError] = useState(null)
   const [success, setSuccess] = useState(false)
 
   const submitRegistration = async (registrationData) => {
     try {
       setLoading(true)
-      setError(null)
       setSuccess(false)
 
       const formData = new FormData()
@@ -141,8 +139,7 @@ export const usePropertyRegistration = () => {
       
     } catch (err) {
       const errorMessage = err.message || 'Failed to register property'
-      setError(errorMessage)
-      throw err
+      throw new Error(errorMessage)
     } finally {
       setLoading(false)
     }
@@ -150,16 +147,14 @@ export const usePropertyRegistration = () => {
 
   const resetState = () => {
     setLoading(false)
-    setError(null)
     setSuccess(false)
   }
 
   return { 
     submitRegistration, 
-    loading, 
-    error, 
-    success, 
-    resetState 
+    loading,
+    success,
+    resetState
   }
 }
 
