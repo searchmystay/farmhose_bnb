@@ -32,6 +32,17 @@ export const fetchBnbList = async () => {
   return result
 }
 
+export const fetchTopProperties = async () => {
+  const response = await apiClient.get('/top-properties')
+  const result = response.data
+  
+  if (result.success === false) {
+    throw new Error(result.message || 'Failed to fetch top properties')
+  }
+  
+  return result
+}
+
 export const registerProperty = async (formData) => {
   const response = await apiClient.post('/register-property', formData, {
     headers: {

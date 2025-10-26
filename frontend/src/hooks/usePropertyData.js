@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { fetchFarmhouseList, fetchBnbList, registerProperty } from '../services/propertyApi'
+import { fetchFarmhouseList, fetchBnbList, fetchTopProperties, registerProperty } from '../services/propertyApi'
 
 export const useFarmhouseList = (shouldFetch = false) => {
   const [farmhouses, setFarmhouses] = useState([])
@@ -59,6 +59,37 @@ export const useBnbList = (shouldFetch = false) => {
   }, [shouldFetch])
 
   return { bnbs, loading, error, refetch: loadBnbs }
+}
+
+export const useTopProperties = () => {
+  const [topFarmhouses, setTopFarmhouses] = useState([])
+  const [topBnbs, setTopBnbs] = useState([])
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState(null)
+
+  const loadTopProperties = async () => {
+    try {
+      setLoading(true)
+      setError(null)
+      const response = await fetchTopProperties()
+      const data = response.backend_data || {}
+      setTopFarmhouses(data.top_farmhouse || [])
+      setTopBnbs(data.top_bnb || [])
+    } catch (err) {
+      const errorMessage = err.message || 'Failed to fetch top properties'
+      setError(errorMessage)
+      setTopFarmhouses([])
+      setTopBnbs([])
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    loadTopProperties()
+  }, [])
+
+  return { topFarmhouses, topBnbs, loading, error, refetch: loadTopProperties }
 }
 
 export const usePropertyRegistration = () => {

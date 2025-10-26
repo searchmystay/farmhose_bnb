@@ -2,123 +2,8 @@ import { Helmet } from 'react-helmet-async'
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Footer from '../../components/Footer'
+import { useTopProperties } from '../../hooks/usePropertyData'
 
-// Mock data constants - replace with API calls later
-const POPULAR_FARMHOUSES = [
-  {
-    id: 1,
-    name: "Royal Heritage Villa",
-    description: "Experience luxury in this stunning heritage villa featuring traditional Rajasthani architecture, spacious gardens, and modern amenities for an unforgettable stay.",
-    images: [
-      "https://images.unsplash.com/photo-1560185008-b033106af5c3?w=400&h=250&fit=crop",
-      "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=400&h=250&fit=crop",
-      "https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=400&h=250&fit=crop"
-    ],
-    amenities: ["WiFi", "Parking", "Pool", "Garden", "Kitchen"]
-  },
-  {
-    id: 2,
-    name: "Serenity Farm Retreat",
-    description: "Peaceful countryside escape with organic gardens, traditional mud houses, and panoramic views of Aravalli hills. Perfect for nature lovers.",
-    images: [
-      "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=400&h=250&fit=crop",
-      "https://images.unsplash.com/photo-1582268611958-ebfd161ef9cf?w=400&h=250&fit=crop",
-      "https://images.unsplash.com/photo-1600047509807-ba8f99d2cdde?w=400&h=250&fit=crop"
-    ],
-    amenities: ["WiFi", "Parking", "Garden", "Organic Farm", "Yoga Space"]
-  },
-  {
-    id: 3,
-    name: "Rajputana Palace Farm",
-    description: "Majestic palace-style farmhouse with regal interiors, large courtyards, and authentic Rajasthani hospitality. Ideal for grand celebrations.",
-    images: [
-      "https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=400&h=250&fit=crop",
-      "https://images.unsplash.com/photo-1590490360182-c33d57733427?w=400&h=250&fit=crop",
-      "https://images.unsplash.com/photo-1519947486511-46149fa0a254?w=400&h=250&fit=crop"
-    ],
-    amenities: ["WiFi", "Parking", "Pool", "Banquet Hall", "Catering"]
-  },
-  {
-    id: 4,
-    name: "Green Valley Farmhouse",
-    description: "Eco-friendly farmhouse surrounded by lush greenery and fruit orchards. Features solar power, rainwater harvesting, and sustainable living.",
-    images: [
-      "https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?w=400&h=250&fit=crop",
-      "https://images.unsplash.com/photo-1600047509358-9dc75507daeb?w=400&h=250&fit=crop",
-      "https://images.unsplash.com/photo-1600607687644-c7171b42498b?w=400&h=250&fit=crop"
-    ],
-    amenities: ["WiFi", "Parking", "Solar Power", "Orchard", "Cycling"]
-  },
-  {
-    id: 5,
-    name: "Desert Oasis Villa",
-    description: "Unique desert-themed farmhouse with camel safari arrangements, folk music evenings, and stunning sunset views. Experience authentic culture.",
-    images: [
-      "https://images.unsplash.com/photo-1602002418082-a4443e081dd1?w=400&h=250&fit=crop",
-      "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=250&fit=crop",
-      "https://images.unsplash.com/photo-1545558014-8692077e9b5c?w=400&h=250&fit=crop"
-    ],
-    amenities: ["WiFi", "Parking", "Camel Safari", "Folk Music", "Bonfire"]
-  }
-]
-
-const POPULAR_BNBS = [
-  {
-    id: 1,
-    name: "Cozy Heritage Homestay",
-    description: "Charming traditional homestay in the heart of Pink City with warm hospitality, home-cooked meals, and authentic Rajasthani cultural experience.",
-    images: [
-      "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=400&h=250&fit=crop",
-      "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=400&h=250&fit=crop",
-      "https://images.unsplash.com/photo-1586611292717-f828b167408c?w=400&h=250&fit=crop"
-    ],
-    amenities: ["WiFi", "Breakfast", "AC", "Parking", "Local Guide"]
-  },
-  {
-    id: 2,
-    name: "Royal Heritage House",
-    description: "Luxurious heritage property with traditional architecture, antique furnishings, and modern amenities for a royal experience in Jaipur.",
-    images: [
-      "https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?w=400&h=250&fit=crop",
-      "https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=400&h=250&fit=crop",
-      "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=400&h=250&fit=crop"
-    ],
-    amenities: ["WiFi", "Heritage Decor", "Butler Service", "Courtyard", "Cultural Tours"]
-  },
-  {
-    id: 3,
-    name: "Garden View Retreat",
-    description: "Peaceful retreat surrounded by lush gardens and flowering plants. Ideal for nature lovers seeking tranquility within the bustling city.",
-    images: [
-      "https://images.unsplash.com/photo-1565623833408-d77e39b88af6?w=400&h=250&fit=crop",
-      "https://images.unsplash.com/photo-1600047509358-9dc75507daeb?w=400&h=250&fit=crop",
-      "https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=400&h=250&fit=crop"
-    ],
-    amenities: ["WiFi", "Garden Access", "Balcony", "Bird Watching", "Meditation Area"]
-  },
-  {
-    id: 4,
-    name: "Modern City Center Stay",
-    description: "Contemporary accommodation in the heart of Jaipur with modern amenities and easy access to major attractions, markets, and restaurants.",
-    images: [
-      "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?w=400&h=250&fit=crop",
-      "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=400&h=250&fit=crop",
-      "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=400&h=250&fit=crop"
-    ],
-    amenities: ["WiFi", "Kitchen", "AC", "Elevator", "City View"]
-  },
-  {
-    id: 5,
-    name: "Traditional Rajasthani BnB",
-    description: "Authentic Rajasthani experience with traditional decor, local cuisine, and cultural activities. Perfect for immersing in local heritage and traditions.",
-    images: [
-      "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=400&h=250&fit=crop",
-      "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=400&h=250&fit=crop",
-      "https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=400&h=250&fit=crop"
-    ],
-    amenities: ["WiFi", "Traditional Decor", "Local Cuisine", "Folk Music", "Handicraft Tours"]
-  }
-]
 
 // Component for full-screen hero with scrolling background
 function HeroSection() {
@@ -196,7 +81,7 @@ function HeroSection() {
 function FarmhouseCard({ property }) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
 
-  const images = property.images || [property.image]
+  const images = property.images || []
 
   useEffect(() => {
     if (images.length > 1) {
@@ -211,11 +96,17 @@ function FarmhouseCard({ property }) {
   return (
     <div className="bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-300 w-80 h-96 flex-shrink-0 overflow-hidden flex flex-col">
       <div className="relative h-48 overflow-hidden">
-        <img 
-          src={images[currentImageIndex]} 
-          alt={`${property.name} - Image ${currentImageIndex + 1}`} 
-          className="w-full h-48 object-cover transition-opacity duration-500"
-        />
+        {images.length > 0 ? (
+          <img 
+            src={images[currentImageIndex]} 
+            alt={`${property.name} - Image ${currentImageIndex + 1}`} 
+            className="w-full h-48 object-cover transition-opacity duration-500"
+          />
+        ) : (
+          <div className="w-full h-48 bg-gray-200 flex items-center justify-center">
+            <span className="text-gray-400">No Image Available</span>
+          </div>
+        )}
         
         {images.length > 1 && (
           <div className="absolute bottom-3 left-1/2 transform -translate-x-1/2 flex space-x-1.5">
@@ -451,6 +342,8 @@ function TestimonialsSection() {
 
 // Main homepage component that renders all sections
 function HomePage() {
+  const { topFarmhouses, topBnbs, loading, error } = useTopProperties()
+
   return (
     <>
       <Helmet>
@@ -464,10 +357,25 @@ function HomePage() {
 
       <div className="min-h-screen bg-white">
         <HeroSection />
-        <div className="pt-8 bg-gray-50">
-          <FarmhouseCarousel title="Popular Farmhouses in Jaipur" properties={POPULAR_FARMHOUSES} />
-        </div>
-        <FarmhouseCarousel title="Popular BnB in Jaipur" properties={POPULAR_BNBS} />
+        
+        {loading ? (
+          <div className="py-16 text-center bg-gray-50">
+            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
+            <p className="mt-2 text-gray-600">Loading popular properties...</p>
+          </div>
+        ) : error ? (
+          <div className="py-16 text-center bg-gray-50">
+            <p className="text-red-600">Error loading properties: {error}</p>
+          </div>
+        ) : (
+          <>
+            <div className="pt-8 bg-gray-50">
+              <FarmhouseCarousel title="Popular Farmhouses in Jaipur" properties={topFarmhouses} />
+            </div>
+            <FarmhouseCarousel title="Popular BnB in Jaipur" properties={topBnbs} />
+          </>
+        )}
+        
         <PropertyRegistrationSection />
         <TestimonialsSection />
         <Footer />
