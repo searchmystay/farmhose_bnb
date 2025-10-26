@@ -940,13 +940,13 @@ const RegisterPropertyPage = () => {
         <button
           type="submit"
           disabled={loading}
-          className={`px-8 py-3 rounded-lg focus:ring-2 focus:ring-offset-2 transition-all font-medium ${
+          className={`px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all font-medium ${
             loading 
-              ? 'bg-gray-400 text-white cursor-not-allowed' 
-              : 'bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500'
+              ? 'bg-gray-400 cursor-not-allowed hover:bg-gray-400' 
+              : ''
           }`}
         >
-          {loading ? 'Submitting...' : 'Submit Registration'}
+          {loading ? 'Submitting...' : 'Register'}
         </button>
       </div>
     </form>
