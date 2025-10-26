@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { fetchFarmhouseList, fetchBnbList, fetchTopProperties, fetchPropertyDetail, registerProperty } from '../services/propertyApi'
+import { fetchFarmhouseList, fetchBnbList, fetchTopProperties, fetchPropertyDetail, registerProperty, contactViaWhatsapp } from '../services/propertyApi'
 
 export const useFarmhouseList = (shouldFetch = false) => {
   const [farmhouses, setFarmhouses] = useState([])
@@ -190,4 +190,32 @@ export const usePropertyDetail = (propertyId) => {
   }, [propertyId])
 
   return { property, loading, error, refetch: loadPropertyDetail }
+}
+
+export const useWhatsappContact = () => {
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState(null)
+
+  const getWhatsappLink = async (propertyId) => {
+    try {
+      setLoading(true)
+      setError(null)
+      const response = await contactViaWhatsapp(propertyId)
+      const whatsappLink = response.backend_data?.whatsapp_link
+      
+      if (whatsappLink) {
+        window.open(whatsappLink, '_blank')
+      }
+      
+      return response.backend_data
+    } catch (err) {
+      const errorMessage = err.message || 'Failed to get WhatsApp contact'
+      setError(errorMessage)
+      throw err
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return { getWhatsappLink, loading, error }
 }

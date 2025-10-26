@@ -68,3 +68,14 @@ export const registerProperty = async (formData) => {
   
   return result
 }
+
+export const contactViaWhatsapp = async (propertyId) => {
+  const response = await apiClient.post(`/contact-whatsapp/${propertyId}`)
+  const result = response.data
+  
+  if (result.success === false) {
+    throw new Error(result.message || 'Failed to get WhatsApp contact')
+  }
+  
+  return result
+}

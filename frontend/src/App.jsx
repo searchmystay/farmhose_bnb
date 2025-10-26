@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import { HelmetProvider } from 'react-helmet-async'
+import { Toaster } from 'sonner'
 import HomePage from './pages/website/HomePage'
 import PropertiesPage from './pages/website/PropertiesPage'
 import PropertyDetailPage from './pages/website/PropertyDetailPage'
@@ -21,6 +22,7 @@ function App() {
             <Route path="/admin" element={<AdminLogin />} />
             <Route path="/admin/dashboard" element={<AdminDashboard />} />
           </Routes>
+          <Toaster position="bottom-left" richColors />
         </div>
       </Router>
     </HelmetProvider>
