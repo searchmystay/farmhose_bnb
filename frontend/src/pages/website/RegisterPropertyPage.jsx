@@ -925,7 +925,7 @@ const RegisterPropertyPage = () => {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {renderFileUploadSection('aadhaarCard', 'Aadhaar Card (PDF only)', '.pdf')}
-          {renderFileUploadSection('panCard', 'Bank Card (PDF only)', '.pdf')}
+          {renderFileUploadSection('panCard', 'PAN Card (PDF only)', '.pdf')}
         </div>
       </div>
 
