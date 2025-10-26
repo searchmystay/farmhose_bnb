@@ -538,10 +538,15 @@ const RegisterPropertyPage = () => {
           Pin Code
         </label>
         <input
-          type="text"
+          type="tel"
           name="pin_code"
           value={basicInfo.pin_code}
           onChange={handleBasicInfoChange}
+          onKeyPress={(e) => {
+            if (!/[0-9]/.test(e.key)) {
+              e.preventDefault();
+            }
+          }}
           className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:border-transparent transition-all ${
             validationErrors.pin_code ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-green-500'
           }`}
