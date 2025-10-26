@@ -237,6 +237,69 @@ function PropertiesPage({ propertyType = 'both' } = {}) {
     console.log('Opening filters')
   }
 
+  const renderLoadingState = () => (
+    <div className="flex flex-col items-center justify-center py-16">
+      <div className="relative">
+        <div className="w-16 h-16 border-4 border-gray-200 border-t-gray-900 rounded-full animate-spin"></div>
+      </div>
+      <p className="text-gray-600 mt-4 text-lg">Loading {getTitle().toLowerCase()}...</p>
+      <p className="text-gray-500 mt-2 text-sm">Please wait while we fetch the best properties for you</p>
+    </div>
+  )
+
+  const renderErrorState = () => (
+    <div className="flex flex-col items-center justify-center py-16">
+      <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-4">
+        <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+      </div>
+      <h3 className="text-xl font-semibold text-gray-900 mb-2">Unable to load properties</h3>
+      <p className="text-gray-600 mb-6 text-center max-w-md">
+        We're having trouble loading the properties right now. Please try again later.
+      </p>
+      <button 
+        onClick={() => window.location.reload()}
+        className="bg-gray-900 hover:bg-gray-800 text-white px-6 py-3 rounded-lg font-medium transition-colors"
+      >
+        Try Again
+      </button>
+    </div>
+  )
+
+  const renderEmptyState = () => (
+    <div className="flex flex-col items-center justify-center py-16">
+      <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+        <svg className="w-8 h-8 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+        </svg>
+      </div>
+      <h3 className="text-xl font-semibold text-gray-900 mb-2">No properties found</h3>
+      <p className="text-gray-600 text-center max-w-md">
+        We couldn't find any {getTitle().toLowerCase()} at the moment. Please check back later for new listings.
+      </p>
+    </div>
+  )
+
+  const renderPropertiesGrid = () => (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 justify-items-center">
+      {properties.map(property => (
+        <FarmhouseCard 
+          key={property._id} 
+          property={property} 
+          onClick={(propertyId) => navigate(`/property/${propertyId}`)}
+        />
+      ))}
+    </div>
+  )
+
+  const renderPropertiesContent = () => {
+    if (loading) return renderLoadingState()
+    if (error) return renderErrorState()
+    if (properties.length === 0) return renderEmptyState()
+    return renderPropertiesGrid()
+  }
+
   return (
     <>
       <Helmet>
@@ -245,7 +308,7 @@ function PropertiesPage({ propertyType = 'both' } = {}) {
         <meta name="keywords" content="farmhouse listings, bnb properties, vacation rentals, farm stay" />
       </Helmet>
 
-      <div className="min-h-screen bg-white">
+      <div className="min-h-screen bg-white flex flex-col">
         <SearchNavbar
           searchLocation={searchLocation}
           onSearchLocationChange={setSearchLocation}
@@ -271,17 +334,9 @@ function PropertiesPage({ propertyType = 'both' } = {}) {
         </section>
 
         {/* Properties Grid */}
-        <section className="py-12 bg-gray-50">
+        <section className="py-12 bg-gray-50 flex-grow">
           <div className="container mx-auto px-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 justify-items-center">
-              {properties.map(property => (
-                <FarmhouseCard 
-                  key={property._id} 
-                  property={property} 
-                  onClick={(propertyId) => navigate(`/property/${propertyId}`)}
-                />
-              ))}
-            </div>
+            {renderPropertiesContent()}
           </div>
         </section>
 
