@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { fetchFarmhouseList, fetchBnbList, fetchTopProperties, registerProperty } from '../services/propertyApi'
+import { fetchFarmhouseList, fetchBnbList, fetchTopProperties, fetchPropertyDetail, registerProperty } from '../services/propertyApi'
 
 export const useFarmhouseList = (shouldFetch = false) => {
   const [farmhouses, setFarmhouses] = useState([])
@@ -161,4 +161,33 @@ export const usePropertyRegistration = () => {
     success, 
     resetState 
   }
+}
+
+export const usePropertyDetail = (propertyId) => {
+  const [property, setProperty] = useState(null)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState(null)
+
+  const loadPropertyDetail = async () => {
+    if (!propertyId) return
+    
+    try {
+      setLoading(true)
+      setError(null)
+      const response = await fetchPropertyDetail(propertyId)
+      setProperty(response.backend_data)
+    } catch (err) {
+      const errorMessage = err.message || 'Failed to fetch property details'
+      setError(errorMessage)
+      setProperty(null)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    loadPropertyDetail()
+  }, [propertyId])
+
+  return { property, loading, error, refetch: loadPropertyDetail }
 }

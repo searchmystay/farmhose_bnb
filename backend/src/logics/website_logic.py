@@ -11,10 +11,10 @@ import pytz
 def extract_all_amenities(amenities_data):
     all_amenities = {}
     
-    for amenity_object in amenities_data:
-        for amenity_name, amenity_value in amenity_object.items():
+    for category_name, category_data in amenities_data.items():
+        for amenity_name, amenity_value in category_data.items():
             all_amenities[amenity_name] = amenity_value
-    
+     
     return all_amenities
 
 
@@ -37,19 +37,18 @@ def process_property_for_detail(property_data):
     name = property_data.get("name", "")
     full_description = property_data.get("description", "")
     images = property_data.get("images", [])
-    amenities_data = property_data.get("amenities", [])
+    amenities_data = property_data.get("amenities", {})
     location_data = property_data.get("location", {})
-    
-    all_amenities = extract_all_amenities(amenities_data)
-    complete_address = build_complete_address(location_data)
+    phone_number = property_data.get("phone_number", "")
     
     processed_data = {
-        "id": property_id,
+        "_id": property_id,
         "name": name,
         "description": full_description,
         "images": images,
-        "amenities": all_amenities,
-        "address": complete_address
+        "amenities": amenities_data,
+        "location": location_data,
+        "phone_number": phone_number
     }
     
     return processed_data
@@ -67,7 +66,8 @@ def process_farmhouse_for_listing(farmhouse_data):
     name = farmhouse_data.get("name", "")
     full_description = farmhouse_data.get("description", "")
     images = farmhouse_data.get("images", [])
-    amenities_data = farmhouse_data.get("amenities", [])
+    amenities_data = farmhouse_data.get("amenities", {})
+    favourite = farmhouse_data.get("favourite", False)
     description_words = full_description.split()
     
     if len(description_words) > 20:
@@ -78,11 +78,12 @@ def process_farmhouse_for_listing(farmhouse_data):
     available_amenities = extract_available_amenities(amenities_data)
     
     processed_data = {
-        "id": farmhouse_id,
+        "_id": farmhouse_id,
         "name": name,
         "description": truncated_description,
         "images": images,
-        "amenities": available_amenities
+        "amenities": available_amenities,
+        "favourite": favourite
     }
     
     return processed_data
@@ -117,7 +118,8 @@ def get_property_details(property_id):
         "description": 1,
         "images": 1,
         "amenities": 1,
-        "location": 1
+        "location": 1,
+        "phone_number": 1
     }
     
     property_data = db_find_one("farmhouses", query_filter, projection)

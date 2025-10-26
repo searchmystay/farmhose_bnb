@@ -79,6 +79,7 @@ function HeroSection() {
 
 // Component for enhanced farmhouse card with auto-changing images
 function FarmhouseCard({ property }) {
+  const navigate = useNavigate()
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
 
   const images = property.images || []
@@ -93,8 +94,15 @@ function FarmhouseCard({ property }) {
     }
   }, [images.length])
 
+  const handleCardClick = () => {
+    navigate(`/property/${property._id}`)
+  }
+
   return (
-    <div className="bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-300 w-80 h-96 flex-shrink-0 overflow-hidden flex flex-col">
+    <div 
+      onClick={handleCardClick}
+      className="bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-300 w-80 h-96 flex-shrink-0 overflow-hidden flex flex-col cursor-pointer"
+    >
       <div className="relative h-48 overflow-hidden">
         {images.length > 0 ? (
           <img 
