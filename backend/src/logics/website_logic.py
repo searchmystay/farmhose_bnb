@@ -57,14 +57,8 @@ def process_property_for_detail(property_data):
 
 @handle_exceptions
 def extract_available_amenities(amenities_data):
-    available_amenities = []
-    
-    for amenity_object in amenities_data:
-        for amenity_name, amenity_value in amenity_object.items():
-            if amenity_value == "true":
-                available_amenities.append(amenity_name)
-    
-    return available_amenities
+    enimities = ["WiFi", "Parking", "Swimming Pool", "Kitchen", "Air Conditioning"]
+    return enimities
 
 
 @handle_exceptions  
