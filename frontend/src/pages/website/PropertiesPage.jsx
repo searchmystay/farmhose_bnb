@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Helmet } from 'react-helmet-async'
 import { useFarmhouseList, useBnbList } from '../../hooks/usePropertyData'
 import Footer from '../../components/Footer'
@@ -112,7 +113,7 @@ const SearchNavbar = ({
   )
 }
 
-const FarmhouseCard = ({ property }) => {
+const FarmhouseCard = ({ property, onClick }) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
 
   const images = property.images || [property.image]
@@ -128,7 +129,10 @@ const FarmhouseCard = ({ property }) => {
   }, [images.length])
 
   return (
-    <div className="bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-300 w-80 h-96 flex-shrink-0 overflow-hidden flex flex-col">
+    <div 
+      onClick={() => onClick?.(property._id)}
+      className="bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-300 w-80 h-96 flex-shrink-0 overflow-hidden flex flex-col cursor-pointer"
+    >
       <div className="relative h-48 overflow-hidden">
         <img 
           src={images[currentImageIndex]} 
@@ -170,6 +174,7 @@ const FarmhouseCard = ({ property }) => {
 }
 
 function PropertiesPage({ propertyType = 'both' } = {}) {
+  const navigate = useNavigate()
   const [checkInDate, setCheckInDate] = useState('')
   const [checkOutDate, setCheckOutDate] = useState('')
   const [searchLocation, setSearchLocation] = useState('')
@@ -270,7 +275,11 @@ function PropertiesPage({ propertyType = 'both' } = {}) {
           <div className="container mx-auto px-4">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 justify-items-center">
               {properties.map(property => (
-                <FarmhouseCard key={property.id} property={property} />
+                <FarmhouseCard 
+                  key={property._id} 
+                  property={property} 
+                  onClick={(propertyId) => navigate(`/property/${propertyId}`)}
+                />
               ))}
             </div>
           </div>
