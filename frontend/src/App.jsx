@@ -6,7 +6,6 @@ import PropertiesPage from './pages/website/PropertiesPage'
 import PropertyDetailPage from './pages/website/PropertyDetailPage'
 import RegisterPropertyPage from './pages/website/RegisterPropertyPage'
 import AdminLogin from './pages/admin/AdminLogin'
-import AdminDashboard from './pages/admin/AdminDashboard'
 
 function App() {
   return (
@@ -20,7 +19,6 @@ function App() {
             <Route path="/property/:propertyId" element={<PropertyDetailPage />} />
             <Route path="/register-property" element={<RegisterPropertyPage />} />
             <Route path="/admin" element={<AdminLogin />} />
-            <Route path="/admin/dashboard" element={<AdminDashboard />} />
           </Routes>
           <Toaster position="bottom-left" richColors />
         </div>
