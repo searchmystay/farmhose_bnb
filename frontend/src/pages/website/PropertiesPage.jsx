@@ -224,19 +224,19 @@ function PropertiesPage({ propertyType = 'both' } = {}) {
         <SearchNavbar />
 
         {/* Heading Section */}
-        <section className="bg-gray-50 py-12">
+        <section className="bg-gray-50 py-6 md:py-12">
           <div className="container mx-auto px-4 text-center">
-            <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-3">
+            <h1 className="text-xl md:text-4xl font-bold text-gray-900 mb-3">
               {getTitle()}
             </h1>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            <p className="text-sm md:text-lg text-gray-600 max-w-2xl mx-auto">
               {getDescription()}
             </p>
           </div>
         </section>
 
         {/* Properties Grid */}
-        <section className="py-12 bg-gray-50 flex-grow">
+        <section className="py-6 md:py-12 bg-gray-50 flex-grow">
           <div className="container mx-auto px-4">
             {renderPropertiesContent()}
           </div>
