@@ -7,6 +7,7 @@ import PropertyDetailPage from './pages/website/PropertyDetailPage'
 import RegisterPropertyPage from './pages/website/RegisterPropertyPage'
 import AdminLogin from './pages/admin/AdminLogin'
 import AdminDashboard from './pages/admin/AdminDashboard'
+import OwnerDashboard from './pages/owner/OwnerDashboard'
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
             <Route path="/register-property" element={<RegisterPropertyPage />} />
             <Route path="/admin" element={<AdminLogin />} />
             <Route path="/admin/dashboard" element={<AdminDashboard />} />
+            <Route path="/owner-dashboard/:farmhouseId" element={<OwnerDashboard />} />
           </Routes>
           <Toaster position="bottom-left" richColors />
         </div>
