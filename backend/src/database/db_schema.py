@@ -440,3 +440,49 @@ def get_farmhouse_schema() -> Dict:
         }
     }
 
+
+def get_payment_schema() -> Dict:
+    return {
+        "bsonType": "object",
+        "required": ["farmhouse_id", "amount", "status", "created_at"],
+        "properties": {
+            "_id": {
+                "bsonType": "objectId",
+                "description": "Unique identifier for the payment"
+            },
+            "farmhouse_id": {
+                "bsonType": "objectId",
+                "description": "Reference to farmhouse making the payment"
+            },
+            "amount": {
+                "bsonType": "number",
+                "description": "Payment amount in rupees",
+                "minimum": 1
+            },
+            "order_id": {
+                "bsonType": "string",
+                "description": "Razorpay order ID"
+            },
+            "payment_id": {
+                "bsonType": "string",
+                "description": "Razorpay payment ID after successful payment"
+            },
+            "signature": {
+                "bsonType": "string",
+                "description": "Razorpay signature for verification"
+            },
+            "status": {
+                "bsonType": "string",
+                "description": "Payment status",
+                "enum": ["initiated", "success", "failed"]
+            },
+            "created_at": {
+                "bsonType": "date",
+                "description": "Timestamp when payment was initiated"
+            },
+            "verified_at": {
+                "bsonType": "date",
+                "description": "Timestamp when payment was verified"
+            }
+        }
+    }
