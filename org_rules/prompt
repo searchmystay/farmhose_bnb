@@ -1,0 +1,88 @@
+D:\Projects\farmhouse_listing\org_rules\js_rules.md  ,, D:\Projects\farmhouse_listing\org_rules\react_rules.md ,,  These are my actually rules for making
+a frontend project So you have to follow this every time But I will give you every time these files but surely you have to follow these rules every time In
+this project. we have to ake website.  my client has given us the UI how we have to make the UI I will share you the images of that also with you. Basically
+this website will have 3 persona.bhai iska frontend ka sturctur sahi se banana kyuki isme 3 persona banenge
+
+-> Website and listing for public.
+-> Dashbaord for super admin.
+-> Dashbaord for admin (Farmhouse owner)
+This are the 3 personas.  now just discuss with me what folder structure do you recommend me for this website actually actually as a senior developer you
+have to recommend me the best out of the best okay.
+
+---------------------------------------------------------------------------------------------
+
+Frontend Structure
+
+App.jsx – Main app with routing
+
+main.jsx – Entry point
+
+index.css – Global styles
+
+Components:
+
+common/ – Common UI components (Button, Input, Card, Modal, etc.)
+
+layout/ – Layout components (Header, Footer, Sidebar, etc.)
+
+farmhouse/ – Farmhouse-specific components (FarmhouseCard, FarmhouseGallery, etc.)
+
+Pages (by persona):
+
+public/ – HomePage, FarmhouseListingPage, FarmhouseDetailPage, AboutPage, ContactPage
+
+super-admin/ – DashboardPage, AdminManagementPage, FarmhouseApprovalsPage, UserManagementPage, AnalyticsPage
+
+admin/ – DashboardPage, MyFarmhousesPage, AddFarmhousePage, EditFarmhousePage, BookingsPage, ProfilePage
+
+Hooks:
+
+auth/ – useLogin, useRegister, useAuth
+
+farmhouse/ – useFarmhouseList, useFarmhouseDetail, useCreateFarmhouse, useUpdateFarmhouse
+
+admin/ – useAdminList, useApprovalActions, useAnalytics
+
+common/ – useWhatsAppRedirect, useToast
+
+Services:
+
+api.js – Axios instance
+
+authService.js – Auth APIs
+
+farmhouseService.js – Farmhouse CRUD
+
+adminService.js – Admin APIs
+
+whatsappService.js – WhatsApp logic
+
+Store / Context:
+
+authStore.js – User auth state
+
+farmhouseStore.js – Farmhouse data state
+
+adminStore.js – Admin state
+
+uiStore.js – UI state (modals, loading, etc.)
+
+Routes:
+
+PublicRoutes.jsx, AdminRoutes.jsx, SuperAdminRoutes.jsx, index.jsx
+
+Utils:
+
+constants.js, validators.js, formatters.js, helpers.js
+
+Assets:
+
+images/, icons/
+
+--------------------------------------------------------------------------------------------------------------
+ How to create full folder structure with one command
+ BY one shell command by combining mkdir -p (for folders) and touch (for files).
+
+ --------------------------------------------------------------------------------------------------------------
+
+ 
