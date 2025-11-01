@@ -22,7 +22,7 @@ function AdminDashboard() {
   }
 
   const renderSidebar = () => (
-    <div className={`fixed top-16 left-0 bottom-0 z-50 w-64 bg-white border-r border-gray-200 transform ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:top-0 lg:h-screen`}>
+    <div className={`fixed top-16 left-0 bottom-0 z-50 w-64 bg-white border-r border-gray-200 border-t border-gray-200 transform ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:top-0 lg:h-screen`}>
       <nav className="mt-8">
         {menuItems.map((item) => (
           <button
