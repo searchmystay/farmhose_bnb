@@ -37,8 +37,12 @@ function HeroSection() {
         </div>
       </div>
 
-      <div className="absolute top-8 left-8 z-20">
-        <h2 className="text-2xl md:text-3xl font-bold text-white">SearchMyStay</h2>
+      <div className="absolute top-4 left-4 md:top-8 md:left-8 z-20">
+        <img 
+          src="/search_my_stay_logo.svg" 
+          alt="Search My Stay" 
+          className="h-8 md:h-12 w-auto"
+        />
       </div>
 
       <div className="relative z-10 h-full flex flex-col items-center justify-center text-center px-6 max-w-4xl mx-auto">
