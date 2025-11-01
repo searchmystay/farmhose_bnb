@@ -16,7 +16,7 @@ const SearchNavbar = () => {
             <img 
               src="/search_my_stay_logo.svg" 
               alt="Search My Stay" 
-              className="h-5 md:h-8 w-auto"
+              className="h-6 md:h-8 w-auto"
               style={{ filter: 'brightness(0)' }}
             />
           </div>
