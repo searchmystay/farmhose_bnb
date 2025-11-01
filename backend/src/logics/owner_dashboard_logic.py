@@ -1,8 +1,9 @@
-from src.database.db_owner_analysis_operations import get_total_visits, get_total_contacts, get_contacts_last_7_days, get_contacts_last_month, get_contacts_last_year
+from src.database.db_owner_analysis_operations import get_total_visits, get_total_contacts, get_contacts_last_7_days, get_contacts_last_month, get_contacts_last_year, get_daily_leads_last_7_days, get_daily_views_last_7_days
 from src.database.db_payment_operations import get_farmhouse_credit_balance
 from src.database.db_common_operations import db_find_many, db_aggregate
 from src.utils.exception_handler import handle_exceptions, AppException
 from bson import ObjectId
+from datetime import datetime, timedelta
 
 
 @handle_exceptions
@@ -69,13 +70,33 @@ def get_leads_vs_views_graph(farmhouse_id):
 
 
 @handle_exceptions
+def get_day_labels_last_7_days():
+    day_names = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+    labels = []
+    today = datetime.utcnow()
+    
+    for i in range(6, -1, -1):
+        date = today - timedelta(days=i)
+        day_index = date.weekday()
+        labels.append(day_names[day_index])
+    
+    return labels
+
+
+@handle_exceptions
 def get_owner_dashboard_data(farmhouse_id):
     kpis = get_dashboard_kpis(farmhouse_id)
     graph = get_leads_vs_views_graph(farmhouse_id)
+    daily_leads = get_daily_leads_last_7_days(farmhouse_id)
+    daily_views = get_daily_views_last_7_days(farmhouse_id)
+    day_labels = get_day_labels_last_7_days()
     
     dashboard_data = {
         "kpis": kpis,
-        "leads_vs_views_graph": graph
+        "leads_vs_views_graph": graph,
+        "daily_leads_last_7_days": daily_leads,
+        "daily_views_last_7_days": daily_views,
+        "day_labels": day_labels
     }
     
     return dashboard_data

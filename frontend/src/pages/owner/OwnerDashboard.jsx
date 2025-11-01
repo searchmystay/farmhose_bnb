@@ -1,11 +1,14 @@
 import { Helmet } from 'react-helmet-async'
 import { useParams } from 'react-router-dom'
 import { CurrencyCircleDollar, TrendUp, Eye, Users, CalendarBlank, ChartBar } from '@phosphor-icons/react'
+import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
 import useOwnerDashboard from '../../hooks/owner/useOwnerDashboard'
+import useChartData from '../../hooks/owner/useChartData'
 
 function OwnerDashboard() {
   const { farmhouseId } = useParams()
   const { dashboardData, loading, error, refetchData } = useOwnerDashboard(farmhouseId)
+  const { lineChartData, barChartData } = useChartData(dashboardData)
 
   const renderKpiCard = (icon, title, value, color) => {
     return (
@@ -21,35 +24,44 @@ function OwnerDashboard() {
     )
   }
 
-  const renderGraph = () => {
-    if (!dashboardData?.leads_vs_views_graph) return null
-
-    const { total_views, total_leads } = dashboardData.leads_vs_views_graph
-    const conversionRate = total_views > 0 ? ((total_leads / total_views) * 100).toFixed(1) : 0
-
+  const renderLineChart = () => {
     return (
       <div className="bg-white rounded-lg shadow-sm p-6">
-        <h2 className="text-xl font-semibold mb-6 flex items-center gap-2">
-          <ChartBar size={24} weight="duotone" className="text-blue-600" />
-          Leads vs Views Analysis
+        <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+          <TrendUp size={24} weight="duotone" className="text-blue-600" />
+          Total Leads Last 7 Days
         </h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="text-center p-4 bg-blue-50 rounded-lg">
-            <Eye size={32} weight="duotone" className="text-blue-600 mx-auto mb-2" />
-            <p className="text-sm text-gray-600">Total Views</p>
-            <p className="text-3xl font-bold text-blue-600 mt-1">{total_views}</p>
-          </div>
-          <div className="text-center p-4 bg-green-50 rounded-lg">
-            <Users size={32} weight="duotone" className="text-green-600 mx-auto mb-2" />
-            <p className="text-sm text-gray-600">Total Leads</p>
-            <p className="text-3xl font-bold text-green-600 mt-1">{total_leads}</p>
-          </div>
-          <div className="text-center p-4 bg-purple-50 rounded-lg">
-            <TrendUp size={32} weight="duotone" className="text-purple-600 mx-auto mb-2" />
-            <p className="text-sm text-gray-600">Conversion Rate</p>
-            <p className="text-3xl font-bold text-purple-600 mt-1">{conversionRate}%</p>
-          </div>
-        </div>
+        <ResponsiveContainer width="100%" height={300}>
+          <LineChart data={lineChartData} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+            <XAxis dataKey="day" stroke="#6b7280" style={{ fontSize: '12px' }} />
+            <YAxis stroke="#6b7280" style={{ fontSize: '12px' }} />
+            <Tooltip contentStyle={{ backgroundColor: '#fff', border: '1px solid #e5e7eb', borderRadius: '8px' }} />
+            <Line type="monotone" dataKey="leads" stroke="#3b82f6" strokeWidth={3} dot={{ fill: '#3b82f6', r: 5 }} activeDot={{ r: 7 }} />
+          </LineChart>
+        </ResponsiveContainer>
+      </div>
+    )
+  }
+
+  const renderBarChart = () => {
+    return (
+      <div className="bg-white rounded-lg shadow-sm p-6">
+        <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+          <ChartBar size={24} weight="duotone" className="text-blue-600" />
+          Leads vs Views Comparison (Last 7 Days)
+        </h2>
+        <ResponsiveContainer width="100%" height={300}>
+          <BarChart data={barChartData} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+            <XAxis dataKey="day" stroke="#6b7280" style={{ fontSize: '12px' }} />
+            <YAxis stroke="#6b7280" style={{ fontSize: '12px' }} />
+            <Tooltip contentStyle={{ backgroundColor: '#fff', border: '1px solid #e5e7eb', borderRadius: '8px' }} />
+            <Legend wrapperStyle={{ paddingTop: '20px' }} />
+            <Bar dataKey="views" fill="#3b82f6" radius={[8, 8, 0, 0]} />
+            <Bar dataKey="leads" fill="#10b981" radius={[8, 8, 0, 0]} />
+          </BarChart>
+        </ResponsiveContainer>
       </div>
     )
   }
@@ -114,7 +126,10 @@ function OwnerDashboard() {
               {renderKpiCard(<CalendarBlank size={40} weight="duotone" />, 'Leads Last Year', kpis.total_leads_last_year || 0, '#ec4899')}
             </div>
 
-            {renderGraph()}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {renderLineChart()}
+              {renderBarChart()}
+            </div>
           </div>
         </main>
       </div>
