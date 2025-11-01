@@ -5,108 +5,31 @@ import { useFarmhouseList, useBnbList } from '../../hooks/usePropertyData'
 import Footer from '../../components/Footer'
 
 
-const SearchNavbar = ({ 
-  checkInDate = '',
-  onCheckInChange,
-  checkOutDate = '',
-  onCheckOutChange,
-  onSearch
-}) => {
-  const [showMobileForm, setShowMobileForm] = useState(false)
+const SearchNavbar = () => {
+  const navigate = useNavigate()
+  
   return (
-    <div className="bg-white shadow-sm border-b border-gray-100 py-2">
+    <div className="bg-white shadow-sm border-b border-gray-100 py-4">
       <div className="container mx-auto px-4">
-        <div className="hidden md:flex items-center justify-between">
-          <div className="text-2xl font-bold text-gray-900">
-            SearchMyStay
+        <div className="flex items-center justify-between">
+          <div onClick={() => navigate('/')} className="cursor-pointer">
+            <img 
+              src="/search_my_stay_logo.svg" 
+              alt="Search My Stay" 
+              className="h-5 md:h-8 w-auto"
+              style={{ filter: 'brightness(0)' }}
+            />
           </div>
 
-          <div className="flex items-center bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
-            <div className="px-4 py-2 border-r border-gray-200">
-              <div className="text-xs text-gray-500">Check-in</div>
-              <input
-                type="date"
-                value={checkInDate}
-                onChange={(e) => onCheckInChange?.(e.target.value)}
-                className="text-sm text-gray-900 bg-transparent border-0 outline-none w-28 mt-0.5"
-                min={new Date().toISOString().split('T')[0]}
-              />
-            </div>
-            <div className="px-4 py-2 border-r border-gray-200">
-              <div className="text-xs text-gray-500">Check-out</div>
-              <input
-                type="date"
-                value={checkOutDate}
-                onChange={(e) => onCheckOutChange?.(e.target.value)}
-                className="text-sm text-gray-900 bg-transparent border-0 outline-none w-28 mt-0.5"
-                min={checkInDate || new Date().toISOString().split('T')[0]}
-              />
-            </div>
-            <button
-              onClick={onSearch}
-              className="bg-gray-900 hover:bg-gray-800 text-white p-3 m-2 rounded-full transition-colors"
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
-            </button>
-          </div>
-        </div>
-
-        <div className="md:hidden">
-          <div className="flex items-center justify-between">
-            <div className="text-xl font-bold text-gray-900">
-              SearchMyStay
-            </div>
-            <button
-              onClick={() => setShowMobileForm(!showMobileForm)}
-              className="bg-gray-900 hover:bg-gray-800 text-white p-2 rounded-full transition-colors"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
-            </button>
-          </div>
-
-          {showMobileForm && (
-            <div className="mt-4 bg-white rounded-xl border border-gray-200 shadow-sm p-4">
-              <div className="space-y-3">
-                <div>
-                  <label className="block text-xs font-medium text-gray-600 mb-2">
-                    Check-in Date
-                  </label>
-                  <input
-                    type="date"
-                    value={checkInDate}
-                    onChange={(e) => onCheckInChange?.(e.target.value)}
-                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-gray-300 focus:border-gray-300"
-                    min={new Date().toISOString().split('T')[0]}
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-gray-600 mb-2">
-                    Check-out Date
-                  </label>
-                  <input
-                    type="date"
-                    value={checkOutDate}
-                    onChange={(e) => onCheckOutChange?.(e.target.value)}
-                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-gray-300 focus:border-gray-300"
-                    min={checkInDate || new Date().toISOString().split('T')[0]}
-                  />
-                </div>
-                <button
-                  onClick={() => {
-                    onSearch()
-                    setShowMobileForm(false)
-                  }}
-                  className="w-full bg-gray-900 hover:bg-gray-800 text-white py-3 rounded-lg font-medium transition-colors"
-                >
-                  Search Properties
-                </button>
-              </div>
-            </div>
-          )}
+          <button 
+            onClick={() => {}}
+            className="bg-white border border-gray-300 text-gray-700 px-4 py-2 md:px-6 md:py-3 rounded-full text-sm md:text-base font-medium hover:bg-gray-50 hover:border-gray-400 transition-all duration-200 flex items-center gap-2"
+          >
+            <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+            </svg>
+            Wishlist
+          </button>
         </div>
       </div>
     </div>
@@ -175,9 +98,6 @@ const FarmhouseCard = ({ property, onClick }) => {
 
 function PropertiesPage({ propertyType = 'both' } = {}) {
   const navigate = useNavigate()
-  const [checkInDate, setCheckInDate] = useState('')
-  const [checkOutDate, setCheckOutDate] = useState('')
-  const [searchLocation, setSearchLocation] = useState('')
   
   const shouldFetchFarmhouses = propertyType === 'farmhouse' || propertyType === 'both'
   const shouldFetchBnbs = propertyType === 'bnb' || propertyType === 'both'
@@ -227,14 +147,6 @@ function PropertiesPage({ propertyType = 'both' } = {}) {
       default:
         return 'Choose from our curated collection of farmhouses and bed & breakfast properties'
     }
-  }
-
-  const handleSearch = () => {
-    console.log('Searching with:', { searchLocation, checkInDate, checkOutDate })
-  }
-
-  const handleFilterClick = () => {
-    console.log('Opening filters')
   }
 
   const renderLoadingState = () => (
@@ -309,17 +221,7 @@ function PropertiesPage({ propertyType = 'both' } = {}) {
       </Helmet>
 
       <div className="min-h-screen bg-white flex flex-col">
-        <SearchNavbar
-          searchLocation={searchLocation}
-          onSearchLocationChange={setSearchLocation}
-          checkInDate={checkInDate}
-          onCheckInChange={setCheckInDate}
-          checkOutDate={checkOutDate}
-          onCheckOutChange={setCheckOutDate}
-          onSearch={handleSearch}
-          onFilterClick={handleFilterClick}
-          resultCount={properties.length}
-        />
+        <SearchNavbar />
 
         {/* Heading Section */}
         <section className="bg-gray-50 py-12">
