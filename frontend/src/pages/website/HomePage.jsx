@@ -247,36 +247,6 @@ function FarmhouseCarousel({ title, properties, loading, error }) {
   )
 }
 
-// Component for property registration call-to-action section
-function PropertyRegistrationSection() {
-  const navigate = useNavigate()
-
-  return (
-    <section className="py-16 bg-white">
-      <div className="container mx-auto px-4">
-        <div className="max-w-5xl mx-auto text-center">
-          <h2 className="text-4xl md:text-5xl font-light text-gray-900 mb-6 tracking-tight">
-            List Your Property
-          </h2>
-          <p className="text-xl text-gray-600 mb-4 max-w-3xl mx-auto leading-relaxed">
-            Share your beautiful farmhouse or BnB with travelers seeking authentic experiences
-          </p>
-          <p className="text-lg text-gray-500 mb-12 max-w-2xl mx-auto">
-            Join our trusted community of property owners
-          </p>
-          
-          
-          <button
-            onClick={() => navigate('/register-property')}
-            className="bg-green-600 text-white px-12 py-5 rounded-full text-xl font-medium hover:bg-green-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
-          >
-            Register Your Property
-          </button>
-        </div>
-      </div>
-    </section>
-  )
-}
 
 // Component for testimonials section
 function TestimonialsSection() {
@@ -349,28 +319,6 @@ function TestimonialsSection() {
           ))}
         </div>
         
-        <div className="text-center mt-8">
-          <div className="flex items-center justify-center space-x-6 text-sm text-gray-600">
-            <div className="flex items-center">
-              <svg className="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-              </svg>
-              100% Verified Properties
-            </div>
-            <div className="flex items-center">
-              <svg className="w-5 h-5 text-blue-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-              </svg>
-              Fraud-Free Platform
-            </div>
-            <div className="flex items-center">
-              <svg className="w-5 h-5 text-purple-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              Quality Assured
-            </div>
-          </div>
-        </div>
       </div>
     </section>
   )
@@ -411,7 +359,6 @@ function HomePage() {
           error={error} 
         />
         
-        <PropertyRegistrationSection />
         <TestimonialsSection />
         <Footer />
       </div>
