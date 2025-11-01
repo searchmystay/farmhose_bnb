@@ -51,26 +51,13 @@ function HeroSection() {
         <p className="text-base md:text-lg text-white/80 mb-12 max-w-xl">
           Escape to serene locations and create unforgettable memories
         </p>
-        <div className="flex gap-4 mb-12">
+        <div className="flex justify-center">
           <button 
-            onClick={() => navigate('/farmhouse')}
+            onClick={() => {}}
             className="bg-white text-gray-900 px-10 py-4 rounded-full text-lg font-medium hover:bg-gray-100 transition-all duration-200"
           >
-            Farmhouse
+            Search Your Stay
           </button>
-          <button 
-            onClick={() => navigate('/bnb')}
-            className="bg-gray-900/50 backdrop-blur text-white border border-white/30 px-10 py-4 rounded-full text-lg font-medium hover:bg-gray-900/70 transition-all duration-200"
-          >
-            BnB
-          </button>
-        </div>
-        <div className="w-full max-w-lg">
-          <input 
-            type="text" 
-            placeholder="Search your stay..." 
-            className="w-full px-6 py-4 rounded-full text-white placeholder-white/70 bg-white/10 backdrop-blur border border-white/30 text-lg focus:ring-2 focus:ring-white/50 focus:outline-none focus:bg-white/20 transition-all duration-200"
-          />
         </div>
       </div>
     </section>
