@@ -486,3 +486,29 @@ def get_payment_schema() -> Dict:
             }
         }
     }
+
+
+def get_owner_analysis_schema() -> Dict:
+    return {
+        "bsonType": "object",
+        "required": ["farmhouse_id", "type", "created_at"],
+        "properties": {
+            "_id": {
+                "bsonType": "objectId",
+                "description": "Unique identifier for the analysis record"
+            },
+            "farmhouse_id": {
+                "bsonType": "objectId",
+                "description": "Reference to farmhouse"
+            },
+            "type": {
+                "bsonType": "string",
+                "description": "Type of interaction",
+                "enum": ["visited", "contacted"]
+            },
+            "created_at": {
+                "bsonType": "date",
+                "description": "Timestamp when interaction occurred"
+            }
+        }
+    }
