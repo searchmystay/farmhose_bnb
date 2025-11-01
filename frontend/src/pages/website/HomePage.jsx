@@ -37,12 +37,29 @@ function HeroSection() {
         </div>
       </div>
 
-      <div className="absolute top-4 left-4 md:top-8 md:left-8 z-20">
+      <div className="absolute top-3 left-3 md:top-8 md:left-8 z-20">
         <img 
           src="/search_my_stay_logo.svg" 
           alt="Search My Stay" 
-          className="h-8 md:h-12 w-auto"
+          className="h-6 md:h-12 w-auto"
         />
+      </div>
+
+      <div className="absolute top-3 right-3 md:top-8 md:right-8 z-20">
+        <div className="flex gap-1 md:gap-4">
+          <button 
+            onClick={() => navigate('/register-property')}
+            className="bg-white/10 backdrop-blur text-white border border-white/30 px-2 py-1.5 md:px-6 md:py-3 rounded-full text-xs md:text-base font-medium hover:bg-white/20 transition-all duration-200"
+          >
+            Register
+          </button>
+          <button 
+            onClick={() => {}}
+            className="bg-white/10 backdrop-blur text-white border border-white/30 px-2 py-1.5 md:px-6 md:py-3 rounded-full text-xs md:text-base font-medium hover:bg-white/20 transition-all duration-200"
+          >
+            Wishlist
+          </button>
+        </div>
       </div>
 
       <div className="relative z-10 h-full flex flex-col items-center justify-center text-center px-6 max-w-4xl mx-auto">
