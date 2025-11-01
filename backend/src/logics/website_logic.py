@@ -1,4 +1,5 @@
 from src.database.db_common_operations import db_find_many, db_find_one, db_insert_one, db_update_one
+from src.database.db_owner_analysis_operations import record_visit, record_contact
 from src.utils.exception_handler import handle_exceptions, AppException
 from src.logics.cloudfare_bucket import upload_farmhouse_image_to_r2, upload_farmhouse_document_to_r2
 from src.config import LEAD_COST_RUPEES, MINIMUM_BALANCE_THRESHOLD
@@ -185,6 +186,9 @@ def get_property_details(property_id):
     
     if not property_data:
         raise AppException("Property not found or not active")
+    
+    farmhouse_id = str(property_id)
+    record_visit(farmhouse_id)
     
     processed_property = process_property_for_detail(property_data)
     return processed_property
@@ -452,6 +456,8 @@ def process_whatsapp_contact(farmhouse_id):
     
     if not whatsapp_link:
         raise AppException("WhatsApp link not available for this farmhouse")
+    
+    record_contact(farmhouse_id)
     
     contact_result = {
         "whatsapp_link": whatsapp_link,

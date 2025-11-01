@@ -1,0 +1,22 @@
+import axios from 'axios'
+
+const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000'
+
+const apiClient = axios.create({
+  baseURL: BASE_URL,
+  timeout: 100000,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+})
+
+export const fetchOwnerDashboardData = async (farmhouseId) => {
+  const response = await apiClient.get(`/owner-dashboard/${farmhouseId}`)
+  const result = response.data
+  
+  if (result.success === false) {
+    throw new Error(result.message || 'Failed to fetch dashboard data')
+  }
+  
+  return result
+}

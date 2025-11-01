@@ -2,6 +2,8 @@ from flask import Flask
 from flask_cors import CORS
 from src.routes.website_routes import website_bp
 from src.routes.admin_routes import admin_bp
+from src.routes.payment_routes import payment_bp
+from src.routes.owner_routes import owner_bp
 
 
 def create_app():
@@ -13,9 +15,11 @@ def create_app():
          allow_headers=["Content-Type", "Authorization"],
          methods=["GET", "POST", "OPTIONS", "PUT", "DELETE", "PATCH"],
          max_age=3600
-     )
+    )
 
     app.register_blueprint(website_bp)
     app.register_blueprint(admin_bp)
+    app.register_blueprint(payment_bp)
+    app.register_blueprint(owner_bp)
 
     return app
