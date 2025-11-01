@@ -1,14 +1,28 @@
 import { Helmet } from 'react-helmet-async'
 import { useParams } from 'react-router-dom'
-import { CurrencyCircleDollar, TrendUp, Eye, Users, CalendarBlank, ChartBar } from '@phosphor-icons/react'
+import { useState } from 'react'
+import { CurrencyCircleDollar, TrendUp, Eye, Users, CalendarBlank, ChartBar, X } from '@phosphor-icons/react'
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
+import { toast } from 'sonner'
 import useOwnerDashboard from '../../hooks/owner/useOwnerDashboard'
 import useChartData from '../../hooks/owner/useChartData'
+import useRazorpay from '../../hooks/owner/useRazorpay'
 
 function OwnerDashboard() {
   const { farmhouseId } = useParams()
   const { dashboardData, loading, error, refetchData } = useOwnerDashboard(farmhouseId)
   const { lineChartData, barChartData } = useChartData(dashboardData)
+  const [showPaymentModal, setShowPaymentModal] = useState(false)
+  const [rechargeAmount, setRechargeAmount] = useState('')
+
+  const handlePaymentSuccess = () => {
+    toast.success('Payment successful! Credits added to your account.')
+    setShowPaymentModal(false)
+    setRechargeAmount('')
+    refetchData()
+  }
+
+  const { initiatePayment, loading: paymentLoading } = useRazorpay(farmhouseId, handlePaymentSuccess)
 
   const renderKpiCard = (icon, title, value, color) => {
     return (
@@ -66,6 +80,85 @@ function OwnerDashboard() {
     )
   }
 
+  const handleRechargeSubmit = (e) => {
+    e.preventDefault()
+    const amount = parseFloat(rechargeAmount)
+    
+    if (!amount || amount <= 0) {
+      toast.error('Please enter a valid amount')
+      return
+    }
+
+    initiatePayment(amount)
+  }
+
+  const renderPaymentModal = () => {
+    if (!showPaymentModal) return null
+
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-md m-4">
+          <div className="flex justify-between items-center mb-6">
+            <h3 className="text-xl font-bold text-gray-900">Recharge Credits</h3>
+            <button onClick={() => setShowPaymentModal(false)} className="text-gray-400 hover:text-gray-600">
+              <X size={24} />
+            </button>
+          </div>
+
+          <form onSubmit={handleRechargeSubmit}>
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Enter Amount (₹)
+              </label>
+              <input
+                type="number"
+                value={rechargeAmount}
+                onChange={(e) => setRechargeAmount(e.target.value)}
+                placeholder="Enter amount"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                disabled={paymentLoading}
+                min="1"
+                step="1"
+              />
+              <p className="text-xs text-gray-500 mt-2">
+                ₹40 per lead. Enter amount you want to recharge.
+              </p>
+            </div>
+
+            <div className="bg-blue-50 p-4 rounded-lg mb-6">
+              <p className="text-sm text-blue-800">
+                <span className="font-semibold">Current Balance:</span> ₹{dashboardData?.kpis?.total_cost_left || 0}
+              </p>
+              {rechargeAmount && parseFloat(rechargeAmount) > 0 && (
+                <p className="text-sm text-blue-800 mt-2">
+                  <span className="font-semibold">After Recharge:</span> ₹{(dashboardData?.kpis?.total_cost_left || 0) + parseFloat(rechargeAmount)}
+                </p>
+              )}
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={() => setShowPaymentModal(false)}
+                className="flex-1 px-4 py-3 border border-gray-300 rounded-lg text-gray-700 font-semibold hover:bg-gray-50 transition-colors"
+                disabled={paymentLoading}
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="flex-1 px-4 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors disabled:bg-blue-300 disabled:cursor-not-allowed"
+                disabled={paymentLoading}
+              >
+                {paymentLoading ? 'Processing...' : 'Proceed to Pay'}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    )
+  }
+
   const renderLoadingState = () => {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -99,8 +192,11 @@ function OwnerDashboard() {
         <aside className="w-64 bg-white shadow-lg">
           <div className="p-6">
             <h2 className="text-xl font-bold text-gray-800 mb-6">Owner Panel</h2>
-            <button className="w-full bg-blue-600 text-white px-4 py-3 rounded-lg hover:bg-blue-700 transition-colors font-semibold">
-              Razorpay
+            <button 
+              onClick={() => setShowPaymentModal(true)}
+              className="w-full bg-blue-600 text-white px-4 py-3 rounded-lg hover:bg-blue-700 transition-colors font-semibold"
+            >
+              Recharge Credits
             </button>
           </div>
         </aside>
@@ -147,6 +243,7 @@ function OwnerDashboard() {
       {loading && renderLoadingState()}
       {error && !loading && renderErrorState()}
       {!loading && !error && dashboardData && renderDashboardContent()}
+      {renderPaymentModal()}
     </>
   )
 }
