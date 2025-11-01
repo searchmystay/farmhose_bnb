@@ -158,7 +158,8 @@ function FarmhouseCard({ property }) {
 }
 
 // Component for infinite auto-carousel farmhouse section
-function FarmhouseCarousel({ title, properties, loading, error }) {
+function FarmhouseCarousel({ title, properties, loading, error, navigateTo }) {
+  const navigate = useNavigate()
   const [currentIndex, setCurrentIndex] = useState(0)
   const [isTransitioning, setIsTransitioning] = useState(true)
 
@@ -194,7 +195,23 @@ function FarmhouseCarousel({ title, properties, loading, error }) {
   return (
     <section className="py-6 bg-gray-50">
       <div className="container mx-auto px-4">
-        <h2 className="text-2xl font-bold text-gray-900 mb-8">{title}</h2>
+        <h2 
+          onClick={() => navigateTo && navigate(navigateTo)}
+          className={`text-xl md:text-2xl font-bold text-gray-900 mb-6 md:mb-8 ${navigateTo ? 'cursor-pointer group' : ''}`}
+        >
+          <span>
+            {title}
+            {navigateTo && (
+              <svg 
+                className="inline-block w-4 h-4 md:w-5 md:h-5 ml-1 align-middle transition-transform duration-200 group-hover:translate-x-0.5" 
+                fill="currentColor" 
+                viewBox="0 0 24 24"
+              >
+                <path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z" />
+              </svg>
+            )}
+          </span>
+        </h2>
         
         {loading ? (
           <div className="flex justify-center items-center py-16">
@@ -343,12 +360,13 @@ function HomePage() {
       <div className="min-h-screen bg-white">
         <HeroSection />
         
-        <div className="pt-8 bg-gray-50">
+        <div className="pt-1 md:pt-2 bg-gray-50">
           <FarmhouseCarousel 
             title="Popular Farmhouses in Jaipur" 
             properties={topFarmhouses} 
             loading={loading} 
             error={error} 
+            navigateTo="/farmhouse"
           />
         </div>
         
@@ -357,6 +375,7 @@ function HomePage() {
           properties={topBnbs} 
           loading={loading} 
           error={error} 
+          navigateTo="/bnb"
         />
         
         <TestimonialsSection />
