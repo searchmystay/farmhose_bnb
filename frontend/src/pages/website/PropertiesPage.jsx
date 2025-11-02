@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Helmet } from 'react-helmet-async'
-import { useFarmhouseList, useBnbList } from '../../hooks/usePropertyData'
+import { useFarmhouseList, useBnbList, useVisitorRegistration } from '../../hooks/usePropertyData'
 import Footer from '../../components/Footer'
+import VisitorLoginPopup from '../../components/VisitorLoginPopup'
 
 
-const SearchNavbar = () => {
+const SearchNavbar = ({ onWishlistClick }) => {
   const navigate = useNavigate()
   
   return (
@@ -22,7 +23,7 @@ const SearchNavbar = () => {
           </div>
 
           <button 
-            onClick={() => {}}
+            onClick={onWishlistClick}
             className="bg-white border border-gray-300 text-gray-700 px-4 py-2 md:px-6 md:py-3 rounded-full text-sm md:text-base font-medium hover:bg-gray-50 hover:border-gray-400 transition-all duration-200 flex items-center gap-2"
           >
             <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -98,6 +99,8 @@ const FarmhouseCard = ({ property, onClick }) => {
 
 function PropertiesPage({ propertyType = 'both' } = {}) {
   const navigate = useNavigate()
+  const { handleVisitorInfo, getVisitorInfo } = useVisitorRegistration()
+  const [showVisitorPopup, setShowVisitorPopup] = useState(false)
   
   const shouldFetchFarmhouses = propertyType === 'farmhouse' || propertyType === 'both'
   const shouldFetchBnbs = propertyType === 'bnb' || propertyType === 'both'
@@ -135,6 +138,37 @@ function PropertiesPage({ propertyType = 'both' } = {}) {
       default:
         return 'Farmhouses & BnB'
     }
+  }
+
+  const handleWishlistClick = () => {
+    const visitorInfo = getVisitorInfo()
+    const hasEmail = visitorInfo?.email
+    
+    if (hasEmail) {
+      navigate('/wishlist')
+    } else {
+      setShowVisitorPopup(true)
+    }
+  }
+
+  const handleVisitorSubmit = async (visitorData) => {
+    try {
+      const result = await handleVisitorInfo(visitorData)
+      
+      if (result.success) {
+        console.log('Visitor registered successfully:', result.data)
+        setShowVisitorPopup(false)
+        navigate('/wishlist')
+      } else {
+        console.error('Registration failed:', result.error)
+      }
+    } catch (error) {
+      console.error('Error handling visitor submission:', error)
+    }
+  }
+
+  const handlePopupClose = () => {
+    setShowVisitorPopup(false)
   }
 
   const getDescription = () => {
@@ -221,7 +255,7 @@ function PropertiesPage({ propertyType = 'both' } = {}) {
       </Helmet>
 
       <div className="min-h-screen bg-white flex flex-col">
-        <SearchNavbar />
+        <SearchNavbar onWishlistClick={handleWishlistClick} />
 
         {/* Heading Section */}
         <section className="bg-gray-50 py-6 md:py-12">
@@ -244,6 +278,12 @@ function PropertiesPage({ propertyType = 'both' } = {}) {
 
         <Footer />
       </div>
+
+      <VisitorLoginPopup 
+        isOpen={showVisitorPopup}
+        onClose={handlePopupClose}
+        onSubmit={handleVisitorSubmit}
+      />
     </>
   )
 }
