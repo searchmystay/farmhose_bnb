@@ -97,7 +97,10 @@ def process_property_for_detail(property_data):
     images = property_data.get("images", [])
     raw_amenities_data = property_data.get("amenities", {})
     location_data = property_data.get("location", {})
-    phone_number = property_data.get("phone_number", "")
+    reviews = property_data.get("reviews", [])
+    owner_details = property_data.get("owner_details", {})
+    opening_time = property_data.get("opening_time", "")
+    closing_time = property_data.get("closing_time", "")
     
     formatted_amenities = format_amenities_for_display(raw_amenities_data)
     
@@ -108,7 +111,10 @@ def process_property_for_detail(property_data):
         "images": images,
         "amenities": formatted_amenities,
         "location": location_data,
-        "phone_number": phone_number
+        "reviews": reviews,
+        "owner_details": owner_details,
+        "opening_time": opening_time,
+        "closing_time": closing_time
     }
     
     return processed_data
@@ -179,7 +185,10 @@ def get_property_details(property_id):
         "images": 1,
         "amenities": 1,
         "location": 1,
-        "phone_number": 1
+        "reviews": 1,
+        "owner_details": 1,
+        "opening_time": 1,
+        "closing_time": 1
     }
     
     property_data = db_find_one("farmhouses", query_filter, projection)
