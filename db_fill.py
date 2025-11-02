@@ -53,6 +53,40 @@ PROPERTY_TYPES_WORDS = [
     "Lodge", "Resort", "Getaway", "Palace", "Mansion", "Bungalow", "Home"
 ]
 
+REVIEWER_NAMES = [
+    "Amit Sharma", "Priya Gupta", "Rahul Singh", "Sneha Patel", "Vikash Kumar",
+    "Neha Agarwal", "Rohit Verma", "Kavya Reddy", "Arjun Mehta", "Pooja Jain",
+    "Sanjay Yadav", "Ritu Malhotra", "Deepak Goel", "Anita Shah", "Manish Tiwari"
+]
+
+REVIEW_COMMENTS = [
+    "Amazing farmhouse with excellent facilities. Had a wonderful time with family. Highly recommended!",
+    "Beautiful property with great amenities. The owner was very helpful and responsive throughout our stay.",
+    "Perfect place for a weekend getaway. Clean, spacious and well-maintained property with stunning views.",
+    "Excellent experience! The farmhouse exceeded our expectations. Great for groups and family gatherings.",
+    "Lovely property in a peaceful location. All amenities as described. Would definitely visit again.",
+    "Outstanding hospitality and beautiful surroundings. Perfect for relaxation and quality time with loved ones.",
+    "Great value for money. Clean rooms, good facilities and excellent service from the property owner.",
+    "Wonderful farmhouse with modern amenities. The outdoor area is perfect for barbecue and bonfire nights.",
+    "Fantastic property for celebrations. Spacious rooms, beautiful garden and very cooperative owner.",
+    "Peaceful and serene location. Perfect escape from city life. Highly recommend this beautiful farmhouse."
+]
+
+OWNER_DESCRIPTIONS = [
+    "Experienced hospitality professional with 10+ years in property management. Passionate about providing excellent guest experiences.",
+    "Local property expert and nature enthusiast. Dedicated to maintaining high standards and ensuring guest satisfaction.",
+    "Friendly host with deep knowledge of the local area. Always available to help guests make the most of their stay.",
+    "Professional property manager committed to cleanliness and guest comfort. Fluent in multiple languages.",
+    "Hospitality veteran with attention to detail. Specializes in creating memorable experiences for families and groups.",
+    "Local resident and property owner with extensive experience in guest services and area guidance.",
+    "Dedicated host focused on providing personalized service and maintaining property to the highest standards."
+]
+
+OWNER_PHOTOS = [
+    "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80",  # Professional man with smile
+    "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80"   # Friendly man portrait
+]
+
 DESCRIPTION_TEMPLATES = [
     "Experience the perfect blend of comfort and luxury at this stunning property. Nestled in a serene location, it offers breathtaking views and modern amenities for an unforgettable stay.",
     "Escape to this beautiful retreat where nature meets comfort. The property features spacious rooms, elegant interiors, and a peaceful environment perfect for relaxation.",
@@ -208,6 +242,45 @@ def generate_random_images():
     return random.sample(IMAGE_LINKS, num_images)
 
 
+def generate_reviews():
+    num_reviews = random.randint(2, 6)
+    reviews = []
+    
+    for _ in range(num_reviews):
+        review = {
+            "reviewer_name": random.choice(REVIEWER_NAMES),
+            "review_comment": random.choice(REVIEW_COMMENTS),
+            "rating": random.randint(3, 5)
+        }
+        reviews.append(review)
+    
+    return reviews
+
+
+def generate_owner_details():
+    owner_photo = random.choice(OWNER_PHOTOS)
+    owner_description = random.choice(OWNER_DESCRIPTIONS)
+    
+    return {
+        "owner_photo": owner_photo,
+        "owner_description": owner_description
+    }
+
+
+def generate_operating_hours():
+    opening_hours = [
+        "6:00 AM", "7:00 AM", "8:00 AM", "9:00 AM", "10:00 AM"
+    ]
+    closing_hours = [
+        "8:00 PM", "9:00 PM", "10:00 PM", "11:00 PM", "12:00 AM"
+    ]
+    
+    opening_time = random.choice(opening_hours)
+    closing_time = random.choice(closing_hours)
+    
+    return opening_time, closing_time
+
+
 def generate_farmhouse_data():
     property_name = generate_property_name()
     property_description = generate_description()
@@ -217,6 +290,9 @@ def generate_farmhouse_data():
     documents = generate_random_documents()
     images = generate_random_images()
     amenities = generate_random_amenities()
+    reviews = generate_reviews()
+    owner_details = generate_owner_details()
+    opening_time, closing_time = generate_operating_hours()
     credit_balance = random.randint(500, 5000)
     current_time = datetime.now()
     
@@ -230,6 +306,10 @@ def generate_farmhouse_data():
         "booked_dates": [],
         "images": images,
         "amenities": amenities,
+        "reviews": reviews,
+        "owner_details": owner_details,
+        "opening_time": opening_time,
+        "closing_time": closing_time,
         "credit_balance": credit_balance,
         "status": "active",
         "favourite": random.choice([True, False]),
