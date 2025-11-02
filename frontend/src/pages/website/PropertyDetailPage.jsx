@@ -5,6 +5,7 @@ import { toast } from 'sonner'
 import { usePropertyDetail, useWhatsappContact, useVisitorRegistration, useAddToWishlist } from '../../hooks/usePropertyData'
 import Footer from '../../components/Footer'
 import VisitorLoginPopup from '../../components/VisitorLoginPopup'
+import OwnerDetailsPopup from '../../components/OwnerDetailsPopup'
 
 function ReviewsCarousel({ reviews }) {
   const [currentIndex, setCurrentIndex] = useState(0)
@@ -139,6 +140,7 @@ function PropertyDetailPage() {
   const [openDropdown, setOpenDropdown] = useState('core_amenities')
   const [showFullDescription, setShowFullDescription] = useState(false)
   const [showVisitorPopup, setShowVisitorPopup] = useState(false)
+  const [showOwnerDetailsPopup, setShowOwnerDetailsPopup] = useState(false)
 
   const handleWishlistClick = () => {
     const visitorInfo = getVisitorInfo()
@@ -368,7 +370,10 @@ function PropertyDetailPage() {
 
     return (
       <div className="flex items-center">
-        <button className="flex items-center text-gray-700 hover:text-green-600 transition-colors">
+        <button 
+          onClick={() => setShowOwnerDetailsPopup(true)}
+          className="flex items-center text-gray-700 hover:text-green-600 transition-colors"
+        >
           <svg className="w-4 h-4 md:w-5 md:h-5 mr-3 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
           </svg>
@@ -542,6 +547,12 @@ function PropertyDetailPage() {
         isOpen={showVisitorPopup}
         onClose={handlePopupClose}
         onSubmit={handleVisitorSubmit}
+      />
+
+      <OwnerDetailsPopup 
+        isOpen={showOwnerDetailsPopup}
+        onClose={() => setShowOwnerDetailsPopup(false)}
+        ownerDetails={property?.owner_details}
       />
     </>
   )

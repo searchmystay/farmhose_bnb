@@ -454,7 +454,6 @@ def get_farmhouse_schema() -> Dict:
                     "owner_description": {
                         "bsonType": "string",
                         "description": "Description about the farmhouse owner",
-                        "maxLength": 500
                     }
                 }
             },
