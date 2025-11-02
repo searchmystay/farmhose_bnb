@@ -259,11 +259,20 @@ function PropertyDetailPage() {
   const renderReviewsSection = () => {
     if (!property?.reviews?.length) return null
 
+    // Show different number of reviews based on screen size - always one row
+    const getDisplayReviews = () => {
+      if (window.innerWidth >= 1024) return property.reviews.slice(0, 4) // PC: 4 reviews
+      if (window.innerWidth >= 768) return property.reviews.slice(0, 2)  // iPad: 2 reviews
+      return property.reviews.slice(0, 1) // Mobile: 1 review
+    }
+
+    const displayReviews = getDisplayReviews()
+
     return (
       <div className="space-y-4">
         <h3 className="text-xl font-semibold text-gray-900">Reviews</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {property.reviews.map((review, index) => (
+          {displayReviews.map((review, index) => (
             <div key={index} className="bg-white p-4 md:p-6 rounded-lg shadow-sm border border-gray-100">
               <div className="flex items-center space-x-3 mb-4">
                 <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
