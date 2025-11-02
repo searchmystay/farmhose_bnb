@@ -1,4 +1,4 @@
-from src.database.db_common_operations import db_find_many, db_find_one, db_insert_one, db_update_one
+from src.database.db_common_operations import db_find_many, db_find_one, db_insert_one, db_update_one, db_append_to_array, db_remove_from_array
 from src.database.db_owner_analysis_operations import record_visit, record_contact
 from src.utils.exception_handler import handle_exceptions, AppException
 from src.logics.cloudfare_bucket import upload_farmhouse_image_to_r2, upload_farmhouse_document_to_r2
@@ -487,3 +487,22 @@ def get_fav_properties():
         'top_bnb': bnb_farmhouses
     }
 
+
+@handle_exceptions
+def toggle_wishlist(email, farmhouse_id):
+    farmhouse_object_id = ObjectId(farmhouse_id)
+    existing_lead = db_find_one("leads", {"email": email})
+
+    if not existing_lead:
+        raise AppException("Email not found")
+    
+    current_wishlist = existing_lead.get("wishlist", [])
+    
+    if farmhouse_object_id in current_wishlist:
+        db_remove_from_array("leads", {"email": email}, "wishlist", farmhouse_object_id)
+        action = "removed"
+    else:
+        db_append_to_array("leads", {"email": email}, "wishlist", farmhouse_object_id)
+        action = "added"
+    
+    return action
