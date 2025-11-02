@@ -506,3 +506,25 @@ def toggle_wishlist(email, farmhouse_id):
         action = "added"
     
     return action
+
+
+@handle_exceptions
+def create_lead(email, name=None, mobile_number=None):
+    existing_lead = db_find_one("leads", {"email": email})
+    
+    if existing_lead:
+        raise True
+    
+    lead_data = {
+        "email": email,
+        "wishlist": []
+    }
+    
+    if name:
+        lead_data["name"] = name
+    
+    if mobile_number:
+        lead_data["mobile_number"] = mobile_number
+    
+    db_insert_one("leads", lead_data)
+    return True

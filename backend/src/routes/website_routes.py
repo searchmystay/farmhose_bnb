@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify, request
-from src.logics.website_logic import get_approved_farmhouses, get_approved_bnbs, get_property_details, register_property, process_whatsapp_contact, get_fav_properties, toggle_wishlist
+from src.logics.website_logic import get_approved_farmhouses, get_approved_bnbs, get_property_details, register_property, process_whatsapp_contact, get_fav_properties, toggle_wishlist, create_lead
 from src.utils.exception_handler import handle_route_exceptions, AppException
 from bson import ObjectId
 import json
@@ -133,6 +133,28 @@ def toggle_wishlist_route():
     response_data = {
         "success": True,
         "message": f"{action} to wishlist"
+    }
+    
+    return jsonify(response_data), 200
+
+
+@website_bp.route('/create-lead', methods=['POST'])
+@handle_route_exceptions
+def create_lead_route():
+    data = request.get_json()
+    
+    email = data.get('email')
+    name = data.get('name')
+    mobile_number = data.get('mobile_number')
+    
+    if not email:
+        raise AppException("Email is required")
+    
+    create_lead(email, name, mobile_number)
+    
+    response_data = {
+        "success": True,
+        "message": "Lead created successfully"
     }
     
     return jsonify(response_data), 200
