@@ -433,7 +433,6 @@ def get_farmhouse_schema() -> Dict:
                             "bsonType": "string",
                             "description": "Review comment or feedback about the farmhouse",
                             "minLength": 10,
-                            "maxLength": 1000
                         },
                         "rating": {
                             "bsonType": "number",
