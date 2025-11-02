@@ -2,11 +2,12 @@ import { Helmet } from 'react-helmet-async'
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Footer from '../../components/Footer'
-import { useTopProperties } from '../../hooks/usePropertyData'
+import { useTopProperties, useVisitorRegistration } from '../../hooks/usePropertyData'
+import VisitorLoginPopup from '../../components/VisitorLoginPopup'
 
 
 // Component for full-screen hero with scrolling background
-function HeroSection() {
+function HeroSection({ onWishlistClick }) {
   const navigate = useNavigate()
   
   const backgroundImages = [
@@ -54,7 +55,7 @@ function HeroSection() {
             Register
           </button>
           <button 
-            onClick={() => {}}
+            onClick={onWishlistClick}
             className="bg-white/10 backdrop-blur text-white border border-white/30 px-2 py-1.5 md:px-6 md:py-3 rounded-full text-xs md:text-base font-medium hover:bg-white/20 transition-all duration-200"
           >
             Wishlist
@@ -342,9 +343,41 @@ function TestimonialsSection() {
 }
 
 
-// Main homepage component that renders all sections
 function HomePage() {
   const { topFarmhouses, topBnbs, loading, error } = useTopProperties()
+  const { handleVisitorInfo, getVisitorInfo } = useVisitorRegistration()
+  const [showVisitorPopup, setShowVisitorPopup] = useState(false)
+
+  const handleWishlistClick = () => {
+    const visitorInfo = getVisitorInfo()
+    const hasEmail = visitorInfo?.email
+    
+    if (hasEmail) {
+      navigate('/wishlist')
+    } else {
+      setShowVisitorPopup(true)
+    }
+  }
+
+  const handleVisitorSubmit = async (visitorData) => {
+    try {
+      const result = await handleVisitorInfo(visitorData)
+      
+      if (result.success) {
+        console.log('Visitor registered successfully:', result.data)
+        setShowVisitorPopup(false)
+        navigate('/wishlist')
+      } else {
+        console.error('Registration failed:', result.error)
+      }
+    } catch (error) {
+      console.error('Error handling visitor submission:', error)
+    }
+  }
+
+  const handlePopupClose = () => {
+    setShowVisitorPopup(false)
+  }
 
   return (
     <>
@@ -358,7 +391,7 @@ function HomePage() {
       </Helmet>
 
       <div className="min-h-screen bg-white">
-        <HeroSection />
+        <HeroSection onWishlistClick={handleWishlistClick} />
         
         <div className="pt-1 md:pt-2 bg-gray-50">
           <FarmhouseCarousel 
@@ -381,6 +414,12 @@ function HomePage() {
         <TestimonialsSection />
         <Footer />
       </div>
+
+      <VisitorLoginPopup 
+        isOpen={showVisitorPopup}
+        onClose={handlePopupClose}
+        onSubmit={handleVisitorSubmit}
+      />
       
       <style jsx>{`
         @keyframes scroll-slow {

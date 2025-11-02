@@ -214,3 +214,56 @@ export const useWhatsappContact = () => {
 
   return { getWhatsappLink, loading, error }
 }
+
+export const useVisitorRegistration = () => {
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState(null)
+
+  const handleVisitorInfo = async (visitorData) => {
+    try {
+      setLoading(true)
+      setError(null)
+
+      const payload = {
+        email: visitorData.email || null,
+        name: visitorData.name || null,
+        mobile: visitorData.mobile || null
+      }
+
+      const response = await fetch('/visitor-registration', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload)
+      })
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+
+      const result = await response.json()
+
+      setLoading(false)
+      return { success: true, data: result }
+
+    } catch (err) {
+      console.error('Error submitting visitor info:', err)
+      setError(err.message)
+      setLoading(false)
+      return { success: false, error: err.message }
+    }
+  }
+
+  const getVisitorInfo = () => {
+    try {
+      const visitorData = sessionStorage.getItem('visitorInfo')
+      return visitorData ? JSON.parse(visitorData) : null
+    } catch (err) {
+      console.error('Error getting visitor info from session storage:', err)
+      return null
+    }
+  }
+
+  return { handleVisitorInfo, getVisitorInfo, loading, error}
+}
