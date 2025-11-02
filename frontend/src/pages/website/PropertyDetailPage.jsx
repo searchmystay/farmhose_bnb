@@ -6,6 +6,128 @@ import { usePropertyDetail, useWhatsappContact, useVisitorRegistration, useAddTo
 import Footer from '../../components/Footer'
 import VisitorLoginPopup from '../../components/VisitorLoginPopup'
 
+function ReviewsCarousel({ reviews }) {
+  const [currentIndex, setCurrentIndex] = useState(0)
+  const [isTransitioning, setIsTransitioning] = useState(true)
+
+  const getVisibleCards = () => {
+    if (window.innerWidth >= 1024) return 4 
+    if (window.innerWidth >= 768) return 2
+    return 1
+  }
+
+  const [visibleCards, setVisibleCards] = useState(getVisibleCards)
+
+  const extendedReviews = [...reviews, ...reviews, ...reviews]
+  const startIndex = reviews.length
+
+  useEffect(() => {
+    if (reviews.length > 0) {
+      const interval = setInterval(() => {
+        setCurrentIndex(prev => prev + 1)
+      }, 4000)
+
+      return () => clearInterval(interval)
+    }
+  }, [reviews.length])
+
+  useEffect(() => {
+    if (currentIndex >= startIndex + reviews.length && reviews.length > 0) {
+      setTimeout(() => {
+        setIsTransitioning(false)
+        setCurrentIndex(startIndex)
+        setTimeout(() => setIsTransitioning(true), 50)
+      }, 700)
+    }
+  }, [currentIndex, startIndex, reviews.length])
+
+  useEffect(() => {
+    if (reviews.length > 0) {
+      setCurrentIndex(startIndex)
+    }
+  }, [startIndex, reviews.length])
+
+  useEffect(() => {
+    const handleResize = () => {
+      setVisibleCards(getVisibleCards())
+    }
+
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
+
+  if (!reviews || reviews.length === 0) return null
+
+  const cardWidth = 320
+  const cardGap = 24
+
+  return (
+    <div className="relative">
+      <div className="overflow-hidden">
+        <div 
+          className={`flex gap-6 ${isTransitioning ? 'transition-transform duration-700 ease-in-out' : ''}`}
+          style={{
+            transform: `translateX(-${currentIndex * (cardWidth + cardGap)}px)`,
+            width: `${extendedReviews.length * (cardWidth + cardGap)}px`
+          }}
+        >
+          {extendedReviews.map((review, index) => (
+            <div key={`${review.reviewer_name}-${index}`} className="flex-shrink-0" style={{ width: `${cardWidth}px` }}>
+              <div className="bg-white p-4 md:p-6 rounded-lg shadow-sm border border-gray-100 h-full">
+                <div className="flex items-center space-x-3 mb-4">
+                  <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
+                    <span className="text-green-600 font-semibold text-base">
+                      {review.reviewer_name.charAt(0).toUpperCase()}
+                    </span>
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <h4 className="font-medium text-gray-900 text-sm md:text-base truncate">
+                      {review.reviewer_name}
+                    </h4>
+                    {review.rating && (
+                      <div className="flex items-center mt-1">
+                        {[...Array(5)].map((_, i) => (
+                          <svg
+                            key={i}
+                            className={`w-3 h-3 md:w-4 md:h-4 ${
+                              i < review.rating ? 'text-yellow-400' : 'text-gray-300'
+                            }`}
+                            fill="currentColor"
+                            viewBox="0 0 20 20"
+                          >
+                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                          </svg>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+                <p className="text-gray-700 text-sm md:text-base leading-relaxed">
+                  {review.review_comment}
+                </p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="flex justify-center mt-8 space-x-2">
+        {reviews.map((_, index) => (
+          <button
+            key={index}
+            onClick={() => setCurrentIndex(startIndex + index)}
+            className={`w-2 h-2 rounded-full transition-all duration-300 ${
+              (currentIndex - startIndex) % reviews.length === index
+                ? 'bg-green-600 scale-125' 
+                : 'bg-gray-300 hover:bg-gray-400'
+            }`}
+          />
+        ))}
+      </div>
+    </div>
+  )
+}
+
 function PropertyDetailPage() {
   const { propertyId } = useParams()
   const navigate = useNavigate()
@@ -259,55 +381,10 @@ function PropertyDetailPage() {
   const renderReviewsSection = () => {
     if (!property?.reviews?.length) return null
 
-    // Show different number of reviews based on screen size - always one row
-    const getDisplayReviews = () => {
-      if (window.innerWidth >= 1024) return property.reviews.slice(0, 4) // PC: 4 reviews
-      if (window.innerWidth >= 768) return property.reviews.slice(0, 2)  // iPad: 2 reviews
-      return property.reviews.slice(0, 1) // Mobile: 1 review
-    }
-
-    const displayReviews = getDisplayReviews()
-
     return (
       <div className="space-y-4">
         <h3 className="text-xl font-semibold text-gray-900">Reviews</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {displayReviews.map((review, index) => (
-            <div key={index} className="bg-white p-4 md:p-6 rounded-lg shadow-sm border border-gray-100">
-              <div className="flex items-center space-x-3 mb-4">
-                <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
-                  <span className="text-green-600 font-semibold text-base">
-                    {review.reviewer_name.charAt(0).toUpperCase()}
-                  </span>
-                </div>
-                <div className="min-w-0 flex-1">
-                  <h4 className="font-medium text-gray-900 text-sm md:text-base truncate">
-                    {review.reviewer_name}
-                  </h4>
-                  {review.rating && (
-                    <div className="flex items-center mt-1">
-                      {[...Array(5)].map((_, i) => (
-                        <svg
-                          key={i}
-                          className={`w-3 h-3 md:w-4 md:h-4 ${
-                            i < review.rating ? 'text-yellow-400' : 'text-gray-300'
-                          }`}
-                          fill="currentColor"
-                          viewBox="0 0 20 20"
-                        >
-                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                        </svg>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
-              <p className="text-gray-700 text-sm md:text-base leading-relaxed">
-                {review.review_comment}
-              </p>
-            </div>
-          ))}
-        </div>
+        <ReviewsCarousel reviews={property.reviews} />
       </div>
     )
   }
