@@ -141,6 +141,7 @@ function PropertyDetailPage() {
   const [showFullDescription, setShowFullDescription] = useState(false)
   const [showVisitorPopup, setShowVisitorPopup] = useState(false)
   const [showOwnerDetailsPopup, setShowOwnerDetailsPopup] = useState(false)
+  const [isInWishlist, setIsInWishlist] = useState(false)
 
   const handleWishlistClick = () => {
     const visitorInfo = getLeadInfo()
@@ -165,9 +166,16 @@ function PropertyDetailPage() {
     const result = await handleToggleWishlist(visitorInfo.email, propertyId)
     
     if (result.success) {
-      toast.success('Property added to wishlist!')
+      const action = result.data.backend_data?.action || (isInWishlist ? 'removed' : 'added')
+      setIsInWishlist(!isInWishlist)
+      
+      if (action === 'added') {
+        toast.success('Property added to wishlist!')
+      } else {
+        toast.success('Property removed from wishlist!')
+      }
     } else {
-      toast.error('Failed to add property to wishlist')
+      toast.error('Failed to update wishlist')
     }
   }
 
@@ -410,12 +418,25 @@ function PropertyDetailPage() {
             <div className="flex items-center gap-2">
               <button 
                 onClick={handleAddToWishlist}
-                className="bg-white border border-gray-300 text-gray-700 p-2 md:px-4 md:py-2 rounded-full hover:bg-gray-50 hover:border-gray-400 transition-all duration-200 flex items-center gap-2"
+                disabled={wishlistLoading}
+                className={`${
+                  isInWishlist 
+                    ? 'bg-red-50 border-red-300 text-red-700 hover:bg-red-100 hover:border-red-400' 
+                    : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400'
+                } ${
+                  wishlistLoading ? 'opacity-50 cursor-not-allowed' : ''
+                } p-2 md:px-4 md:py-2 rounded-full transition-all duration-200 flex items-center gap-2`}
               >
-                <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                </svg>
-                <span className="hidden md:inline text-sm font-medium">Add to Wishlist</span>
+                {wishlistLoading ? (
+                  <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
+                ) : (
+                  <svg className="w-4 h-4 md:w-5 md:h-5" fill={isInWishlist ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                  </svg>
+                )}
+                <span className="hidden md:inline text-sm font-medium">
+                  {wishlistLoading ? 'Updating...' : isInWishlist ? 'Remove from Wishlist' : 'Add to Wishlist'}
+                </span>
               </button>
 
               <button 
@@ -508,6 +529,13 @@ function PropertyDetailPage() {
       return () => clearInterval(interval)
     }
   }, [property?.images])
+
+  useEffect(() => {
+    if (property) {
+      const wishlistStatus = property.favourite || property.in_wishlist || false
+      setIsInWishlist(wishlistStatus)
+    }
+  }, [property])
 
   if (loading) return renderLoadingState()
   if (error) return renderErrorState()
