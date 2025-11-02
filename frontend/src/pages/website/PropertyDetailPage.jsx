@@ -2,17 +2,71 @@ import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { Helmet } from 'react-helmet-async'
 import { toast } from 'sonner'
-import { usePropertyDetail, useWhatsappContact } from '../../hooks/usePropertyData'
+import { usePropertyDetail, useWhatsappContact, useVisitorRegistration, useAddToWishlist } from '../../hooks/usePropertyData'
 import Footer from '../../components/Footer'
+import VisitorLoginPopup from '../../components/VisitorLoginPopup'
 
 function PropertyDetailPage() {
   const { propertyId } = useParams()
   const navigate = useNavigate()
   const { property, loading, error, refetch } = usePropertyDetail(propertyId)
   const { getWhatsappLink, loading: whatsappLoading, error: whatsappError } = useWhatsappContact()
+  const { handleVisitorInfo, getVisitorInfo } = useVisitorRegistration()
+  const { addToWishlist, loading: wishlistLoading, error: wishlistError } = useAddToWishlist()
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
   const [openDropdown, setOpenDropdown] = useState('core_amenities')
   const [showFullDescription, setShowFullDescription] = useState(false)
+  const [showVisitorPopup, setShowVisitorPopup] = useState(false)
+
+  const handleWishlistClick = () => {
+    const visitorInfo = getVisitorInfo()
+    const hasEmail = visitorInfo?.email
+    
+    if (hasEmail) {
+      navigate('/wishlist')
+    } else {
+      setShowVisitorPopup(true)
+    }
+  }
+
+  const handleAddToWishlist = async () => {
+    const visitorInfo = getVisitorInfo()
+    const hasEmail = visitorInfo?.email
+
+    if(!hasEmail) {
+      setShowVisitorPopup(true)
+      return
+    }
+    
+    const result = await addToWishlist(visitorInfo.email, propertyId)
+    
+    if (result.success) {
+      toast.success('Property added to wishlist!')
+    } else {
+      toast.error('Failed to add property to wishlist')
+    }
+  }
+
+  const handleVisitorSubmit = async (visitorData) => {
+    try {
+      const result = await handleVisitorInfo(visitorData)
+      
+      if (result.success) {
+        setShowVisitorPopup(false)
+        handleAddToWishlist()
+      } else {
+        console.error('Registration failed:', result.error)
+        toast.error('Registration failed. Please try again.')
+      }
+    } catch (error) {
+      console.error('Error handling visitor submission:', error)
+      toast.error('Something went wrong. Please try again.')
+    }
+  }
+
+  const handlePopupClose = () => {
+    setShowVisitorPopup(false)
+  }
 
   const renderImageGallery = () => {
     if (!property?.images?.length) {
@@ -150,7 +204,7 @@ function PropertyDetailPage() {
             </div>
 
             <button 
-              onClick={() => {}}
+              onClick={handleWishlistClick}
               className="bg-white border border-gray-300 text-gray-700 px-4 py-2 md:px-6 md:py-3 rounded-full text-sm md:text-base font-medium hover:bg-gray-50 hover:border-gray-400 transition-all duration-200 flex items-center gap-2"
             >
               <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -186,9 +240,8 @@ function PropertyDetailPage() {
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl md:text-2xl font-bold text-gray-900">{property.name}</h2>
             <div className="flex items-center gap-2">
-              {/* Add to Wishlist Button */}
               <button 
-                onClick={() => {}}
+                onClick={handleAddToWishlist}
                 className="bg-white border border-gray-300 text-gray-700 p-2 md:px-4 md:py-2 rounded-full hover:bg-gray-50 hover:border-gray-400 transition-all duration-200 flex items-center gap-2"
               >
                 <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -197,7 +250,6 @@ function PropertyDetailPage() {
                 <span className="hidden md:inline text-sm font-medium">Add to Wishlist</span>
               </button>
 
-              {/* WhatsApp Contact Button */}
               <button 
                 onClick={handleWhatsappContact}
                 disabled={whatsappLoading}
@@ -315,6 +367,12 @@ function PropertyDetailPage() {
         
         <Footer />
       </div>
+
+      <VisitorLoginPopup 
+        isOpen={showVisitorPopup}
+        onClose={handlePopupClose}
+        onSubmit={handleVisitorSubmit}
+      />
     </>
   )
 }

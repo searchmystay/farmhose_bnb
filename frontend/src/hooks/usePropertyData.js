@@ -267,3 +267,46 @@ export const useVisitorRegistration = () => {
 
   return { handleVisitorInfo, getVisitorInfo, loading, error}
 }
+
+export const useAddToWishlist = () => {
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState(null)
+
+  const addToWishlist = async (email, propertyId) => {
+    try {
+      setLoading(true)
+      setError(null)
+
+      const response = await fetch('/add-to-wishlist', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: email,
+          propertyId: propertyId
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+
+      const result = await response.json()
+      setLoading(false)
+      return { success: true, data: result }
+
+    } catch (err) {
+      console.error('Error adding to wishlist:', err)
+      setError(err.message)
+      setLoading(false)
+      return { success: false, error: err.message }
+    }
+  }
+
+  return {
+    addToWishlist,
+    loading,
+    error
+  }
+}
