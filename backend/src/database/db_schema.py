@@ -563,3 +563,35 @@ def get_owner_analysis_schema() -> Dict:
             }
         }
     }
+
+
+def get_lead_schema() -> Dict:
+    return {
+        "bsonType": "object",
+        "required": ["email"],
+        "properties": {
+            "_id": {
+                "bsonType": "objectId",
+                "description": "Unique identifier for the lead"
+            },
+            "name": {
+                "bsonType": "string",
+                "description": "Name of the lead"
+            },
+            "email": {
+                "bsonType": "string",
+                "description": "Email address of the lead"
+            },
+            "mobile_number": {
+                "bsonType": "string",
+                "description": "Mobile number of the lead"
+            },
+            "wishlist": {
+                "bsonType": "array",
+                "description": "Array of farmhouse IDs in the user's wishlist",
+                "items": {
+                    "bsonType": "objectId"
+                }
+            }
+        }
+    }
