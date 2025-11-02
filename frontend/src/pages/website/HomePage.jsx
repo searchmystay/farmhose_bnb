@@ -2,7 +2,7 @@ import { Helmet } from 'react-helmet-async'
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Footer from '../../components/Footer'
-import { useTopProperties, useVisitorRegistration } from '../../hooks/usePropertyData'
+import { useTopProperties, useLeadRegistration } from '../../hooks/usePropertyData'
 import VisitorLoginPopup from '../../components/VisitorLoginPopup'
 
 
@@ -345,11 +345,11 @@ function TestimonialsSection() {
 
 function HomePage() {
   const { topFarmhouses, topBnbs, loading, error } = useTopProperties()
-  const { handleVisitorInfo, getVisitorInfo } = useVisitorRegistration()
+  const { handleLeadInfo, getLeadInfo } = useLeadRegistration()
   const [showVisitorPopup, setShowVisitorPopup] = useState(false)
 
   const handleWishlistClick = () => {
-    const visitorInfo = getVisitorInfo()
+    const visitorInfo = getLeadInfo()
     const hasEmail = visitorInfo?.email
     
     if (hasEmail) {

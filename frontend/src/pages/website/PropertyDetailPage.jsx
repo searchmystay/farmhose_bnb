@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { Helmet } from 'react-helmet-async'
 import { toast } from 'sonner'
-import { usePropertyDetail, useWhatsappContact, useVisitorRegistration, useAddToWishlist } from '../../hooks/usePropertyData'
+import { usePropertyDetail, useWhatsappContact, useLeadRegistration, useAddToWishlist } from '../../hooks/usePropertyData'
 import Footer from '../../components/Footer'
 import VisitorLoginPopup from '../../components/VisitorLoginPopup'
 import OwnerDetailsPopup from '../../components/OwnerDetailsPopup'
@@ -134,7 +134,7 @@ function PropertyDetailPage() {
   const navigate = useNavigate()
   const { property, loading, error, refetch } = usePropertyDetail(propertyId)
   const { getWhatsappLink, loading: whatsappLoading, error: whatsappError } = useWhatsappContact()
-  const { handleVisitorInfo, getVisitorInfo } = useVisitorRegistration()
+  const { handleLeadInfo, getLeadInfo } = useLeadRegistration()
   const { addToWishlist, loading: wishlistLoading, error: wishlistError } = useAddToWishlist()
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
   const [openDropdown, setOpenDropdown] = useState('core_amenities')
@@ -143,7 +143,7 @@ function PropertyDetailPage() {
   const [showOwnerDetailsPopup, setShowOwnerDetailsPopup] = useState(false)
 
   const handleWishlistClick = () => {
-    const visitorInfo = getVisitorInfo()
+    const visitorInfo = getLeadInfo()
     const hasEmail = visitorInfo?.email
     
     if (hasEmail) {
@@ -154,7 +154,7 @@ function PropertyDetailPage() {
   }
 
   const handleAddToWishlist = async () => {
-    const visitorInfo = getVisitorInfo()
+    const visitorInfo = getLeadInfo()
     const hasEmail = visitorInfo?.email
 
     if(!hasEmail) {

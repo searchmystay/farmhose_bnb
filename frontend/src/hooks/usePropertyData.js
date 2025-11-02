@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { fetchFarmhouseList, fetchBnbList, fetchTopProperties, fetchPropertyDetail, registerProperty, contactViaWhatsapp } from '../services/propertyApi'
+import { fetchFarmhouseList, fetchBnbList, fetchTopProperties, fetchPropertyDetail, registerProperty, contactViaWhatsapp, toggleWishlist, createLead, getUserWishlist } from '../services/propertyApi'
 
 export const useFarmhouseList = (shouldFetch = false) => {
   const [farmhouses, setFarmhouses] = useState([])
@@ -215,98 +215,66 @@ export const useWhatsappContact = () => {
   return { getWhatsappLink, loading, error }
 }
 
-export const useVisitorRegistration = () => {
+export const useLeadRegistration = () => {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
 
-  const handleVisitorInfo = async (visitorData) => {
+  const handleLeadInfo = async (leadData) => {
     try {
       setLoading(true)
       setError(null)
 
-      const payload = {
-        email: visitorData.email || null,
-        name: visitorData.name || null,
-        mobile: visitorData.mobile || null
-      }
+      const email = leadData.email || null
+      const name = leadData.name || null
+      const mobileNumber = leadData.mobile || null
 
-      const response = await fetch('/visitor-registration', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(payload)
-      })
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
-      }
-
-      const result = await response.json()
-
+      const result = await createLead(email, name, mobileNumber)
+      
       setLoading(false)
       return { success: true, data: result }
 
     } catch (err) {
-      console.error('Error submitting visitor info:', err)
-      setError(err.message)
+      const errorMessage = err.message || 'Failed to register lead'
+      setError(errorMessage)
       setLoading(false)
-      return { success: false, error: err.message }
+      return { success: false, error: errorMessage }
     }
   }
 
-  const getVisitorInfo = () => {
+  const getLeadInfo = () => {
     try {
-      const visitorData = sessionStorage.getItem('visitorInfo')
-      return visitorData ? JSON.parse(visitorData) : null
+      const leadData = sessionStorage.getItem('leadInfo')
+      const parsedData = leadData ? JSON.parse(leadData) : null
+      return parsedData
     } catch (err) {
-      console.error('Error getting visitor info from session storage:', err)
       return null
     }
   }
 
-  return { handleVisitorInfo, getVisitorInfo, loading, error}
+  return { handleLeadInfo, getLeadInfo, loading, error}
 }
 
-export const useAddToWishlist = () => {
+export const useToggleWishlist = () => {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
 
-  const addToWishlist = async (email, propertyId) => {
+  const handleToggleWishlist = async (email, farmhouseId) => {
     try {
       setLoading(true)
       setError(null)
 
-      const response = await fetch('/add-to-wishlist', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email: email,
-          propertyId: propertyId
-        })
-      })
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
-      }
-
-      const result = await response.json()
+      const result = await toggleWishlist(email, farmhouseId)
+      
       setLoading(false)
       return { success: true, data: result }
 
     } catch (err) {
-      console.error('Error adding to wishlist:', err)
-      setError(err.message)
+      const errorMessage = err.message || 'Failed to toggle wishlist'
+      setError(errorMessage)
       setLoading(false)
-      return { success: false, error: err.message }
+      return { success: false, error: errorMessage }
     }
   }
 
-  return {
-    addToWishlist,
-    loading,
-    error
-  }
+  return {handleToggleWishlist, loading, error}
 }

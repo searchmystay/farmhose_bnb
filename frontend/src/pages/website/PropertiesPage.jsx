@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Helmet } from 'react-helmet-async'
-import { useFarmhouseList, useBnbList, useVisitorRegistration } from '../../hooks/usePropertyData'
+import { useFarmhouseList, useBnbList, useLeadRegistration } from '../../hooks/usePropertyData'
 import Footer from '../../components/Footer'
 import VisitorLoginPopup from '../../components/VisitorLoginPopup'
 
@@ -99,7 +99,7 @@ const FarmhouseCard = ({ property, onClick }) => {
 
 function PropertiesPage({ propertyType = 'both' } = {}) {
   const navigate = useNavigate()
-  const { handleVisitorInfo, getVisitorInfo } = useVisitorRegistration()
+  const { handleLeadInfo, getLeadInfo } = useLeadRegistration()
   const [showVisitorPopup, setShowVisitorPopup] = useState(false)
   
   const shouldFetchFarmhouses = propertyType === 'farmhouse' || propertyType === 'both'
@@ -141,7 +141,7 @@ function PropertiesPage({ propertyType = 'both' } = {}) {
   }
 
   const handleWishlistClick = () => {
-    const visitorInfo = getVisitorInfo()
+    const visitorInfo = getLeadInfo()
     const hasEmail = visitorInfo?.email
     
     if (hasEmail) {
