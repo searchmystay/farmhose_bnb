@@ -153,7 +153,7 @@ function PropertiesPage({ propertyType = 'both' } = {}) {
 
   const handleVisitorSubmit = async (visitorData) => {
     try {
-      const result = await handleVisitorInfo(visitorData)
+      const result = await handleLeadInfo(visitorData)
       
       if (result.success) {
         console.log('Visitor registered successfully:', result.data)
