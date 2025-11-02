@@ -121,7 +121,7 @@ def process_property_for_detail(property_data):
 
 
 @handle_exceptions
-def extract_available_amenities(amenities_data):
+def extract_available_amenities():
     enimities = ["WiFi", "Parking", "Swimming Pool", "Kitchen", "Air Conditioning"]
     return enimities
 
@@ -132,7 +132,6 @@ def process_farmhouse_for_listing(farmhouse_data):
     name = farmhouse_data.get("name", "")
     full_description = farmhouse_data.get("description", "")
     images = farmhouse_data.get("images", [])
-    amenities_data = farmhouse_data.get("amenities", {})
     favourite = farmhouse_data.get("favourite", False)
     description_words = full_description.split()
     
@@ -141,7 +140,7 @@ def process_farmhouse_for_listing(farmhouse_data):
     else:
         truncated_description = full_description
     
-    available_amenities = extract_available_amenities(amenities_data)
+    available_amenities = extract_available_amenities()
     
     processed_data = {
         "_id": farmhouse_id,
@@ -547,8 +546,7 @@ def get_user_wishlist(email):
         "_id": 1,
         "name": 1,
         "description": 1,
-        "images": 1,
-        "amenities": 1
+        "images": 1
     }
     
     properties_list = db_find_many("farmhouses", query_filter, projection)
