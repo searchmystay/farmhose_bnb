@@ -528,3 +528,34 @@ def create_lead(email, name=None, mobile_number=None):
     
     db_insert_one("leads", lead_data)
     return True
+
+
+@handle_exceptions
+def get_user_wishlist(email):
+    existing_lead = db_find_one("leads", {"email": email})
+    
+    if not existing_lead:
+        raise AppException("Email not found")
+    
+    wishlist_ids = existing_lead.get("wishlist", [])
+    
+    if not wishlist_ids:
+        return []
+    
+    query_filter = {"_id": {"$in": wishlist_ids}, "status": "active"}
+    projection = {
+        "_id": 1,
+        "name": 1,
+        "description": 1,
+        "images": 1,
+        "amenities": 1
+    }
+    
+    properties_list = db_find_many("farmhouses", query_filter, projection)
+    
+    processed_properties = []
+    for property_data in properties_list:
+        processed_property = process_farmhouse_for_listing(property_data)
+        processed_properties.append(processed_property)
+    
+    return processed_properties
