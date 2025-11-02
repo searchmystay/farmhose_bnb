@@ -230,6 +230,14 @@ export const useLeadRegistration = () => {
 
       const result = await createLead(email, name, mobileNumber)
       
+      const leadInfoToStore = {
+        email: email,
+        name: name,
+        mobile: mobileNumber
+      }
+      
+      sessionStorage.setItem('leadInfo', JSON.stringify(leadInfoToStore))
+      
       setLoading(false)
       return { success: true, data: result }
 
