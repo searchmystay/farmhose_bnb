@@ -542,7 +542,7 @@ def get_payment_schema() -> Dict:
 def get_owner_analysis_schema() -> Dict:
     return {
         "bsonType": "object",
-        "required": ["farmhouse_id", "type", "created_at"],
+        "required": ["farmhouse_id", "total_views", "total_leads", "daily", "created_at", "updated_at"],
         "properties": {
             "_id": {
                 "bsonType": "objectId",
@@ -550,16 +550,45 @@ def get_owner_analysis_schema() -> Dict:
             },
             "farmhouse_id": {
                 "bsonType": "objectId",
-                "description": "Reference to farmhouse"
+                "description": "Reference to farmhouse (unique - one document per farmhouse)"
             },
-            "type": {
-                "bsonType": "string",
-                "description": "Type of interaction",
-                "enum": ["visited", "contacted"]
+            "total_views": {
+                "bsonType": "int",
+                "description": "Total views count"
+            },
+            "total_leads": {
+                "bsonType": "int",
+                "description": "Total leads count"
+            },
+            "daily": {
+                "bsonType": "array",
+                "description": "Daily breakdown",
+                "items": {
+                    "bsonType": "object",
+                    "required": ["date", "views", "leads"],
+                    "properties": {
+                        "date": {
+                            "bsonType": "string",
+                            "description": "Date in YYYY-MM-DD format"
+                        },
+                        "views": {
+                            "bsonType": "int",
+                            "description": "Views on this date"
+                        },
+                        "leads": {
+                            "bsonType": "int",
+                            "description": "Leads on this date"
+                        }
+                    }
+                }
             },
             "created_at": {
                 "bsonType": "date",
-                "description": "Timestamp when interaction occurred"
+                "description": "Timestamp when document was created"
+            },
+            "updated_at": {
+                "bsonType": "date",
+                "description": "Timestamp when document was last updated"
             }
         }
     }
