@@ -624,3 +624,34 @@ def get_lead_schema() -> Dict:
             }
         }
     }
+
+
+def get_pending_reviews_schema() -> Dict:
+    return {
+        "bsonType": "object",
+        "required": ["farmhouse_id", "reviewer_name", "rating", "review_comment"],
+        "properties": {
+            "_id": {
+                "bsonType": "objectId",
+                "description": "Unique identifier for the review"
+            },
+            "farmhouse_id": {
+                "bsonType": "objectId",
+                "description": "Reference to the farmhouse/property _id"
+            },
+            "reviewer_name": {
+                "bsonType": "string",
+                "description": "Name of the person writing the review"
+            },
+            "rating": {
+                "bsonType": "int",
+                "minimum": 1,
+                "maximum": 5,
+                "description": "Star rating from 1-5"
+            },
+            "review_comment": {
+                "bsonType": "string",
+                "description": "Review description/comment"
+            }
+        }
+    }
