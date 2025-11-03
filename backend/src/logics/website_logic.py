@@ -521,7 +521,7 @@ def create_lead(email, name=None, mobile_number=None):
     existing_lead = db_find_one("leads", {"email": email})
     
     if existing_lead:
-        raise True
+        return True
     
     lead_data = {
         "email": email,

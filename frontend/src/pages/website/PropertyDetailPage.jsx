@@ -185,7 +185,8 @@ function PropertyDetailPage() {
       
       if (result.success) {
         setShowVisitorPopup(false)
-        handleAddToWishlist()
+        await refetch()
+        toast.success('Registration successful! You can now add to wishlist.')
       } else {
         console.error('Registration failed:', result.error)
         toast.error('Registration failed. Please try again.')
