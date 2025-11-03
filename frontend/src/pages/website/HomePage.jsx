@@ -158,40 +158,60 @@ function FarmhouseCard({ property }) {
   )
 }
 
-// Component for infinite auto-carousel farmhouse section
 function FarmhouseCarousel({ title, properties, loading, error, navigateTo }) {
   const navigate = useNavigate()
   const [currentIndex, setCurrentIndex] = useState(0)
   const [isTransitioning, setIsTransitioning] = useState(true)
 
-  const extendedProperties = [...properties, ...properties, ...properties]
-  const startIndex = properties.length 
+  const getVisibleCards = () => {
+    if (window.innerWidth >= 1024) return 4 
+    if (window.innerWidth >= 768) return 2
+    return 1
+  }
+
+  const [visibleCards, setVisibleCards] = useState(getVisibleCards)
+
+  const shouldEnableCarousel = properties.length > visibleCards
+
+  const extendedProperties = shouldEnableCarousel ? [...properties, ...properties, ...properties] : properties
+  const startIndex = shouldEnableCarousel ? properties.length : 0
 
   useEffect(() => {
-    if (properties.length > 0) {
+    if (shouldEnableCarousel) {
       const interval = setInterval(() => {
         setCurrentIndex(prev => prev + 1)
       }, 4000)
 
       return () => clearInterval(interval)
     }
-  }, [properties.length])
+  }, [shouldEnableCarousel])
 
   useEffect(() => {
-    if (currentIndex >= startIndex + properties.length && properties.length > 0) {
+    if (shouldEnableCarousel && currentIndex >= startIndex + properties.length) {
       setTimeout(() => {
         setIsTransitioning(false)
         setCurrentIndex(startIndex)
         setTimeout(() => setIsTransitioning(true), 50)
-      }, 700) 
+      }, 700)
     }
-  }, [currentIndex, startIndex, properties.length])
+  }, [currentIndex, startIndex, properties.length, shouldEnableCarousel])
 
   useEffect(() => {
-    if (properties.length > 0) {
+    if (shouldEnableCarousel) {
       setCurrentIndex(startIndex)
+    } else {
+      setCurrentIndex(0)
     }
-  }, [startIndex, properties.length])
+  }, [startIndex, shouldEnableCarousel])
+
+  useEffect(() => {
+    const handleResize = () => {
+      setVisibleCards(getVisibleCards())
+    }
+
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
 
   return (
     <section className="py-6 bg-gray-50">
@@ -227,7 +247,7 @@ function FarmhouseCarousel({ title, properties, loading, error, navigateTo }) {
           <div className="flex justify-center items-center py-16">
             <p className="text-gray-600">No properties available</p>
           </div>
-        ) : (
+        ) : shouldEnableCarousel ? (
           <>
             <div className="relative overflow-hidden">
               <div 
@@ -259,6 +279,19 @@ function FarmhouseCarousel({ title, properties, loading, error, navigateTo }) {
               ))}
             </div>
           </>
+        ) : (
+          <div className={`${
+            properties.length === 1 ? 'flex justify-center' : 
+            properties.length === 2 ? 'grid grid-cols-1 md:grid-cols-2 gap-6 justify-items-center max-w-4xl mx-auto' :
+            properties.length === 3 ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center max-w-5xl mx-auto' :
+            'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 justify-items-center max-w-6xl mx-auto'
+          }`}>
+            {properties.map((property, index) => (
+              <div key={`${property.id || property.name}-${index}`} className="w-full max-w-sm">
+                <FarmhouseCard property={property} />
+              </div>
+            ))}
+          </div>
         )}
       </div>
     </section>
