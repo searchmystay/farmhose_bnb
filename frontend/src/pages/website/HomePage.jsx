@@ -344,6 +344,7 @@ function TestimonialsSection() {
 
 
 function HomePage() {
+  const navigate = useNavigate()
   const { topFarmhouses, topBnbs, loading, error } = useTopProperties()
   const { handleLeadInfo, getLeadInfo } = useLeadRegistration()
   const [showVisitorPopup, setShowVisitorPopup] = useState(false)
