@@ -26,7 +26,6 @@ package-lock.json
 *.jpg
 *.jpeg
 *.gif
-*.svg
 *.webp
 
 # Extra folder for your project, for local work
