@@ -132,11 +132,11 @@ function OwnerDashboard() {
 
             <div className="bg-blue-50 p-4 rounded-lg mb-6">
               <p className="text-sm text-blue-800">
-                <span className="font-semibold">Current Balance:</span> ₹{dashboardData?.kpis?.payment_info?.total_cost_left || 0}
+                <span className="font-semibold">Current Balance:</span> ₹{dashboardData?.kpis?.payment_kpis?.total_cost_left || 0}
               </p>
               {rechargeAmount && parseFloat(rechargeAmount) > 0 && (
                 <p className="text-sm text-blue-800 mt-2">
-                  <span className="font-semibold">After Recharge:</span> ₹{(dashboardData?.kpis?.payment_info?.total_cost_left || 0) + parseFloat(rechargeAmount)}
+                  <span className="font-semibold">After Recharge:</span> ₹{(dashboardData?.kpis?.payment_kpis?.total_cost_left || 0) + parseFloat(rechargeAmount)}
                 </p>
               )}
             </div>
@@ -191,8 +191,9 @@ function OwnerDashboard() {
 
   const renderDashboardContent = () => {
     const kpis = dashboardData?.kpis || {}
-    const paymentInfo = kpis.payment_info || {}
-    const mainKpis = kpis.main_kpis || {}
+    const row1Kpis = kpis.row1_kpis || {}
+    const row2Kpis = kpis.row2_kpis || {}
+    const paymentKpis = kpis.payment_kpis || {}
     const ownerInfo = kpis.owner_info || {}
 
     return (
@@ -255,29 +256,56 @@ function OwnerDashboard() {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
                   {renderKpiCard(
                     <CurrencyCircleDollar size={40} weight="duotone" />, 
-                    'Total Money Spend', 
-                    `₹${mainKpis.total_spend_money || 0}`, 
+                    'This Month Money Spend', 
+                    `₹${row1Kpis.this_month_money_spend || 0}`, 
                     '#ef4444'
                   )}
                   {renderKpiCard(
-                    <CalendarBlank size={40} weight="duotone" />, 
+                    <Users size={40} weight="duotone" />, 
                     'This Month Leads', 
-                    mainKpis.this_month_leads || 0, 
+                    row1Kpis.this_month_leads || 0, 
                     '#8b5cf6',
-                    `Last Month: ${mainKpis.last_month_leads || 0}`
+                    `Last Month: ${row1Kpis.last_month_leads || 0}`
                   )}
                   {renderKpiCard(
                     <Eye size={40} weight="duotone" />, 
                     'This Month Views', 
-                    mainKpis.this_month_views || 0, 
+                    row1Kpis.this_month_views || 0, 
                     '#f59e0b',
-                    `Last Month: ${mainKpis.last_month_views || 0}`
+                    `Last Month: ${row1Kpis.last_month_views || 0}`
+                  )}
+                  {renderKpiCard(
+                    <CalendarBlank size={40} weight="duotone" />, 
+                    'Last 7 Days Lead', 
+                    row1Kpis.leads_last_7_days || 0, 
+                    '#06b6d4'
+                  )}
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+                  {renderKpiCard(
+                    <CurrencyCircleDollar size={40} weight="duotone" />, 
+                    'Total Money Spent', 
+                    `₹${row2Kpis.total_money_spent || 0}`, 
+                    '#dc2626'
                   )}
                   {renderKpiCard(
                     <Users size={40} weight="duotone" />, 
-                    'Overall Total Leads', 
-                    mainKpis.total_leads_overall || 0, 
+                    'Total Lead', 
+                    row2Kpis.total_leads || 0, 
                     '#10b981'
+                  )}
+                  {renderKpiCard(
+                    <Eye size={40} weight="duotone" />, 
+                    'Total Views', 
+                    row2Kpis.total_views || 0, 
+                    '#3b82f6'
+                  )}
+                  {renderKpiCard(
+                    <TrendUp size={40} weight="duotone" />, 
+                    'Total Rating out of 5', 
+                    row2Kpis.total_rating || 0, 
+                    '#f59e0b'
                   )}
                 </div>
 
@@ -285,13 +313,13 @@ function OwnerDashboard() {
                   {renderKpiCard(
                     <CurrencyCircleDollar size={40} weight="duotone" />, 
                     'Total Cost Given', 
-                    `₹${paymentInfo.total_cost_given || 0}`, 
+                    `₹${paymentKpis.total_cost_given || 0}`, 
                     '#3b82f6'
                   )}
                   {renderKpiCard(
                     <CurrencyCircleDollar size={40} weight="duotone" />, 
                     'Total Cost Left', 
-                    `₹${paymentInfo.total_cost_left || 0}`, 
+                    `₹${paymentKpis.total_cost_left || 0}`, 
                     '#10b981'
                   )}
                 </div>
