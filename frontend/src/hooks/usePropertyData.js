@@ -298,3 +298,47 @@ export const useToggleWishlist = () => {
 
   return {handleToggleWishlist, loading, error}
 }
+
+export const useUserWishlist = () => {
+  const [wishlistProperties, setWishlistProperties] = useState([])
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState(null)
+
+  const getLeadEmail = () => {
+    try {
+      const leadData = sessionStorage.getItem('leadInfo')
+      const parsedData = leadData ? JSON.parse(leadData) : null
+      return parsedData?.email || null
+    } catch (err) {
+      return null
+    }
+  }
+
+  const loadWishlist = async () => {
+    const email = getLeadEmail()
+    if (!email) {
+      setError('Please login to view your wishlist')
+      return
+    }
+
+    try {
+      setLoading(true)
+      setError(null)
+      const response = await getUserWishlist(email)
+      const properties = response.backend_data || []
+      setWishlistProperties(properties)
+    } catch (err) {
+      const errorMessage = err.message || 'Failed to fetch wishlist'
+      setError(errorMessage)
+      setWishlistProperties([])
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    loadWishlist()
+  }, [])
+
+  return { wishlistProperties, loading, error, refetch: loadWishlist, userEmail: getLeadEmail() }
+}
