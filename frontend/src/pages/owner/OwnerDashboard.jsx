@@ -7,6 +7,7 @@ import { toast } from 'sonner'
 import useOwnerDashboard from '../../hooks/owner/useOwnerDashboard'
 import useChartData from '../../hooks/owner/useChartData'
 import useRazorpay from '../../hooks/owner/useRazorpay'
+import Logo from '../../assets/icons/logo.svg'
 
 function OwnerDashboard() {
   const { farmhouseId } = useParams()
@@ -14,6 +15,7 @@ function OwnerDashboard() {
   const { lineChartData, barChartData } = useChartData(dashboardData)
   const [showPaymentModal, setShowPaymentModal] = useState(false)
   const [rechargeAmount, setRechargeAmount] = useState('')
+  const [activeTab, setActiveTab] = useState('dashboard')
 
   const handlePaymentSuccess = () => {
     toast.success('Payment successful! Credits added to your account.')
@@ -24,13 +26,16 @@ function OwnerDashboard() {
 
   const { initiatePayment, loading: paymentLoading } = useRazorpay(farmhouseId, handlePaymentSuccess)
 
-  const renderKpiCard = (icon, title, value, color) => {
+  const renderKpiCard = (icon, title, value, color, subtitle = null) => {
     return (
       <div className="bg-white rounded-lg shadow-sm p-6 border-l-4" style={{ borderLeftColor: color }}>
         <div className="flex items-center justify-between">
-          <div>
+          <div className="flex-1">
             <p className="text-sm font-medium text-gray-500">{title}</p>
             <p className="text-3xl font-bold mt-2" style={{ color }}>{value}</p>
+            {subtitle && (
+              <p className="text-xs text-gray-500 mt-2">{subtitle}</p>
+            )}
           </div>
           <div className="text-4xl opacity-20" style={{ color }}>{icon}</div>
         </div>
@@ -127,11 +132,11 @@ function OwnerDashboard() {
 
             <div className="bg-blue-50 p-4 rounded-lg mb-6">
               <p className="text-sm text-blue-800">
-                <span className="font-semibold">Current Balance:</span> ₹{dashboardData?.kpis?.total_cost_left || 0}
+                <span className="font-semibold">Current Balance:</span> ₹{dashboardData?.kpis?.payment_info?.total_cost_left || 0}
               </p>
               {rechargeAmount && parseFloat(rechargeAmount) > 0 && (
                 <p className="text-sm text-blue-800 mt-2">
-                  <span className="font-semibold">After Recharge:</span> ₹{(dashboardData?.kpis?.total_cost_left || 0) + parseFloat(rechargeAmount)}
+                  <span className="font-semibold">After Recharge:</span> ₹{(dashboardData?.kpis?.payment_info?.total_cost_left || 0) + parseFloat(rechargeAmount)}
                 </p>
               )}
             </div>
@@ -186,48 +191,127 @@ function OwnerDashboard() {
 
   const renderDashboardContent = () => {
     const kpis = dashboardData?.kpis || {}
+    const paymentInfo = kpis.payment_info || {}
+    const mainKpis = kpis.main_kpis || {}
+    const ownerInfo = kpis.owner_info || {}
 
     return (
-      <div className="flex min-h-screen bg-gray-50">
-        <aside className="w-64 bg-white shadow-lg">
-          <div className="p-6">
-            <h2 className="text-xl font-bold text-gray-800 mb-6">Owner Panel</h2>
-            <button 
-              onClick={() => setShowPaymentModal(true)}
-              className="w-full bg-blue-600 text-white px-4 py-3 rounded-lg hover:bg-blue-700 transition-colors font-semibold"
-            >
-              Recharge Credits
-            </button>
+      <div className="min-h-screen bg-gray-50">
+        <header className="bg-white shadow-sm border-b px-6 py-3 flex justify-between items-center">
+          <div className="flex items-center">
+            <img src={Logo} alt="Company Logo" className="h-8" style={{ filter: 'brightness(0)' }} />
           </div>
-        </aside>
-
-        <main className="flex-1">
-          <header className="bg-white shadow-sm border-b">
-            <div className="px-8 py-4">
-              <h1 className="text-2xl font-bold text-gray-900">Owner Dashboard</h1>
+          <div className="flex items-center gap-6 text-sm">
+            <div className="text-right">
+              <span className="text-gray-500">Owner: </span>
+              <span className="font-semibold text-gray-900">{ownerInfo.name || 'N/A'}</span>
             </div>
-          </header>
-
-          <div className="p-8">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-              {renderKpiCard(<CurrencyCircleDollar size={40} weight="duotone" />, 'Total Cost Left', `₹${kpis.total_cost_left || 0}`, '#10b981')}
-              {renderKpiCard(<CurrencyCircleDollar size={40} weight="duotone" />, 'Total Cost Given', `₹${kpis.total_cost_given || 0}`, '#3b82f6')}
-              {renderKpiCard(<Users size={40} weight="duotone" />, 'Total Leads', kpis.total_leads || 0, '#8b5cf6')}
-              {renderKpiCard(<Eye size={40} weight="duotone" />, 'Total Views', kpis.total_views || 0, '#f59e0b')}
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-              {renderKpiCard(<CalendarBlank size={40} weight="duotone" />, 'Leads Last 7 Days', kpis.total_leads_last_7_days || 0, '#ef4444')}
-              {renderKpiCard(<CalendarBlank size={40} weight="duotone" />, 'Leads Last Month', kpis.total_leads_last_month || 0, '#06b6d4')}
-              {renderKpiCard(<CalendarBlank size={40} weight="duotone" />, 'Leads Last Year', kpis.total_leads_last_year || 0, '#ec4899')}
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {renderLineChart()}
-              {renderBarChart()}
+            <div className="text-right">
+              <span className="text-gray-500">ID: </span>
+              <span className="font-semibold text-gray-700">{ownerInfo.farmhouse_id || 'N/A'}</span>
             </div>
           </div>
-        </main>
+        </header>
+
+        <div className="flex">
+          <aside className="w-64 bg-white shadow-lg min-h-[calc(100vh-56px)]">
+            <div className="p-6">
+              <nav className="space-y-2">
+                <button
+                  onClick={() => setActiveTab('dashboard')}
+                  className={`w-full text-left px-4 py-3 rounded-lg font-semibold transition-colors ${
+                    activeTab === 'dashboard' 
+                      ? 'bg-blue-600 text-white' 
+                      : 'text-gray-700 hover:bg-gray-100'
+                  }`}
+                >
+                  Dashboard
+                </button>
+                
+                <button 
+                  onClick={() => setShowPaymentModal(true)}
+                  className="w-full text-left px-4 py-3 rounded-lg font-semibold text-gray-700 hover:bg-gray-100 transition-colors"
+                >
+                  Recharge Credits
+                </button>
+                
+                <button
+                  onClick={() => setActiveTab('settings')}
+                  className={`w-full text-left px-4 py-3 rounded-lg font-semibold transition-colors ${
+                    activeTab === 'settings' 
+                      ? 'bg-blue-600 text-white' 
+                      : 'text-gray-700 hover:bg-gray-100'
+                  }`}
+                >
+                  Settings
+                </button>
+              </nav>
+            </div>
+          </aside>
+
+          <main className="flex-1">
+            {activeTab === 'dashboard' && (
+              <div className="p-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+                  {renderKpiCard(
+                    <CurrencyCircleDollar size={40} weight="duotone" />, 
+                    'Total Money Spend', 
+                    `₹${mainKpis.total_spend_money || 0}`, 
+                    '#ef4444'
+                  )}
+                  {renderKpiCard(
+                    <CalendarBlank size={40} weight="duotone" />, 
+                    'This Month Leads', 
+                    mainKpis.this_month_leads || 0, 
+                    '#8b5cf6',
+                    `Last Month: ${mainKpis.last_month_leads || 0}`
+                  )}
+                  {renderKpiCard(
+                    <Eye size={40} weight="duotone" />, 
+                    'This Month Views', 
+                    mainKpis.this_month_views || 0, 
+                    '#f59e0b',
+                    `Last Month: ${mainKpis.last_month_views || 0}`
+                  )}
+                  {renderKpiCard(
+                    <Users size={40} weight="duotone" />, 
+                    'Overall Total Leads', 
+                    mainKpis.total_leads_overall || 0, 
+                    '#10b981'
+                  )}
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                  {renderKpiCard(
+                    <CurrencyCircleDollar size={40} weight="duotone" />, 
+                    'Total Cost Given', 
+                    `₹${paymentInfo.total_cost_given || 0}`, 
+                    '#3b82f6'
+                  )}
+                  {renderKpiCard(
+                    <CurrencyCircleDollar size={40} weight="duotone" />, 
+                    'Total Cost Left', 
+                    `₹${paymentInfo.total_cost_left || 0}`, 
+                    '#10b981'
+                  )}
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  {renderLineChart()}
+                  {renderBarChart()}
+                </div>
+              </div>
+            )}
+
+            {activeTab === 'settings' && (
+              <div className="p-8">
+                <div className="bg-white rounded-lg shadow-sm p-8 text-center">
+                  <p className="text-gray-600">Settings page - Coming soon!</p>
+                </div>
+              </div>
+            )}
+          </main>
+        </div>
       </div>
     )
   }
