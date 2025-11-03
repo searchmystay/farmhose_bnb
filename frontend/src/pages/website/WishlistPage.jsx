@@ -147,7 +147,7 @@ function WishlistPage() {
   const [showVisitorPopup, setShowVisitorPopup] = useState(false)
 
   const handlePropertyClick = (propertyId) => {
-    navigate(`/property-detail/${propertyId}`)
+    navigate(`/property/${propertyId}`)
   }
 
   const handleLoginClick = () => {
