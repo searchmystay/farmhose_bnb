@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Helmet } from 'react-helmet-async'
-import { useUserWishlist } from '../../hooks/usePropertyData'
+import { useUserWishlist, useLeadRegistration } from '../../hooks/usePropertyData'
 import Footer from '../../components/Footer'
+import VisitorLoginPopup from '../../components/VisitorLoginPopup'
 
 const SearchNavbar = () => {
   const navigate = useNavigate()
@@ -116,7 +117,7 @@ const ErrorState = () => (
 )
 
 const EmptyState = ({ title, description }) => (
-  <div className="flex flex-col items-center justify-center py-16">
+  <div className="flex flex-col items-center justify-center py-6">
     <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
       <svg className="w-8 h-8 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
@@ -128,7 +129,7 @@ const EmptyState = ({ title, description }) => (
 )
 
 const PropertiesGrid = ({ properties, onPropertyClick }) => (
-  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 justify-items-center">
+  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 mx-2 justify-items-center">
     {properties.map(property => (
       <FarmhouseCard 
         key={property._id} 
@@ -142,24 +143,72 @@ const PropertiesGrid = ({ properties, onPropertyClick }) => (
 function WishlistPage() {
   const navigate = useNavigate()
   const { wishlistProperties, loading, error, userEmail } = useUserWishlist()
+  const { handleLeadInfo } = useLeadRegistration()
+  const [showVisitorPopup, setShowVisitorPopup] = useState(false)
 
   const handlePropertyClick = (propertyId) => {
     navigate(`/property-detail/${propertyId}`)
   }
 
+  const handleLoginClick = () => {
+    setShowVisitorPopup(true)
+  }
+
+  const handlePopupClose = () => {
+    setShowVisitorPopup(false)
+  }
+
+  const handleVisitorSubmit = async (visitorData) => {
+    try {
+      const result = await handleLeadInfo(visitorData)
+      
+      if (result.success) {
+        setShowVisitorPopup(false)
+        window.location.reload()
+      }
+    } catch (error) {
+      console.error('Registration failed:', error.message)
+    }
+  }
+
 
   if (!userEmail) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-3xl font-bold text-gray-800 mb-4">
-            Please Login
-          </h1>
-          <p className="text-gray-600">
-            You need to login to view your wishlist.
-          </p>
+      <>
+        <Helmet>
+          <title>My Wishlist | Find Your Perfect Stay</title>
+          <meta name="description" content="View your saved properties and favorite farmhouse listings" />
+        </Helmet>
+
+        <div className="min-h-screen bg-white flex flex-col">
+          <SearchNavbar />
+
+          <section className="bg-gray-50 py-6 md:py-12 flex-grow flex items-center justify-center">
+            <div className="container mx-auto px-4 text-center">
+              <h1 className="text-xl md:text-4xl font-bold text-gray-900 mb-3">
+                Please Login
+              </h1>
+              <p className="text-sm md:text-lg text-gray-600 mb-6">
+                You need to login to view your wishlist.
+              </p>
+              <button
+                onClick={handleLoginClick}
+                className="bg-gray-900 hover:bg-gray-800 text-white px-6 py-3 rounded-lg font-medium transition-colors"
+              >
+                Login Now
+              </button>
+            </div>
+          </section>
+
+          <Footer />
         </div>
-      </div>
+        
+        <VisitorLoginPopup 
+          isOpen={showVisitorPopup}
+          onClose={handlePopupClose}
+          onSubmit={handleVisitorSubmit}
+        />
+      </>
     )
   }
 
@@ -168,14 +217,14 @@ function WishlistPage() {
     if (error) return <ErrorState />
     if (wishlistProperties.length === 0) {
       return (
-        <div className="text-center py-12">
+        <div className="text-center py-4">
           <EmptyState 
             title="Your wishlist is empty"
             description="Start exploring properties and add your favorites here!"
           />
           <button
-            onClick={() => navigate('/properties')}
-            className="mt-6 bg-gray-900 hover:bg-gray-800 text-white px-6 py-3 rounded-lg font-medium transition-colors"
+            onClick={() => navigate('/farmhouse')}
+            className="mt-4 bg-gray-900 hover:bg-gray-800 text-white px-6 py-3 rounded-lg font-medium transition-colors"
           >
             Browse Properties
           </button>
@@ -206,7 +255,7 @@ function WishlistPage() {
           </div>
         </section>
 
-        <section className="py-6 md:py-12 bg-gray-50 flex-grow">
+        <section className="py-4 md:py-8 bg-gray-50 flex-grow">
           <div className="container mx-auto px-4">
             {renderWishlistContent()}
           </div>
@@ -214,6 +263,12 @@ function WishlistPage() {
 
         <Footer />
       </div>
+      
+      <VisitorLoginPopup 
+        isOpen={showVisitorPopup}
+        onClose={handlePopupClose}
+        onSubmit={handleVisitorSubmit}
+      />
     </>
   )
 }
