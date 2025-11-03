@@ -7,7 +7,7 @@ import { toast } from 'sonner'
 import useOwnerDashboard from '../../hooks/owner/useOwnerDashboard'
 import useChartData from '../../hooks/owner/useChartData'
 import useRazorpay from '../../hooks/owner/useRazorpay'
-import Logo from '/search_my_stay_logo.svg'
+import Logo from '../../assets/icons/logo.svg'
 
 function OwnerDashboard() {
   const { farmhouseId } = useParams()

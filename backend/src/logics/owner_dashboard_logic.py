@@ -41,6 +41,13 @@ def get_total_spend_money(farmhouse_id):
 
 
 @handle_exceptions
+def get_this_month_money_spend(farmhouse_id):
+    this_month_leads = get_this_month_leads(farmhouse_id)
+    this_month_money_spend = this_month_leads * 40
+    return this_month_money_spend
+
+
+@handle_exceptions
 def generate_custom_farmhouse_id(mongodb_id):
     short_id = str(mongodb_id)[-6:].upper()
     custom_id = f"FH-{short_id}"
@@ -49,31 +56,43 @@ def generate_custom_farmhouse_id(mongodb_id):
 
 @handle_exceptions
 def get_dashboard_kpis(farmhouse_id):
-    total_cost_left = get_farmhouse_credit_balance(farmhouse_id)
-    total_cost_given = get_total_cost_given(farmhouse_id)
-    total_spend_money = get_total_spend_money(farmhouse_id)
-    total_leads_overall = get_total_contacts(farmhouse_id)
+    this_month_money_spend = get_this_month_money_spend(farmhouse_id)
     this_month_leads = get_this_month_leads(farmhouse_id)
     last_month_leads = get_last_month_leads(farmhouse_id)
     this_month_views = get_this_month_views(farmhouse_id)
     last_month_views = get_last_month_views(farmhouse_id)
+    leads_last_7_days = get_contacts_last_7_days(farmhouse_id)
+    
+    total_money_spent = get_total_spend_money(farmhouse_id)
+    total_leads = get_total_contacts(farmhouse_id)
+    total_views = get_total_visits(farmhouse_id)
+    total_rating = 0
+    
+    total_cost_given = get_total_cost_given(farmhouse_id)
+    total_cost_left = get_farmhouse_credit_balance(farmhouse_id)
     
     farmhouse_doc = db_find_one("farmhouses", {"_id": ObjectId(farmhouse_id)})
     owner_name = farmhouse_doc.get("owner_details", {}).get("name", "N/A") if farmhouse_doc else "N/A"
     custom_farmhouse_id = generate_custom_farmhouse_id(farmhouse_id)
     
     kpis_data = {
-        "payment_info": {
-            "total_cost_given": total_cost_given,
-            "total_cost_left": total_cost_left
-        },
-        "main_kpis": {
-            "total_spend_money": total_spend_money,
-            "total_leads_overall": total_leads_overall,
+        "row1_kpis": {
+            "this_month_money_spend": this_month_money_spend,
             "this_month_leads": this_month_leads,
             "last_month_leads": last_month_leads,
             "this_month_views": this_month_views,
-            "last_month_views": last_month_views
+            "last_month_views": last_month_views,
+            "leads_last_7_days": leads_last_7_days
+        },
+        "row2_kpis": {
+            "total_money_spent": total_money_spent,
+            "total_leads": total_leads,
+            "total_views": total_views,
+            "total_rating": total_rating
+        },
+        "payment_kpis": {
+            "total_cost_given": total_cost_given,
+            "total_cost_left": total_cost_left
         },
         "owner_info": {
             "name": owner_name,
