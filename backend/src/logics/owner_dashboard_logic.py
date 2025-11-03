@@ -35,9 +35,8 @@ def get_total_cost_given(farmhouse_id):
 
 @handle_exceptions
 def get_total_spend_money(farmhouse_id):
-    total_cost_given = get_total_cost_given(farmhouse_id)
-    total_cost_left = get_farmhouse_credit_balance(farmhouse_id)
-    total_spend_money = total_cost_given - total_cost_left
+    total_leads = get_total_contacts(farmhouse_id)
+    total_spend_money = total_leads * 40
     return total_spend_money
 
 
