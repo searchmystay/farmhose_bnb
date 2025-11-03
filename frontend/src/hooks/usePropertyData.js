@@ -163,13 +163,25 @@ export const usePropertyDetail = (propertyId) => {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
 
+  const getLeadEmail = () => {
+    try {
+      const leadData = sessionStorage.getItem('leadInfo')
+      const parsedData = leadData ? JSON.parse(leadData) : null
+      return parsedData?.email || null
+    } catch (err) {
+      return null
+    }
+  }
+
   const loadPropertyDetail = async () => {
     if (!propertyId) return
     
     try {
       setLoading(true)
       setError(null)
-      const response = await fetchPropertyDetail(propertyId)
+      
+      const leadEmail = getLeadEmail()
+      const response = await fetchPropertyDetail(propertyId, leadEmail)
       setProperty(response.backend_data)
     } catch (err) {
       const errorMessage = err.message || 'Failed to fetch property details'
