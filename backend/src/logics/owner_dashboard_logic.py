@@ -1,6 +1,6 @@
-from src.database.db_owner_analysis_operations import get_total_visits, get_total_contacts, get_contacts_last_7_days, get_contacts_last_month, get_contacts_last_year, get_daily_leads_last_7_days, get_daily_views_last_7_days
+from src.database.db_owner_analysis_operations import get_total_visits, get_total_contacts, get_contacts_last_7_days, get_contacts_last_month, get_contacts_last_year, get_daily_leads_last_7_days, get_daily_views_last_7_days, get_this_month_leads, get_last_month_leads, get_this_month_views, get_last_month_views
 from src.database.db_payment_operations import get_farmhouse_credit_balance
-from src.database.db_common_operations import db_find_many, db_aggregate
+from src.database.db_common_operations import db_find_many, db_aggregate, db_find_one
 from src.utils.exception_handler import handle_exceptions, AppException
 from bson import ObjectId
 from datetime import datetime, timedelta
@@ -34,23 +34,52 @@ def get_total_cost_given(farmhouse_id):
 
 
 @handle_exceptions
+def get_total_spend_money(farmhouse_id):
+    total_cost_given = get_total_cost_given(farmhouse_id)
+    total_cost_left = get_farmhouse_credit_balance(farmhouse_id)
+    total_spend_money = total_cost_given - total_cost_left
+    return total_spend_money
+
+
+@handle_exceptions
+def generate_custom_farmhouse_id(mongodb_id):
+    short_id = str(mongodb_id)[-6:].upper()
+    custom_id = f"FH-{short_id}"
+    return custom_id
+
+
+@handle_exceptions
 def get_dashboard_kpis(farmhouse_id):
     total_cost_left = get_farmhouse_credit_balance(farmhouse_id)
     total_cost_given = get_total_cost_given(farmhouse_id)
-    total_leads = get_total_contacts(farmhouse_id)
-    total_leads_last_7_days = get_contacts_last_7_days(farmhouse_id)
-    total_leads_last_month = get_contacts_last_month(farmhouse_id)
-    total_leads_last_year = get_contacts_last_year(farmhouse_id)
-    total_views = get_total_visits(farmhouse_id)
+    total_spend_money = get_total_spend_money(farmhouse_id)
+    total_leads_overall = get_total_contacts(farmhouse_id)
+    this_month_leads = get_this_month_leads(farmhouse_id)
+    last_month_leads = get_last_month_leads(farmhouse_id)
+    this_month_views = get_this_month_views(farmhouse_id)
+    last_month_views = get_last_month_views(farmhouse_id)
+    
+    farmhouse_doc = db_find_one("farmhouses", {"_id": ObjectId(farmhouse_id)})
+    owner_name = farmhouse_doc.get("owner_details", {}).get("name", "N/A") if farmhouse_doc else "N/A"
+    custom_farmhouse_id = generate_custom_farmhouse_id(farmhouse_id)
     
     kpis_data = {
-        "total_cost_left": total_cost_left,
-        "total_cost_given": total_cost_given,
-        "total_leads": total_leads,
-        "total_leads_last_7_days": total_leads_last_7_days,
-        "total_leads_last_month": total_leads_last_month,
-        "total_leads_last_year": total_leads_last_year,
-        "total_views": total_views
+        "payment_info": {
+            "total_cost_given": total_cost_given,
+            "total_cost_left": total_cost_left
+        },
+        "main_kpis": {
+            "total_spend_money": total_spend_money,
+            "total_leads_overall": total_leads_overall,
+            "this_month_leads": this_month_leads,
+            "last_month_leads": last_month_leads,
+            "this_month_views": this_month_views,
+            "last_month_views": last_month_views
+        },
+        "owner_info": {
+            "name": owner_name,
+            "farmhouse_id": custom_farmhouse_id
+        }
     }
     
     return kpis_data

@@ -170,3 +170,79 @@ def get_daily_views_last_7_days(farmhouse_id):
         daily_data.append(daily_dict.get(date_str, 0))
     
     return daily_data
+
+
+@handle_exceptions
+def get_this_month_leads(farmhouse_id):
+    now = datetime.utcnow()
+    month_start = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+    month_start_str = month_start.strftime("%Y-%m-%d")
+    
+    collection = db["owner_analysis"]
+    filter_dict = {"farmhouse_id": ObjectId(farmhouse_id)}
+    doc = collection.find_one(filter_dict)
+    
+    if not doc or "daily" not in doc:
+        return 0
+    
+    total = sum(d.get("leads", 0) for d in doc.get("daily", []) if d.get("date", "") >= month_start_str)
+    return total
+
+
+@handle_exceptions
+def get_last_month_leads(farmhouse_id):
+    now = datetime.utcnow()
+    last_month_start = (now.replace(day=1) - timedelta(days=1)).replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+    last_month_end = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0) - timedelta(microseconds=1)
+    
+    last_month_start_str = last_month_start.strftime("%Y-%m-%d")
+    last_month_end_str = last_month_end.strftime("%Y-%m-%d")
+    
+    collection = db["owner_analysis"]
+    filter_dict = {"farmhouse_id": ObjectId(farmhouse_id)}
+    doc = collection.find_one(filter_dict)
+    
+    if not doc or "daily" not in doc:
+        return 0
+    
+    total = sum(d.get("leads", 0) for d in doc.get("daily", []) 
+                if last_month_start_str <= d.get("date", "") <= last_month_end_str)
+    return total
+
+
+@handle_exceptions
+def get_this_month_views(farmhouse_id):
+    now = datetime.utcnow()
+    month_start = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+    month_start_str = month_start.strftime("%Y-%m-%d")
+    
+    collection = db["owner_analysis"]
+    filter_dict = {"farmhouse_id": ObjectId(farmhouse_id)}
+    doc = collection.find_one(filter_dict)
+    
+    if not doc or "daily" not in doc:
+        return 0
+    
+    total = sum(d.get("views", 0) for d in doc.get("daily", []) if d.get("date", "") >= month_start_str)
+    return total
+
+
+@handle_exceptions
+def get_last_month_views(farmhouse_id):
+    now = datetime.utcnow()
+    last_month_start = (now.replace(day=1) - timedelta(days=1)).replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+    last_month_end = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0) - timedelta(microseconds=1)
+    
+    last_month_start_str = last_month_start.strftime("%Y-%m-%d")
+    last_month_end_str = last_month_end.strftime("%Y-%m-%d")
+    
+    collection = db["owner_analysis"]
+    filter_dict = {"farmhouse_id": ObjectId(farmhouse_id)}
+    doc = collection.find_one(filter_dict)
+    
+    if not doc or "daily" not in doc:
+        return 0
+    
+    total = sum(d.get("views", 0) for d in doc.get("daily", []) 
+                if last_month_start_str <= d.get("date", "") <= last_month_end_str)
+    return total
