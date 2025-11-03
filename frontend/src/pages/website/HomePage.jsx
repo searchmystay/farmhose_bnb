@@ -2,11 +2,12 @@ import { Helmet } from 'react-helmet-async'
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Footer from '../../components/Footer'
-import { useTopProperties } from '../../hooks/usePropertyData'
+import { useTopProperties, useLeadRegistration } from '../../hooks/usePropertyData'
+import VisitorLoginPopup from '../../components/VisitorLoginPopup'
 
 
 // Component for full-screen hero with scrolling background
-function HeroSection() {
+function HeroSection({ onWishlistClick }) {
   const navigate = useNavigate()
   
   const backgroundImages = [
@@ -37,8 +38,29 @@ function HeroSection() {
         </div>
       </div>
 
-      <div className="absolute top-8 left-8 z-20">
-        <h2 className="text-2xl md:text-3xl font-bold text-white">SearchMyStay</h2>
+      <div className="absolute top-3 left-3 md:top-8 md:left-8 z-20">
+        <img 
+          src="/search_my_stay_logo.svg" 
+          alt="Search My Stay" 
+          className="h-6 md:h-12 w-auto"
+        />
+      </div>
+
+      <div className="absolute top-3 right-3 md:top-8 md:right-8 z-20">
+        <div className="flex gap-1 md:gap-4">
+          <button 
+            onClick={() => navigate('/register-property')}
+            className="bg-white/10 backdrop-blur text-white border border-white/30 px-2 py-1.5 md:px-6 md:py-3 rounded-full text-xs md:text-base font-medium hover:bg-white/20 transition-all duration-200"
+          >
+            Register
+          </button>
+          <button 
+            onClick={onWishlistClick}
+            className="bg-white/10 backdrop-blur text-white border border-white/30 px-2 py-1.5 md:px-6 md:py-3 rounded-full text-xs md:text-base font-medium hover:bg-white/20 transition-all duration-200"
+          >
+            Wishlist
+          </button>
+        </div>
       </div>
 
       <div className="relative z-10 h-full flex flex-col items-center justify-center text-center px-6 max-w-4xl mx-auto">
@@ -51,26 +73,13 @@ function HeroSection() {
         <p className="text-base md:text-lg text-white/80 mb-12 max-w-xl">
           Escape to serene locations and create unforgettable memories
         </p>
-        <div className="flex gap-4 mb-12">
+        <div className="flex justify-center">
           <button 
-            onClick={() => navigate('/farmhouse')}
+            onClick={() => {}}
             className="bg-white text-gray-900 px-10 py-4 rounded-full text-lg font-medium hover:bg-gray-100 transition-all duration-200"
           >
-            Farmhouse
+            Search Your Stay
           </button>
-          <button 
-            onClick={() => navigate('/bnb')}
-            className="bg-gray-900/50 backdrop-blur text-white border border-white/30 px-10 py-4 rounded-full text-lg font-medium hover:bg-gray-900/70 transition-all duration-200"
-          >
-            BnB
-          </button>
-        </div>
-        <div className="w-full max-w-lg">
-          <input 
-            type="text" 
-            placeholder="Search your stay..." 
-            className="w-full px-6 py-4 rounded-full text-white placeholder-white/70 bg-white/10 backdrop-blur border border-white/30 text-lg focus:ring-2 focus:ring-white/50 focus:outline-none focus:bg-white/20 transition-all duration-200"
-          />
         </div>
       </div>
     </section>
@@ -150,7 +159,8 @@ function FarmhouseCard({ property }) {
 }
 
 // Component for infinite auto-carousel farmhouse section
-function FarmhouseCarousel({ title, properties, loading, error }) {
+function FarmhouseCarousel({ title, properties, loading, error, navigateTo }) {
+  const navigate = useNavigate()
   const [currentIndex, setCurrentIndex] = useState(0)
   const [isTransitioning, setIsTransitioning] = useState(true)
 
@@ -186,7 +196,23 @@ function FarmhouseCarousel({ title, properties, loading, error }) {
   return (
     <section className="py-6 bg-gray-50">
       <div className="container mx-auto px-4">
-        <h2 className="text-2xl font-bold text-gray-900 mb-8">{title}</h2>
+        <h2 
+          onClick={() => navigateTo && navigate(navigateTo)}
+          className={`text-xl md:text-2xl font-bold text-gray-900 mb-6 md:mb-8 ${navigateTo ? 'cursor-pointer group' : ''}`}
+        >
+          <span>
+            {title}
+            {navigateTo && (
+              <svg 
+                className="inline-block w-4 h-4 md:w-5 md:h-5 ml-1 align-middle transition-transform duration-200 group-hover:translate-x-0.5" 
+                fill="currentColor" 
+                viewBox="0 0 24 24"
+              >
+                <path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z" />
+              </svg>
+            )}
+          </span>
+        </h2>
         
         {loading ? (
           <div className="flex justify-center items-center py-16">
@@ -239,36 +265,6 @@ function FarmhouseCarousel({ title, properties, loading, error }) {
   )
 }
 
-// Component for property registration call-to-action section
-function PropertyRegistrationSection() {
-  const navigate = useNavigate()
-
-  return (
-    <section className="py-16 bg-white">
-      <div className="container mx-auto px-4">
-        <div className="max-w-5xl mx-auto text-center">
-          <h2 className="text-4xl md:text-5xl font-light text-gray-900 mb-6 tracking-tight">
-            List Your Property
-          </h2>
-          <p className="text-xl text-gray-600 mb-4 max-w-3xl mx-auto leading-relaxed">
-            Share your beautiful farmhouse or BnB with travelers seeking authentic experiences
-          </p>
-          <p className="text-lg text-gray-500 mb-12 max-w-2xl mx-auto">
-            Join our trusted community of property owners
-          </p>
-          
-          
-          <button
-            onClick={() => navigate('/register-property')}
-            className="bg-green-600 text-white px-12 py-5 rounded-full text-xl font-medium hover:bg-green-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
-          >
-            Register Your Property
-          </button>
-        </div>
-      </div>
-    </section>
-  )
-}
 
 // Component for testimonials section
 function TestimonialsSection() {
@@ -341,37 +337,47 @@ function TestimonialsSection() {
           ))}
         </div>
         
-        <div className="text-center mt-8">
-          <div className="flex items-center justify-center space-x-6 text-sm text-gray-600">
-            <div className="flex items-center">
-              <svg className="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-              </svg>
-              100% Verified Properties
-            </div>
-            <div className="flex items-center">
-              <svg className="w-5 h-5 text-blue-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-              </svg>
-              Fraud-Free Platform
-            </div>
-            <div className="flex items-center">
-              <svg className="w-5 h-5 text-purple-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              Quality Assured
-            </div>
-          </div>
-        </div>
       </div>
     </section>
   )
 }
 
 
-// Main homepage component that renders all sections
 function HomePage() {
   const { topFarmhouses, topBnbs, loading, error } = useTopProperties()
+  const { handleLeadInfo, getLeadInfo } = useLeadRegistration()
+  const [showVisitorPopup, setShowVisitorPopup] = useState(false)
+
+  const handleWishlistClick = () => {
+    const visitorInfo = getLeadInfo()
+    const hasEmail = visitorInfo?.email
+    
+    if (hasEmail) {
+      navigate('/wishlist')
+    } else {
+      setShowVisitorPopup(true)
+    }
+  }
+
+  const handleVisitorSubmit = async (visitorData) => {
+    try {
+      const result = await handleLeadInfo(visitorData)
+      
+      if (result.success) {
+        console.log('Visitor registered successfully:', result.data)
+        setShowVisitorPopup(false)
+        navigate('/wishlist')
+      } else {
+        console.error('Registration failed:', result.error)
+      }
+    } catch (error) {
+      console.error('Error handling visitor submission:', error)
+    }
+  }
+
+  const handlePopupClose = () => {
+    setShowVisitorPopup(false)
+  }
 
   return (
     <>
@@ -385,14 +391,15 @@ function HomePage() {
       </Helmet>
 
       <div className="min-h-screen bg-white">
-        <HeroSection />
+        <HeroSection onWishlistClick={handleWishlistClick} />
         
-        <div className="pt-8 bg-gray-50">
+        <div className="pt-1 md:pt-2 bg-gray-50">
           <FarmhouseCarousel 
             title="Popular Farmhouses in Jaipur" 
             properties={topFarmhouses} 
             loading={loading} 
             error={error} 
+            navigateTo="/farmhouse"
           />
         </div>
         
@@ -401,12 +408,18 @@ function HomePage() {
           properties={topBnbs} 
           loading={loading} 
           error={error} 
+          navigateTo="/bnb"
         />
         
-        <PropertyRegistrationSection />
         <TestimonialsSection />
         <Footer />
       </div>
+
+      <VisitorLoginPopup 
+        isOpen={showVisitorPopup}
+        onClose={handlePopupClose}
+        onSubmit={handleVisitorSubmit}
+      />
       
       <style jsx>{`
         @keyframes scroll-slow {

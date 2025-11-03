@@ -416,6 +416,57 @@ def get_farmhouse_schema() -> Dict:
                     }
                 }
             },
+            "reviews": {
+                "bsonType": "array",
+                "description": "Array of reviews for the farmhouse",
+                "items": {
+                    "bsonType": "object",
+                    "required": ["reviewer_name", "review_comment"],
+                    "properties": {
+                        "reviewer_name": {
+                            "bsonType": "string",
+                            "description": "Name of the person who reviewed the farmhouse",
+                            "minLength": 2,
+                            "maxLength": 100
+                        },
+                        "review_comment": {
+                            "bsonType": "string",
+                            "description": "Review comment or feedback about the farmhouse",
+                            "minLength": 10,
+                        },
+                        "rating": {
+                            "bsonType": "number",
+                            "description": "Rating given by the reviewer (1-5 stars)",
+                            "minimum": 0,
+                            "maximum": 5
+                        }
+                    }
+                }
+            },
+            "owner_details": {
+                "bsonType": "object",
+                "description": "Details about the farmhouse owner",
+                "properties": {
+                    "owner_photo": {
+                        "bsonType": "string",
+                        "description": "Photo URL of the farmhouse owner"
+                    },
+                    "owner_description": {
+                        "bsonType": "string",
+                        "description": "Description about the farmhouse owner",
+                    }
+                }
+            },
+            "opening_time": {
+                "bsonType": "string",
+                "description": "Opening time of the farmhouse (12-hour format with AM/PM)",
+                "pattern": "^(1[0-2]|0?[1-9]):[0-5][0-9] (AM|PM)$"
+            },
+            "closing_time": {
+                "bsonType": "string",
+                "description": "Closing time of the farmhouse (12-hour format with AM/PM)",
+                "pattern": "^(1[0-2]|0?[1-9]):[0-5][0-9] (AM|PM)$"
+            },
             "credit_balance": {
                 "bsonType": "number",
                 "description": "Available credit balance for lead charges (40 rupees per lead)",
@@ -509,6 +560,38 @@ def get_owner_analysis_schema() -> Dict:
             "created_at": {
                 "bsonType": "date",
                 "description": "Timestamp when interaction occurred"
+            }
+        }
+    }
+
+
+def get_lead_schema() -> Dict:
+    return {
+        "bsonType": "object",
+        "required": ["email"],
+        "properties": {
+            "_id": {
+                "bsonType": "objectId",
+                "description": "Unique identifier for the lead"
+            },
+            "name": {
+                "bsonType": "string",
+                "description": "Name of the lead"
+            },
+            "email": {
+                "bsonType": "string",
+                "description": "Email address of the lead"
+            },
+            "mobile_number": {
+                "bsonType": "string",
+                "description": "Mobile number of the lead"
+            },
+            "wishlist": {
+                "bsonType": "array",
+                "description": "Array of farmhouse IDs in the user's wishlist",
+                "items": {
+                    "bsonType": "objectId"
+                }
             }
         }
     }

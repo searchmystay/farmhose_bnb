@@ -1,4 +1,4 @@
-from src.database.db_common_operations import db_find_many, db_find_one, db_insert_one, db_update_one
+from src.database.db_common_operations import db_find_many, db_find_one, db_insert_one, db_update_one, db_append_to_array, db_remove_from_array
 from src.database.db_owner_analysis_operations import record_visit, record_contact
 from src.utils.exception_handler import handle_exceptions, AppException
 from src.logics.cloudfare_bucket import upload_farmhouse_image_to_r2, upload_farmhouse_document_to_r2
@@ -97,7 +97,10 @@ def process_property_for_detail(property_data):
     images = property_data.get("images", [])
     raw_amenities_data = property_data.get("amenities", {})
     location_data = property_data.get("location", {})
-    phone_number = property_data.get("phone_number", "")
+    reviews = property_data.get("reviews", [])
+    owner_details = property_data.get("owner_details", {})
+    opening_time = property_data.get("opening_time", "")
+    closing_time = property_data.get("closing_time", "")
     
     formatted_amenities = format_amenities_for_display(raw_amenities_data)
     
@@ -108,14 +111,17 @@ def process_property_for_detail(property_data):
         "images": images,
         "amenities": formatted_amenities,
         "location": location_data,
-        "phone_number": phone_number
+        "reviews": reviews,
+        "owner_details": owner_details,
+        "opening_time": opening_time,
+        "closing_time": closing_time
     }
     
     return processed_data
 
 
 @handle_exceptions
-def extract_available_amenities(amenities_data):
+def extract_available_amenities():
     enimities = ["WiFi", "Parking", "Swimming Pool", "Kitchen", "Air Conditioning"]
     return enimities
 
@@ -126,7 +132,6 @@ def process_farmhouse_for_listing(farmhouse_data):
     name = farmhouse_data.get("name", "")
     full_description = farmhouse_data.get("description", "")
     images = farmhouse_data.get("images", [])
-    amenities_data = farmhouse_data.get("amenities", {})
     favourite = farmhouse_data.get("favourite", False)
     description_words = full_description.split()
     
@@ -135,7 +140,7 @@ def process_farmhouse_for_listing(farmhouse_data):
     else:
         truncated_description = full_description
     
-    available_amenities = extract_available_amenities(amenities_data)
+    available_amenities = extract_available_amenities()
     
     processed_data = {
         "_id": farmhouse_id,
@@ -179,7 +184,10 @@ def get_property_details(property_id):
         "images": 1,
         "amenities": 1,
         "location": 1,
-        "phone_number": 1
+        "reviews": 1,
+        "owner_details": 1,
+        "opening_time": 1,
+        "closing_time": 1
     }
     
     property_data = db_find_one("farmhouses", query_filter, projection)
@@ -478,3 +486,74 @@ def get_fav_properties():
         'top_bnb': bnb_farmhouses
     }
 
+
+@handle_exceptions
+def toggle_wishlist(email, farmhouse_id):
+    farmhouse_object_id = ObjectId(farmhouse_id)
+    existing_lead = db_find_one("leads", {"email": email})
+
+    if not existing_lead:
+        raise AppException("Email not found")
+    
+    current_wishlist = existing_lead.get("wishlist", [])
+    
+    if farmhouse_object_id in current_wishlist:
+        db_remove_from_array("leads", {"email": email}, "wishlist", farmhouse_object_id)
+        action = "removed"
+    else:
+        db_append_to_array("leads", {"email": email}, "wishlist", farmhouse_object_id)
+        action = "added"
+    
+    return action
+
+
+@handle_exceptions
+def create_lead(email, name=None, mobile_number=None):
+    existing_lead = db_find_one("leads", {"email": email})
+    
+    if existing_lead:
+        raise True
+    
+    lead_data = {
+        "email": email,
+        "wishlist": []
+    }
+    
+    if name:
+        lead_data["name"] = name
+    
+    if mobile_number:
+        lead_data["mobile_number"] = mobile_number
+    
+    db_insert_one("leads", lead_data)
+    return True
+
+
+@handle_exceptions
+def get_user_wishlist(email):
+    existing_lead = db_find_one("leads", {"email": email})
+    
+    if not existing_lead:
+        raise AppException("Email not found")
+    
+    wishlist_ids = existing_lead.get("wishlist", [])
+    
+    if not wishlist_ids:
+        return []
+    
+    query_filter = {"_id": {"$in": wishlist_ids}, "status": "active"}
+    projection = {
+        "_id": 1,
+        "name": 1,
+        "description": 1,
+        "images": 1
+    }
+    
+    properties_list = db_find_many("farmhouses", query_filter, projection)
+    
+    processed_properties = []
+    for property_data in properties_list:
+        processed_property = process_farmhouse_for_listing(property_data)
+        processed_properties.append(processed_property)
+    
+    return processed_properties

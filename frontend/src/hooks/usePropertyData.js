@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { fetchFarmhouseList, fetchBnbList, fetchTopProperties, fetchPropertyDetail, registerProperty, contactViaWhatsapp } from '../services/propertyApi'
+import { fetchFarmhouseList, fetchBnbList, fetchTopProperties, fetchPropertyDetail, registerProperty, contactViaWhatsapp, toggleWishlist, createLead, getUserWishlist } from '../services/propertyApi'
 
 export const useFarmhouseList = (shouldFetch = false) => {
   const [farmhouses, setFarmhouses] = useState([])
@@ -213,4 +213,76 @@ export const useWhatsappContact = () => {
   }
 
   return { getWhatsappLink, loading, error }
+}
+
+export const useLeadRegistration = () => {
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState(null)
+
+  const handleLeadInfo = async (leadData) => {
+    try {
+      setLoading(true)
+      setError(null)
+
+      const email = leadData.email || null
+      const name = leadData.name || null
+      const mobileNumber = leadData.mobile || null
+
+      const result = await createLead(email, name, mobileNumber)
+      
+      const leadInfoToStore = {
+        email: email,
+        name: name,
+        mobile: mobileNumber
+      }
+      
+      sessionStorage.setItem('leadInfo', JSON.stringify(leadInfoToStore))
+      
+      setLoading(false)
+      return { success: true, data: result }
+
+    } catch (err) {
+      const errorMessage = err.message || 'Failed to register lead'
+      setError(errorMessage)
+      setLoading(false)
+      return { success: false, error: errorMessage }
+    }
+  }
+
+  const getLeadInfo = () => {
+    try {
+      const leadData = sessionStorage.getItem('leadInfo')
+      const parsedData = leadData ? JSON.parse(leadData) : null
+      return parsedData
+    } catch (err) {
+      return null
+    }
+  }
+
+  return { handleLeadInfo, getLeadInfo, loading, error}
+}
+
+export const useToggleWishlist = () => {
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState(null)
+
+  const handleToggleWishlist = async (email, farmhouseId) => {
+    try {
+      setLoading(true)
+      setError(null)
+
+      const result = await toggleWishlist(email, farmhouseId)
+      
+      setLoading(false)
+      return { success: true, data: result }
+
+    } catch (err) {
+      const errorMessage = err.message || 'Failed to toggle wishlist'
+      setError(errorMessage)
+      setLoading(false)
+      return { success: false, error: errorMessage }
+    }
+  }
+
+  return {handleToggleWishlist, loading, error}
 }

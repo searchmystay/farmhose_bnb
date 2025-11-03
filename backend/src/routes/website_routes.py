@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify, request
-from src.logics.website_logic import get_approved_farmhouses, get_approved_bnbs, get_property_details, register_property, process_whatsapp_contact, get_fav_properties
+from src.logics.website_logic import get_approved_farmhouses, get_approved_bnbs, get_property_details, register_property, process_whatsapp_contact, get_fav_properties, toggle_wishlist, create_lead, get_user_wishlist
 from src.utils.exception_handler import handle_route_exceptions, AppException
 from bson import ObjectId
 import json
@@ -112,6 +112,68 @@ def get_top_properties():
     response_data = {
         "success": True,
         "backend_data": top_properties_data
+    }
+    
+    return jsonify(response_data), 200
+
+
+@website_bp.route('/toggle-wishlist', methods=['POST'])
+@handle_route_exceptions
+def toggle_wishlist_route():
+    data = request.get_json()
+    
+    email = data.get('email')
+    farmhouse_id = data.get('farmhouse_id')
+    
+    if not email or not farmhouse_id:
+        raise AppException("Email and farmhouse_id are required")
+    
+    action = toggle_wishlist(email, farmhouse_id)
+    
+    response_data = {
+        "success": True,
+        "message": f"{action} to wishlist"
+    }
+    
+    return jsonify(response_data), 200
+
+
+@website_bp.route('/create-lead', methods=['POST'])
+@handle_route_exceptions
+def create_lead_route():
+    data = request.get_json()
+    
+    email = data.get('email')
+    name = data.get('name')
+    mobile_number = data.get('mobile_number')
+    
+    if not email:
+        raise AppException("Email is required")
+    
+    create_lead(email, name, mobile_number)
+    
+    response_data = {
+        "success": True,
+        "message": "Lead created successfully"
+    }
+    
+    return jsonify(response_data), 200
+
+
+@website_bp.route('/get-wishlist', methods=['POST'])
+@handle_route_exceptions
+def get_wishlist_route():
+    data = request.get_json()
+    email = data.get('email')
+    
+    if not email:
+        raise AppException("Email is required")
+    
+    wishlist_properties = get_user_wishlist(email)
+    
+    response_data = {
+        "success": True,
+        "backend_data": wishlist_properties,
     }
     
     return jsonify(response_data), 200

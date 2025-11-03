@@ -85,3 +85,60 @@ export const contactViaWhatsapp = async (propertyId) => {
     throw new Error('Failed to get WhatsApp contact, Network error')
   }
 }
+
+export const toggleWishlist = async (email, farmhouseId) => {
+  try {
+    const response = await apiClient.post('/toggle-wishlist', {
+      email: email,
+      farmhouse_id: farmhouseId
+    })
+    const result = response.data
+    return result
+  } catch (error) {
+    if (error.response && error.response.data) {
+      const backendError = error.response.data
+      throw new Error(backendError.message || 'Failed to toggle wishlist')
+    }
+    throw new Error('Failed to toggle wishlist, Network error')
+  }
+}
+
+export const createLead = async (email, name = null, mobileNumber = null) => {
+  try {
+    const requestData = { email }
+    
+    if (name) {
+      requestData.name = name
+    }
+    
+    if (mobileNumber) {
+      requestData.mobile_number = mobileNumber
+    }
+    
+    const response = await apiClient.post('/create-lead', requestData)
+    const result = response.data
+    return result
+  } catch (error) {
+    if (error.response && error.response.data) {
+      const backendError = error.response.data
+      throw new Error(backendError.message || 'Failed to create lead')
+    }
+    throw new Error('Failed to create lead, Network error')
+  }
+}
+
+export const getUserWishlist = async (email) => {
+  try {
+    const response = await apiClient.post('/get-wishlist', {
+      email: email
+    })
+    const result = response.data
+    return result
+  } catch (error) {
+    if (error.response && error.response.data) {
+      const backendError = error.response.data
+      throw new Error(backendError.message || 'Failed to fetch wishlist')
+    }
+    throw new Error('Failed to fetch wishlist, Network error')
+  }
+}
