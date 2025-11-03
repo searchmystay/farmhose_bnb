@@ -33,11 +33,14 @@ def list_bnbs():
     return jsonify(response_data)
 
 
-@website_bp.route('/property-detail/<property_id>', methods=['GET'])
+@website_bp.route('/property-detail/<property_id>', methods=['POST'])
 @handle_route_exceptions
 def get_property_detail(property_id):
+    data = request.get_json() or {}
+    lead_email = data.get('leadEmail')
+    
     object_id = ObjectId(property_id)
-    property_data = get_property_details(object_id)
+    property_data = get_property_details(object_id, lead_email)
     
     response_data = {
         "success": True,

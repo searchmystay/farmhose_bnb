@@ -532,7 +532,7 @@ function PropertyDetailPage() {
 
   useEffect(() => {
     if (property) {
-      const wishlistStatus = property.favourite || property.in_wishlist || false
+      const wishlistStatus = property.in_wishlist || false
       setIsInWishlist(wishlistStatus)
     }
   }, [property])

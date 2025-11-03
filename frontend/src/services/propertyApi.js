@@ -43,8 +43,9 @@ export const fetchTopProperties = async () => {
   return result
 }
 
-export const fetchPropertyDetail = async (propertyId) => {
-  const response = await apiClient.get(`/property-detail/${propertyId}`)
+export const fetchPropertyDetail = async (propertyId, leadEmail = null) => {
+  const requestData = leadEmail ? { leadEmail } : {}
+  const response = await apiClient.post(`/property-detail/${propertyId}`, requestData)
   const result = response.data
   
   if (result.success === false) {

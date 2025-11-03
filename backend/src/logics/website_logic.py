@@ -175,7 +175,7 @@ def get_approved_properties_by_type(query_filter):
 
 
 @handle_exceptions
-def get_property_details(property_id):
+def get_property_details(property_id, lead_email=None):
     query_filter = {"_id": property_id, "status": "active"}
     projection = {
         "_id": 1,
@@ -199,6 +199,15 @@ def get_property_details(property_id):
     record_visit(farmhouse_id)
     
     processed_property = process_property_for_detail(property_data)
+    
+    if not lead_email:
+        processed_property["in_wishlist"] = False
+        return processed_property
+
+    existing_lead = db_find_one("leads", {"email": lead_email})
+    current_wishlist = existing_lead.get("wishlist", [])
+    in_wishlist = property_id in current_wishlist
+    processed_property["in_wishlist"] = in_wishlist
     return processed_property
 
 
