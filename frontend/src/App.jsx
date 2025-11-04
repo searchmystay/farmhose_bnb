@@ -9,6 +9,7 @@ import WishlistPage from './pages/website/WishlistPage'
 import AdminLogin from './pages/admin/AdminLogin'
 import AdminDashboard from './pages/admin/AdminDashboard'
 import OwnerDashboard from './pages/owner/OwnerDashboard'
+import ReviewSubmissionPage from './pages/website/ReviewSubmissionPage'
 
 function App() {
   return (
@@ -22,6 +23,7 @@ function App() {
             <Route path="/property/:propertyId" element={<PropertyDetailPage />} />
             <Route path="/register-property" element={<RegisterPropertyPage />} />
             <Route path="/wishlist" element={<WishlistPage />} />
+            <Route path="/reviews/:farmhouseId" element={<ReviewSubmissionPage />} />
             <Route path="/admin" element={<AdminLogin />} />
             <Route path="/admin/dashboard" element={<AdminDashboard />} />
             <Route path="/owner-dashboard/:farmhouseId" element={<OwnerDashboard />} />

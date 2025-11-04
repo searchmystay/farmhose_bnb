@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { fetchFarmhouseList, fetchBnbList, fetchTopProperties, fetchPropertyDetail, registerProperty, contactViaWhatsapp, toggleWishlist, createLead, getUserWishlist } from '../services/propertyApi'
+import { fetchFarmhouseList, fetchBnbList, fetchTopProperties, fetchPropertyDetail, registerProperty, contactViaWhatsapp, toggleWishlist, createLead, getUserWishlist, submitReview, getFarmhouseName } from '../services/propertyApi'
 
 export const useFarmhouseList = (shouldFetch = false) => {
   const [farmhouses, setFarmhouses] = useState([])
@@ -341,4 +341,68 @@ export const useUserWishlist = () => {
   }, [])
 
   return { wishlistProperties, loading, error, refetch: loadWishlist, userEmail: getLeadEmail() }
+}
+
+export const useFarmhouseName = (farmhouseId) => {
+  const [farmhouseName, setFarmhouseName] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState(null)
+
+  const loadFarmhouseName = async () => {
+    if (!farmhouseId) return
+    
+    try {
+      setLoading(true)
+      setError(null)
+      const response = await getFarmhouseName(farmhouseId)
+      const name = response.backend_data.farmhouse_name || ''
+      setFarmhouseName(name)
+    } catch (err) {
+      const errorMessage = err.message || 'Failed to fetch farmhouse name'
+      setError(errorMessage)
+      setFarmhouseName('')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    loadFarmhouseName()
+  }, [farmhouseId])
+
+  return { farmhouseName, loading, error, refetch: loadFarmhouseName }
+}
+
+export const useReviewSubmission = () => {
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState(null)
+  const [success, setSuccess] = useState(false)
+
+  const handleSubmitReview = async (farmhouseId, reviewerName, rating, reviewComment) => {
+    try {
+      setLoading(true)
+      setError(null)
+      setSuccess(false)
+
+      const result = await submitReview(farmhouseId, reviewerName, rating, reviewComment)
+      setSuccess(true)
+      return { success: true, data: result }
+
+    } catch (err) {
+      const errorMessage = err.message || 'Failed to submit review'
+      setError(errorMessage)
+      setSuccess(false)
+      return { success: false, error: errorMessage }
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const resetState = () => {
+    setLoading(false)
+    setError(null)
+    setSuccess(false)
+  }
+
+  return { handleSubmitReview, loading, error, success, resetState }
 }
