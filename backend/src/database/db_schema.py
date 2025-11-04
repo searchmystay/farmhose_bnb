@@ -3,7 +3,7 @@ from typing import Dict
 def get_farmhouse_schema() -> Dict:
     return {
         "bsonType": "object",
-        "required": ["name", "description", "type", "phone_number", "location", "credit_balance", "status", "max_people" "created_at"],
+        "required": ["name", "description", "type", "phone_number", "location", "credit_balance", "status", "max_people", "created_at", "updated_at"],
         "properties": {
             "_id": {
                 "bsonType": "objectId",

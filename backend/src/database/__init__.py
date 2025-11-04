@@ -1,6 +1,6 @@
 from pymongo import MongoClient
 from src.config import MONGODB_URI, DATABASE_NAME
-from src.database.db_schema import get_farmhouse_schema, get_payment_schema, get_owner_analysis_schema, get_lead_schema, get_pending_reviews_schema
+from src.database.db_schema import get_farmhouse_schema, get_payment_schema, get_farmhouse_analysis_schema, get_lead_schema, get_pending_reviews_schema
 from src.utils.exception_handler import AppException, handle_exceptions
 
 client = MongoClient(MONGODB_URI)
