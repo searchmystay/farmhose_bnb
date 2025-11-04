@@ -35,7 +35,8 @@ function OwnerDashboard() {
   const { initiatePayment, loading: paymentLoading } = useRazorpay(farmhouseId, handlePaymentSuccess)
 
   const handleCopyReviewLink = async () => {
-    const reviewUrl = 'https://mystate.xyz'
+    const baseUrl = window.location.origin
+    const reviewUrl = `${baseUrl}/reviews/${farmhouseId}`
     try {
       await navigator.clipboard.writeText(reviewUrl)
       setCopied(true)
