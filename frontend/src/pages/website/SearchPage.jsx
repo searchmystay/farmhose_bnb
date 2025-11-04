@@ -1,5 +1,5 @@
 import { Helmet } from 'react-helmet-async'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Footer from '../../components/Footer'
 
@@ -11,6 +11,19 @@ function SearchPage() {
     propertyType: 'both',
     numberOfPeople: ''
   })
+
+  useEffect(() => {
+    const savedSearchData = sessionStorage.getItem('searchCriteria')
+    if (savedSearchData) {
+      const parsedData = JSON.parse(savedSearchData)
+      setFormData({
+        checkIn: parsedData.checkIn || '',
+        checkOut: parsedData.checkOut || '',
+        propertyType: parsedData.propertyType || 'both',
+        numberOfPeople: parsedData.numberOfPeople || ''
+      })
+    }
+  }, [])
 
   const handleInputChange = (e) => {
     const { name, value } = e.target
