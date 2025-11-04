@@ -399,12 +399,25 @@ function OwnerDashboard() {
               <div className="p-4 sm:p-6 md:p-8 lg:p-10">
                 <div className="bg-white rounded-2xl shadow-md p-4 sm:p-6 md:p-6 lg:p-8">
                   <div className="mb-4 sm:mb-6">
-                    <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 flex items-center gap-2 sm:gap-3 mb-2">
-                      <CalendarBlank size={24} weight="duotone" className="text-blue-600 sm:hidden" />
-                      <CalendarBlank size={28} weight="duotone" className="text-blue-600 hidden sm:block md:hidden" />
-                      <CalendarBlank size={32} weight="duotone" className="text-blue-600 hidden md:block" />
-                      <span>Booking Calendar</span>
-                    </h2>
+                    <div className="flex justify-between items-start mb-2">
+                      <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 flex items-center gap-2 sm:gap-3">
+                        <CalendarBlank size={24} weight="duotone" className="text-blue-600 sm:hidden" />
+                        <CalendarBlank size={28} weight="duotone" className="text-blue-600 hidden sm:block md:hidden" />
+                        <CalendarBlank size={32} weight="duotone" className="text-blue-600 hidden md:block" />
+                        <span>Booking Calendar</span>
+                      </h2>
+                      <div className="text-right">
+                        <span className="text-sm font-semibold text-gray-700">Review Form Link: </span>
+                        <a 
+                          href="https://mystate.xyz" 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="text-sm text-blue-600 hover:text-blue-800 hover:underline"
+                        >
+                          mystate.xyz
+                        </a>
+                      </div>
+                    </div>
                     <p className="text-gray-600 text-xs sm:text-sm">Click on dates to mark them as booked. Past dates are disabled.</p>
                   </div>
 
