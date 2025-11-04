@@ -3,19 +3,26 @@ import { useParams } from 'react-router-dom'
 import { useState } from 'react'
 import { CurrencyCircleDollar, TrendUp, Eye, Users, CalendarBlank, ChartBar, House, CreditCard, Gear } from '@phosphor-icons/react'
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
+import FullCalendar from '@fullcalendar/react'
+import dayGridPlugin from '@fullcalendar/daygrid'
+import interactionPlugin from '@fullcalendar/interaction'
 import { toast } from 'sonner'
 import useOwnerDashboard from '../../hooks/owner/useOwnerDashboard'
 import useChartData from '../../hooks/owner/useChartData'
 import useRazorpay from '../../hooks/owner/useRazorpay'
+import useBookedDates from '../../hooks/owner/useBookedDates'
 import Logo from '/search_my_stay_logo.svg'
+import '../../styles/calender.css'
 
 function OwnerDashboard() {
   const { farmhouseId } = useParams()
   const { dashboardData, loading, error, refetchData } = useOwnerDashboard(farmhouseId)
   const { lineChartData, barChartData } = useChartData(dashboardData)
+  const { bookedDates, addBookedDate, removeBookedDate, loading: calendarLoading } = useBookedDates(farmhouseId)
   const [rechargeAmount, setRechargeAmount] = useState('')
   const [activeTab, setActiveTab] = useState('dashboard')
   const [sidebarExpanded, setSidebarExpanded] = useState(false)
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   const handlePaymentSuccess = () => {
     toast.success('Payment successful! Credits added to your account.')
@@ -142,32 +149,62 @@ function OwnerDashboard() {
 
     return (
       <div className="min-h-screen bg-gray-50">
-        <header className="bg-white shadow-md border-b-2 border-gray-200 px-6 py-4 flex justify-between items-center">
-          <div className="flex items-center">
-            <img src={Logo} alt="Company Logo" className="h-10" style={{ filter: 'brightness(0)' }}/>
+        <header className="bg-white shadow-md border-b-2 border-gray-200 px-4 sm:px-6 py-4 flex justify-between items-center">
+          <div className="flex items-center gap-4">
+            {/* Hamburger Menu Button - Mobile Only */}
+            <button 
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="md:hidden flex flex-col gap-1.5 p-2 hover:bg-gray-100 rounded transition-colors"
+              aria-label="Toggle menu"
+            >
+              <span className="w-6 h-0.5 bg-black block"></span>
+              <span className="w-6 h-0.5 bg-black block"></span>
+              <span className="w-6 h-0.5 bg-black block"></span>
+            </button>
+            <img src={Logo} alt="Company Logo" className="h-8 sm:h-10" style={{ filter: 'brightness(0)' }}/>
           </div>
-          <div className="flex items-center gap-8 text-sm">
+          <div className="flex items-center gap-4 sm:gap-8 text-xs sm:text-sm">
             <div className="text-right">
-              <span className="text-black font-bold text-1xl">Owner : </span>
+              <span className="text-black font-bold hidden sm:inline">Owner : </span>
               <span className="font-semibold text-gray-900">{ownerInfo.name || 'N/A'}</span>
             </div>
-            <div className="text-right">
+            <div className="text-right hidden sm:block">
               <span className="text-black font-bold">ID : </span>
               <span className="font-semibold text-black">{ownerInfo.farmhouse_id || 'N/A'}</span>
             </div>
           </div>
         </header>
 
-        <div className="flex">
+        <div className="flex relative">
+          {/* Sidebar */}
           <aside 
-            className={`bg-white shadow-xl min-h-[calc(100vh-72px)] transition-all duration-300 ${sidebarExpanded ? 'w-64' : 'w-20'}`}
+            className={`bg-white shadow-2xl min-h-screen transition-all duration-300 z-50
+              ${mobileMenuOpen ? 'fixed md:relative left-0 top-0 w-64' : 'hidden md:block'}
+              md:min-h-[calc(100vh-72px)] md:${sidebarExpanded ? 'w-64' : 'w-20'}`}
             onMouseEnter={() => setSidebarExpanded(true)}
             onMouseLeave={() => setSidebarExpanded(false)}
           >
+            {/* Close button for mobile */}
+            {mobileMenuOpen && (
+              <div className="md:hidden flex justify-between items-center p-4 border-b">
+                <span className="font-semibold text-gray-900">Menu</span>
+                <button 
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="p-2 hover:bg-gray-100 rounded"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+            )}
             <div className="p-4">
               <nav className="space-y-3">
                 <button
-                  onClick={() => setActiveTab('dashboard')}
+                  onClick={() => {
+                    setActiveTab('dashboard')
+                    setMobileMenuOpen(false)
+                  }}
                   className={`w-full flex items-center gap-4 px-4 py-3 rounded-lg font-medium transition-all ${
                     activeTab === 'dashboard' 
                       ? 'bg-blue-50 text-blue-600 shadow-sm' 
@@ -176,11 +213,14 @@ function OwnerDashboard() {
                   title="Dashboard"
                 >
                   <House size={24} weight={activeTab === 'dashboard' ? 'fill' : 'regular'} />
-                  {sidebarExpanded && <span>Dashboard</span>}
+                  <span className="md:hidden lg:inline">{mobileMenuOpen || sidebarExpanded ? 'Dashboard' : ''}</span>
                 </button>
                 
                 <button 
-                  onClick={() => setActiveTab('recharge')}
+                  onClick={() => {
+                    setActiveTab('recharge')
+                    setMobileMenuOpen(false)
+                  }}
                   className={`w-full flex items-center gap-4 px-4 py-3 rounded-lg font-medium transition-all ${
                     activeTab === 'recharge' 
                       ? 'bg-blue-50 text-blue-600 shadow-sm' 
@@ -189,11 +229,14 @@ function OwnerDashboard() {
                   title="Recharge Credits"
                 >
                   <CreditCard size={24} weight={activeTab === 'recharge' ? 'fill' : 'regular'} />
-                  {sidebarExpanded && <span>Recharge Credits</span>}
+                  <span className="md:hidden lg:inline">{mobileMenuOpen || sidebarExpanded ? 'Recharge Credits' : ''}</span>
                 </button>
                 
                 <button
-                  onClick={() => setActiveTab('settings')}
+                  onClick={() => {
+                    setActiveTab('settings')
+                    setMobileMenuOpen(false)
+                  }}
                   className={`w-full flex items-center gap-4 px-4 py-3 rounded-lg font-medium transition-all ${
                     activeTab === 'settings' 
                       ? 'bg-blue-50 text-blue-600 shadow-sm' 
@@ -202,7 +245,7 @@ function OwnerDashboard() {
                   title="Settings"
                 >
                   <Gear size={24} weight={activeTab === 'settings' ? 'fill' : 'regular'} />
-                  {sidebarExpanded && <span>Settings</span>}
+                  <span className="md:hidden lg:inline">{mobileMenuOpen || sidebarExpanded ? 'Settings' : ''}</span>
                 </button>
               </nav>
             </div>
@@ -353,10 +396,134 @@ function OwnerDashboard() {
             )}
 
             {activeTab === 'settings' && (
-              <div className="p-10">
-                <div className="bg-white rounded-2xl shadow-md p-12 text-center max-w-2xl mx-auto">
-                  <Gear size={48} weight="duotone" className="text-gray-400 mx-auto mb-4" />
-                  <p className="text-gray-600 text-lg">Settings page - Coming soon!</p>
+              <div className="p-4 sm:p-6 md:p-8 lg:p-10">
+                <div className="bg-white rounded-2xl shadow-md p-4 sm:p-6 md:p-6 lg:p-8">
+                  <div className="mb-4 sm:mb-6">
+                    <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 flex items-center gap-2 sm:gap-3 mb-2">
+                      <CalendarBlank size={24} weight="duotone" className="text-blue-600 sm:hidden" />
+                      <CalendarBlank size={28} weight="duotone" className="text-blue-600 hidden sm:block md:hidden" />
+                      <CalendarBlank size={32} weight="duotone" className="text-blue-600 hidden md:block" />
+                      <span>Booking Calendar</span>
+                    </h2>
+                    <p className="text-gray-600 text-xs sm:text-sm">Click on dates to mark them as booked. Past dates are disabled.</p>
+                  </div>
+
+                  {calendarLoading ? (
+                    <div className="flex items-center justify-center h-96">
+                      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+                    </div>
+                  ) : (
+                    <div className="fullcalendar-wrapper">
+                      <FullCalendar
+                        key={bookedDates.join(',')}
+                        plugins={[dayGridPlugin, interactionPlugin]}
+                        initialView="dayGridMonth"
+                        headerToolbar={{
+                          left: 'prev,next today',
+                          center: 'title',
+                          right: 'dayGridMonth'
+                        }}
+                        height="auto"
+                        contentHeight="auto"
+                        selectable={false}
+                        selectMirror={false}
+                        dayMaxEvents={false}
+                        weekends={true}
+                        events={[]}
+                        fixedWeekCount={false}
+                        dateClick={async (info) => {
+                          // Use the exact date string from info.dateStr (already in YYYY-MM-DD format)
+                          const clickedDateStr = info.dateStr
+                          
+                          // Compare with today using string format
+                          const today = new Date()
+                          const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`
+                          
+                          // Prevent booking past dates
+                          if (clickedDateStr < todayStr) {
+                            toast.error('Cannot book past dates')
+                            return
+                          }
+                          
+                          // Check if date is already booked
+                          const isBooked = bookedDates.includes(clickedDateStr)
+                          
+                          if (isBooked) {
+                            // Unbook the date
+                            await removeBookedDate(clickedDateStr)
+                          } else {
+                            // Book the date
+                            await addBookedDate(clickedDateStr)
+                          }
+                        }}
+                        dayCellClassNames={(arg) => {
+                          // Format date without timezone conversion
+                          const year = arg.date.getFullYear()
+                          const month = String(arg.date.getMonth() + 1).padStart(2, '0')
+                          const day = String(arg.date.getDate()).padStart(2, '0')
+                          const dateStr = `${year}-${month}-${day}`
+                          
+                          // Compare with today
+                          const today = new Date()
+                          const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`
+                          
+                          const classes = []
+                          
+                          // Past dates
+                          if (dateStr < todayStr) {
+                            classes.push('fc-past-date')
+                          }
+                          // Booked dates
+                          else if (bookedDates.includes(dateStr)) {
+                            classes.push('fc-booked-date')
+                          }
+                          // Available dates
+                          else {
+                            classes.push('fc-available-date')
+                          }
+                          
+                          return classes
+                        }}
+                        dayCellContent={(arg) => {
+                          // Format date without timezone conversion - SAME as above
+                          const year = arg.date.getFullYear()
+                          const month = String(arg.date.getMonth() + 1).padStart(2, '0')
+                          const day = String(arg.date.getDate()).padStart(2, '0')
+                          const dateStr = `${year}-${month}-${day}`
+                          
+                          const isBooked = bookedDates.includes(dateStr)
+                          
+                          return (
+                            <div className="fc-daygrid-day-frame">
+                              <div className="fc-daygrid-day-top">
+                                <a className="fc-daygrid-day-number">{arg.dayNumberText}</a>
+                              </div>
+                              {isBooked && (
+                                <div className="fc-booked-label">
+                                  <span>🔒 Booked</span>
+                                </div>
+                              )}
+                            </div>
+                          )
+                        }}
+                      />
+                    </div>
+                  )}
+
+                  <div className="mt-4 sm:mt-6 flex flex-wrap gap-3 sm:gap-6 text-xs sm:text-sm calendar-legend">
+                    <div className="flex items-center gap-2">
+                      <div className="w-4 h-4 rounded bg-gray-200"></div>
+                      <span className="text-gray-600">Past Dates (Disabled)</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-4 h-4 rounded bg-red-200"></div>
+                      <span className="text-gray-600">Booked Dates</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-4 h-4 rounded bg-white border border-gray-300"></div>
+                      <span className="text-gray-600">Available Dates</span>
+                    </div>
+                  </div>
                 </div>
               </div>
             )}
