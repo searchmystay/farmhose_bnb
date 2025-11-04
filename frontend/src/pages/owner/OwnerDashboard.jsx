@@ -1,43 +1,60 @@
 import { Helmet } from 'react-helmet-async'
 import { useParams } from 'react-router-dom'
 import { useState } from 'react'
-import { CurrencyCircleDollar, TrendUp, Eye, Users, CalendarBlank, ChartBar, X } from '@phosphor-icons/react'
+import { CurrencyCircleDollar, TrendUp, Eye, Users, CalendarBlank, ChartBar, House, CreditCard, Gear } from '@phosphor-icons/react'
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
+import FullCalendar from '@fullcalendar/react'
+import dayGridPlugin from '@fullcalendar/daygrid'
+import interactionPlugin from '@fullcalendar/interaction'
 import { toast } from 'sonner'
 import useOwnerDashboard from '../../hooks/owner/useOwnerDashboard'
 import useChartData from '../../hooks/owner/useChartData'
 import useRazorpay from '../../hooks/owner/useRazorpay'
+import useBookedDates from '../../hooks/owner/useBookedDates'
 import Logo from '/search_my_stay_logo.svg'
+import '../../styles/calender.css'
 
 function OwnerDashboard() {
   const { farmhouseId } = useParams()
   const { dashboardData, loading, error, refetchData } = useOwnerDashboard(farmhouseId)
   const { lineChartData, barChartData } = useChartData(dashboardData)
-  const [showPaymentModal, setShowPaymentModal] = useState(false)
+  const { bookedDates, addBookedDate, removeBookedDate, loading: calendarLoading } = useBookedDates(farmhouseId)
   const [rechargeAmount, setRechargeAmount] = useState('')
   const [activeTab, setActiveTab] = useState('dashboard')
+  const [sidebarExpanded, setSidebarExpanded] = useState(false)
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   const handlePaymentSuccess = () => {
     toast.success('Payment successful! Credits added to your account.')
-    setShowPaymentModal(false)
     setRechargeAmount('')
+    setActiveTab('dashboard')
     refetchData()
   }
 
   const { initiatePayment, loading: paymentLoading } = useRazorpay(farmhouseId, handlePaymentSuccess)
 
-  const renderKpiCard = (icon, title, value, color, subtitle = null) => {
+  const renderKpiCard = (icon, title, value, color, lastMonthValue = null) => {
     return (
-      <div className="bg-white rounded-lg shadow-sm p-6 border-l-4" style={{ borderLeftColor: color }}>
-        <div className="flex items-center justify-between">
-          <div className="flex-1">
-            <p className="text-sm font-medium text-gray-500">{title}</p>
-            <p className="text-3xl font-bold mt-2" style={{ color }}>{value}</p>
-            {subtitle && (
-              <p className="text-xs text-gray-500 mt-2">{subtitle}</p>
-            )}
+      <div 
+        className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1 p-6 cursor-pointer border border-gray-100"
+      >
+        <div className="flex justify-between items-start mb-4">
+          <div 
+            className="w-12 h-12 rounded-lg flex items-center justify-center text-2xl"
+            style={{ backgroundColor: `${color}15` }}
+          >
+            <span style={{ color }}>{icon}</span>
           </div>
-          <div className="text-4xl opacity-20" style={{ color }}>{icon}</div>
+          {lastMonthValue !== null && (
+            <div className="text-right">
+              <p className="text-gray-700 font-semibold text-base">{lastMonthValue}</p>
+              <p className="text-xs text-gray-400">vs last month</p>
+            </div>
+          )}
+        </div>
+        <div>
+          <p className="text-sm font-medium text-gray-600 mb-3">{title}</p>
+          <p className="text-3xl font-bold text-gray-900">{value}</p>
         </div>
       </div>
     )
@@ -45,9 +62,9 @@ function OwnerDashboard() {
 
   const renderLineChart = () => {
     return (
-      <div className="bg-white rounded-lg shadow-sm p-6">
-        <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
-          <TrendUp size={24} weight="duotone" className="text-blue-600" />
+      <div className="bg-white rounded-2xl shadow-md hover:shadow-xl transition-shadow duration-300 p-8">
+        <h2 className="text-xl font-bold mb-6 flex items-center gap-3">
+          <TrendUp size={28} weight="duotone" className="text-blue-600" />
           Total Leads Last 7 Days
         </h2>
         <ResponsiveContainer width="100%" height={300}>
@@ -65,9 +82,9 @@ function OwnerDashboard() {
 
   const renderBarChart = () => {
     return (
-      <div className="bg-white rounded-lg shadow-sm p-6">
-        <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
-          <ChartBar size={24} weight="duotone" className="text-blue-600" />
+      <div className="bg-white rounded-2xl shadow-md hover:shadow-xl transition-shadow duration-300 p-8">
+        <h2 className="text-xl font-bold mb-6 flex items-center gap-3">
+          <ChartBar size={28} weight="duotone" className="text-blue-600" />
           Leads vs Views Comparison (Last 7 Days)
         </h2>
         <ResponsiveContainer width="100%" height={300}>
@@ -97,72 +114,6 @@ function OwnerDashboard() {
     initiatePayment(amount)
   }
 
-  const renderPaymentModal = () => {
-    if (!showPaymentModal) return null
-
-    return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-md m-4">
-          <div className="flex justify-between items-center mb-6">
-            <h3 className="text-xl font-bold text-gray-900">Recharge Credits</h3>
-            <button onClick={() => setShowPaymentModal(false)} className="text-gray-400 hover:text-gray-600">
-              <X size={24} />
-            </button>
-          </div>
-
-          <form onSubmit={handleRechargeSubmit}>
-            <div className="mb-6">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Enter Amount (₹)
-              </label>
-              <input
-                type="number"
-                value={rechargeAmount}
-                onChange={(e) => setRechargeAmount(e.target.value)}
-                placeholder="Enter amount"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                disabled={paymentLoading}
-                min="1"
-                step="1"
-              />
-              <p className="text-xs text-gray-500 mt-2">
-                ₹40 per lead. Enter amount you want to recharge.
-              </p>
-            </div>
-
-            <div className="bg-blue-50 p-4 rounded-lg mb-6">
-              <p className="text-sm text-blue-800">
-                <span className="font-semibold">Current Balance:</span> ₹{dashboardData?.kpis?.payment_kpis?.total_cost_left || 0}
-              </p>
-              {rechargeAmount && parseFloat(rechargeAmount) > 0 && (
-                <p className="text-sm text-blue-800 mt-2">
-                  <span className="font-semibold">After Recharge:</span> ₹{(dashboardData?.kpis?.payment_kpis?.total_cost_left || 0) + parseFloat(rechargeAmount)}
-                </p>
-              )}
-            </div>
-
-            <div className="flex gap-3">
-              <button
-                type="button"
-                onClick={() => setShowPaymentModal(false)}
-                className="flex-1 px-4 py-3 border border-gray-300 rounded-lg text-gray-700 font-semibold hover:bg-gray-50 transition-colors"
-                disabled={paymentLoading}
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                className="flex-1 px-4 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors disabled:bg-blue-300 disabled:cursor-not-allowed"
-                disabled={paymentLoading}
-              >
-                {paymentLoading ? 'Processing...' : 'Proceed to Pay'}
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
-    )
-  }
 
   const renderLoadingState = () => {
     return (
@@ -198,143 +149,394 @@ function OwnerDashboard() {
 
     return (
       <div className="min-h-screen bg-gray-50">
-        <header className="bg-white shadow-sm border-b px-6 py-3 flex justify-between items-center">
-          <div className="flex items-center">
-            <img src={Logo} alt="Company Logo" className="h-8" style={{ filter: 'brightness(0)' }} />
+        <header className="bg-white shadow-md border-b-2 border-gray-200 px-4 sm:px-6 py-4 flex justify-between items-center">
+          <div className="flex items-center gap-4">
+            {/* Hamburger Menu Button - Mobile Only */}
+            <button 
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="md:hidden flex flex-col gap-1.5 p-2 hover:bg-gray-100 rounded transition-colors"
+              aria-label="Toggle menu"
+            >
+              <span className="w-6 h-0.5 bg-black block"></span>
+              <span className="w-6 h-0.5 bg-black block"></span>
+              <span className="w-6 h-0.5 bg-black block"></span>
+            </button>
+            <img src={Logo} alt="Company Logo" className="h-8 sm:h-10" style={{ filter: 'brightness(0)' }}/>
           </div>
-          <div className="flex items-center gap-6 text-sm">
+          <div className="flex items-center gap-4 sm:gap-8 text-xs sm:text-sm">
             <div className="text-right">
-              <span className="text-gray-500">Owner: </span>
+              <span className="text-black font-bold hidden sm:inline">Owner : </span>
               <span className="font-semibold text-gray-900">{ownerInfo.name || 'N/A'}</span>
             </div>
-            <div className="text-right">
-              <span className="text-gray-500">ID: </span>
-              <span className="font-semibold text-gray-700">{ownerInfo.farmhouse_id || 'N/A'}</span>
+            <div className="text-right hidden sm:block">
+              <span className="text-black font-bold">ID : </span>
+              <span className="font-semibold text-black">{ownerInfo.farmhouse_id || 'N/A'}</span>
             </div>
           </div>
         </header>
 
-        <div className="flex">
-          <aside className="w-64 bg-white shadow-lg min-h-[calc(100vh-56px)]">
-            <div className="p-6">
-              <nav className="space-y-2">
-                <button
-                  onClick={() => setActiveTab('dashboard')}
-                  className={`w-full text-left px-4 py-3 rounded-lg font-semibold transition-colors ${
-                    activeTab === 'dashboard' 
-                      ? 'bg-blue-600 text-white' 
-                      : 'text-gray-700 hover:bg-gray-100'
-                  }`}
+        <div className="flex relative">
+          {/* Sidebar */}
+          <aside 
+            className={`bg-white shadow-2xl min-h-screen transition-all duration-300 z-50
+              ${mobileMenuOpen ? 'fixed md:relative left-0 top-0 w-64' : 'hidden md:block'}
+              md:min-h-[calc(100vh-72px)] md:${sidebarExpanded ? 'w-64' : 'w-20'}`}
+            onMouseEnter={() => setSidebarExpanded(true)}
+            onMouseLeave={() => setSidebarExpanded(false)}
+          >
+            {/* Close button for mobile */}
+            {mobileMenuOpen && (
+              <div className="md:hidden flex justify-between items-center p-4 border-b">
+                <span className="font-semibold text-gray-900">Menu</span>
+                <button 
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="p-2 hover:bg-gray-100 rounded"
                 >
-                  Dashboard
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+            )}
+            <div className="p-4">
+              <nav className="space-y-3">
+                <button
+                  onClick={() => {
+                    setActiveTab('dashboard')
+                    setMobileMenuOpen(false)
+                  }}
+                  className={`w-full flex items-center gap-4 px-4 py-3 rounded-lg font-medium transition-all ${
+                    activeTab === 'dashboard' 
+                      ? 'bg-blue-50 text-blue-600 shadow-sm' 
+                      : 'text-gray-600 hover:bg-gray-50'
+                  }`}
+                  title="Dashboard"
+                >
+                  <House size={24} weight={activeTab === 'dashboard' ? 'fill' : 'regular'} />
+                  <span className="md:hidden lg:inline">{mobileMenuOpen || sidebarExpanded ? 'Dashboard' : ''}</span>
                 </button>
                 
                 <button 
-                  onClick={() => setShowPaymentModal(true)}
-                  className="w-full text-left px-4 py-3 rounded-lg font-semibold text-gray-700 hover:bg-gray-100 transition-colors"
+                  onClick={() => {
+                    setActiveTab('recharge')
+                    setMobileMenuOpen(false)
+                  }}
+                  className={`w-full flex items-center gap-4 px-4 py-3 rounded-lg font-medium transition-all ${
+                    activeTab === 'recharge' 
+                      ? 'bg-blue-50 text-blue-600 shadow-sm' 
+                      : 'text-gray-600 hover:bg-gray-50'
+                  }`}
+                  title="Recharge Credits"
                 >
-                  Recharge Credits
+                  <CreditCard size={24} weight={activeTab === 'recharge' ? 'fill' : 'regular'} />
+                  <span className="md:hidden lg:inline">{mobileMenuOpen || sidebarExpanded ? 'Recharge Credits' : ''}</span>
                 </button>
                 
                 <button
-                  onClick={() => setActiveTab('settings')}
-                  className={`w-full text-left px-4 py-3 rounded-lg font-semibold transition-colors ${
+                  onClick={() => {
+                    setActiveTab('settings')
+                    setMobileMenuOpen(false)
+                  }}
+                  className={`w-full flex items-center gap-4 px-4 py-3 rounded-lg font-medium transition-all ${
                     activeTab === 'settings' 
-                      ? 'bg-blue-600 text-white' 
-                      : 'text-gray-700 hover:bg-gray-100'
+                      ? 'bg-blue-50 text-blue-600 shadow-sm' 
+                      : 'text-gray-600 hover:bg-gray-50'
                   }`}
+                  title="Settings"
                 >
-                  Settings
+                  <Gear size={24} weight={activeTab === 'settings' ? 'fill' : 'regular'} />
+                  <span className="md:hidden lg:inline">{mobileMenuOpen || sidebarExpanded ? 'Settings' : ''}</span>
                 </button>
               </nav>
             </div>
           </aside>
 
-          <main className="flex-1">
+          <main className="flex-1 bg-gray-50">
             {activeTab === 'dashboard' && (
-              <div className="p-8">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+              <div className="p-10">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
                   {renderKpiCard(
                     <CurrencyCircleDollar size={40} weight="duotone" />, 
                     'This Month Money Spend', 
                     `₹${row1Kpis.this_month_money_spend || 0}`, 
-                    '#ef4444'
+                    '#ef4444',
+                    null
                   )}
                   {renderKpiCard(
                     <Users size={40} weight="duotone" />, 
                     'This Month Leads', 
                     row1Kpis.this_month_leads || 0, 
                     '#8b5cf6',
-                    `Last Month: ${row1Kpis.last_month_leads || 0}`
+                    row1Kpis.last_month_leads || 0
                   )}
                   {renderKpiCard(
                     <Eye size={40} weight="duotone" />, 
                     'This Month Views', 
                     row1Kpis.this_month_views || 0, 
                     '#f59e0b',
-                    `Last Month: ${row1Kpis.last_month_views || 0}`
+                    row1Kpis.last_month_views || 0
                   )}
                   {renderKpiCard(
                     <CalendarBlank size={40} weight="duotone" />, 
                     'Last 7 Days Lead', 
                     row1Kpis.leads_last_7_days || 0, 
-                    '#06b6d4'
+                    '#06b6d4',
+                    null
                   )}
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
                   {renderKpiCard(
                     <CurrencyCircleDollar size={40} weight="duotone" />, 
                     'Total Money Spent', 
                     `₹${row2Kpis.total_money_spent || 0}`, 
-                    '#dc2626'
+                    '#dc2626',
+                    null
                   )}
                   {renderKpiCard(
                     <Users size={40} weight="duotone" />, 
                     'Total Lead', 
                     row2Kpis.total_leads || 0, 
-                    '#10b981'
+                    '#10b981',
+                    null
                   )}
                   {renderKpiCard(
                     <Eye size={40} weight="duotone" />, 
                     'Total Views', 
                     row2Kpis.total_views || 0, 
-                    '#3b82f6'
+                    '#3b82f6',
+                    null
                   )}
                   {renderKpiCard(
                     <TrendUp size={40} weight="duotone" />, 
                     'Total Rating out of 5', 
                     row2Kpis.total_rating || 0, 
-                    '#f59e0b'
+                    '#f59e0b',
+                    null
                   )}
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
                   {renderKpiCard(
                     <CurrencyCircleDollar size={40} weight="duotone" />, 
                     'Total Cost Given', 
                     `₹${paymentKpis.total_cost_given || 0}`, 
-                    '#3b82f6'
+                    '#3b82f6',
+                    null
                   )}
                   {renderKpiCard(
                     <CurrencyCircleDollar size={40} weight="duotone" />, 
                     'Total Cost Left', 
                     `₹${paymentKpis.total_cost_left || 0}`, 
-                    '#10b981'
+                    '#10b981',
+                    null
                   )}
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                   {renderLineChart()}
                   {renderBarChart()}
                 </div>
               </div>
             )}
 
+           {activeTab === 'recharge' && (
+             <div className="flex items-center justify-center min-h-[80vh] p-10">
+                <div className="bg-white rounded-2xl shadow-md p-10 w-full max-w-3xl">
+                  <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-3">
+                    <CreditCard size={32} weight="duotone" className="text-blue-600" />
+                    Recharge Credits
+                  </h2>
+                  
+                  <form onSubmit={handleRechargeSubmit}>
+                    <div className="mb-6">
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Enter Amount (₹)
+                      </label>
+                      <input
+                        type="number"
+                        value={rechargeAmount}
+                        onChange={(e) => setRechargeAmount(e.target.value)}
+                        placeholder="Enter amount"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-lg"
+                        disabled={paymentLoading}
+                        min="1"
+                        step="1"
+                      />
+                      <p className="text-xs text-gray-500 mt-2">
+                        ₹40 per lead. Enter the amount you want to recharge.
+                      </p>
+                    </div>
+
+                    <div className="bg-blue-50 border border-blue-200 p-6 rounded-lg mb-6">
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <p className="text-sm text-blue-600 font-medium mb-1">Current Balance</p>
+                          <p className="text-2xl font-bold text-blue-900">₹{paymentKpis.total_cost_left || 0}</p>
+                        </div>
+                        {rechargeAmount && parseFloat(rechargeAmount) > 0 && (
+                          <div>
+                            <p className="text-sm text-green-600 font-medium mb-1">After Recharge</p>
+                            <p className="text-2xl font-bold text-green-900">₹{(paymentKpis.total_cost_left || 0) + parseFloat(rechargeAmount)}</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    <button
+                      type="submit"
+                      className="w-full px-6 py-4 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg font-semibold hover:from-blue-700 hover:to-blue-800 transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed text-lg"
+                      disabled={paymentLoading}
+                    >
+                      {paymentLoading ? 'Processing...' : 'Proceed to Payment'}
+                    </button>
+                  </form>
+                </div>
+              </div>
+            )}
+
             {activeTab === 'settings' && (
-              <div className="p-8">
-                <div className="bg-white rounded-lg shadow-sm p-8 text-center">
-                  <p className="text-gray-600">Settings page - Coming soon!</p>
+              <div className="p-4 sm:p-6 md:p-8 lg:p-10">
+                <div className="bg-white rounded-2xl shadow-md p-4 sm:p-6 md:p-6 lg:p-8">
+                  <div className="mb-4 sm:mb-6">
+                    <div className="flex justify-between items-start mb-2">
+                      <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 flex items-center gap-2 sm:gap-3">
+                        <CalendarBlank size={24} weight="duotone" className="text-blue-600 sm:hidden" />
+                        <CalendarBlank size={28} weight="duotone" className="text-blue-600 hidden sm:block md:hidden" />
+                        <CalendarBlank size={32} weight="duotone" className="text-blue-600 hidden md:block" />
+                        <span>Booking Calendar</span>
+                      </h2>
+                      <div className="text-right">
+                        <span className="text-sm font-semibold text-gray-700">Review Form Link: </span>
+                        <a 
+                          href="https://mystate.xyz" 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="text-sm text-blue-600 hover:text-blue-800 hover:underline"
+                        >
+                          mystate.xyz
+                        </a>
+                      </div>
+                    </div>
+                    <p className="text-gray-600 text-xs sm:text-sm">Click on dates to mark them as booked. Past dates are disabled.</p>
+                  </div>
+
+                  {calendarLoading ? (
+                    <div className="flex items-center justify-center h-96">
+                      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+                    </div>
+                  ) : (
+                    <div className="fullcalendar-wrapper">
+                      <FullCalendar
+                        key={bookedDates.join(',')}
+                        plugins={[dayGridPlugin, interactionPlugin]}
+                        initialView="dayGridMonth"
+                        headerToolbar={{
+                          left: 'prev,next today',
+                          center: 'title',
+                          right: 'dayGridMonth'
+                        }}
+                        height="auto"
+                        contentHeight="auto"
+                        selectable={false}
+                        selectMirror={false}
+                        dayMaxEvents={false}
+                        weekends={true}
+                        events={[]}
+                        fixedWeekCount={false}
+                        dateClick={async (info) => {
+                          // Use the exact date string from info.dateStr (already in YYYY-MM-DD format)
+                          const clickedDateStr = info.dateStr
+                          
+                          // Compare with today using string format
+                          const today = new Date()
+                          const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`
+                          
+                          // Prevent booking past dates
+                          if (clickedDateStr < todayStr) {
+                            toast.error('Cannot book past dates')
+                            return
+                          }
+                          
+                          // Check if date is already booked
+                          const isBooked = bookedDates.includes(clickedDateStr)
+                          
+                          if (isBooked) {
+                            // Unbook the date
+                            await removeBookedDate(clickedDateStr)
+                          } else {
+                            // Book the date
+                            await addBookedDate(clickedDateStr)
+                          }
+                        }}
+                        dayCellClassNames={(arg) => {
+                          // Format date without timezone conversion
+                          const year = arg.date.getFullYear()
+                          const month = String(arg.date.getMonth() + 1).padStart(2, '0')
+                          const day = String(arg.date.getDate()).padStart(2, '0')
+                          const dateStr = `${year}-${month}-${day}`
+                          
+                          // Compare with today
+                          const today = new Date()
+                          const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`
+                          
+                          const classes = []
+                          
+                          // Past dates
+                          if (dateStr < todayStr) {
+                            classes.push('fc-past-date')
+                          }
+                          // Booked dates
+                          else if (bookedDates.includes(dateStr)) {
+                            classes.push('fc-booked-date')
+                          }
+                          // Available dates
+                          else {
+                            classes.push('fc-available-date')
+                          }
+                          
+                          return classes
+                        }}
+                        dayCellContent={(arg) => {
+                          // Format date without timezone conversion - SAME as above
+                          const year = arg.date.getFullYear()
+                          const month = String(arg.date.getMonth() + 1).padStart(2, '0')
+                          const day = String(arg.date.getDate()).padStart(2, '0')
+                          const dateStr = `${year}-${month}-${day}`
+                          
+                          const isBooked = bookedDates.includes(dateStr)
+                          
+                          return (
+                            <div className="fc-daygrid-day-frame">
+                              <div className="fc-daygrid-day-top">
+                                <a className="fc-daygrid-day-number">{arg.dayNumberText}</a>
+                              </div>
+                              {isBooked && (
+                                <div className="fc-booked-label">
+                                  <span>🔒 Booked</span>
+                                </div>
+                              )}
+                            </div>
+                          )
+                        }}
+                      />
+                    </div>
+                  )}
+
+                  <div className="mt-4 sm:mt-6 flex flex-wrap gap-3 sm:gap-6 text-xs sm:text-sm calendar-legend">
+                    <div className="flex items-center gap-2">
+                      <div className="w-4 h-4 rounded bg-gray-200"></div>
+                      <span className="text-gray-600">Past Dates (Disabled)</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-4 h-4 rounded bg-red-200"></div>
+                      <span className="text-gray-600">Booked Dates</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-4 h-4 rounded bg-white border border-gray-300"></div>
+                      <span className="text-gray-600">Available Dates</span>
+                    </div>
+                  </div>
                 </div>
               </div>
             )}
@@ -355,7 +557,6 @@ function OwnerDashboard() {
       {loading && renderLoadingState()}
       {error && !loading && renderErrorState()}
       {!loading && !error && dashboardData && renderDashboardContent()}
-      {renderPaymentModal()}
     </>
   )
 }

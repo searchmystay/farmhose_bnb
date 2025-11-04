@@ -1,9 +1,10 @@
 from src.database.db_owner_analysis_operations import get_total_visits, get_total_contacts, get_contacts_last_7_days, get_contacts_last_month, get_contacts_last_year, get_daily_leads_last_7_days, get_daily_views_last_7_days, get_this_month_leads, get_last_month_leads, get_this_month_views, get_last_month_views
 from src.database.db_payment_operations import get_farmhouse_credit_balance
-from src.database.db_common_operations import db_find_many, db_aggregate, db_find_one
+from src.database.db_common_operations import db_find_many, db_aggregate, db_find_one, db_update_one
 from src.utils.exception_handler import handle_exceptions, AppException
 from bson import ObjectId
 from datetime import datetime, timedelta
+import pytz
 
 
 @handle_exceptions
@@ -147,3 +148,93 @@ def get_owner_dashboard_data(farmhouse_id):
     }
     
     return dashboard_data
+
+
+# ============== BOOKED DATES MANAGEMENT ==============
+
+@handle_exceptions
+def get_booked_dates(farmhouse_id):
+    """Get all booked dates for a farmhouse"""
+    farmhouse = db_find_one("farmhouses", {"_id": ObjectId(farmhouse_id)})
+    
+    if not farmhouse:
+        raise AppException("Farmhouse not found")
+    
+    booked_dates = farmhouse.get("booked_dates", [])
+    
+    # Convert datetime objects to ISO string format
+    formatted_dates = []
+    for date in booked_dates:
+        if isinstance(date, datetime):
+            formatted_dates.append(date.strftime("%Y-%m-%d"))
+        else:
+            formatted_dates.append(str(date))
+    
+    return {
+        "booked_dates": formatted_dates
+    }
+
+
+@handle_exceptions
+def add_booked_date(farmhouse_id, date_string):
+    """Add a date to booked_dates array"""
+    # Parse the date string (YYYY-MM-DD format)
+    try:
+        date_obj = datetime.strptime(date_string, "%Y-%m-%d")
+    except ValueError:
+        raise AppException("Invalid date format. Use YYYY-MM-DD")
+    
+    # Set time to start of day UTC
+    date_obj = date_obj.replace(hour=0, minute=0, second=0, microsecond=0)
+    
+    # Check if date is not in the past
+    today = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+    if date_obj < today:
+        raise AppException("Cannot book past dates")
+    
+    # Add to booked_dates array (use $addToSet to avoid duplicates)
+    query_filter = {"_id": ObjectId(farmhouse_id)}
+    update_data = {
+        "$addToSet": {"booked_dates": date_obj}
+    }
+    
+    result = db_update_one("farmhouses", query_filter, update_data)
+    
+    if not result:
+        raise AppException("Failed to add booked date")
+    
+    return {
+        "success": True,
+        "message": "Date marked as booked",
+        "date": date_string
+    }
+
+
+@handle_exceptions
+def remove_booked_date(farmhouse_id, date_string):
+    """Remove a date from booked_dates array"""
+    # Parse the date string
+    try:
+        date_obj = datetime.strptime(date_string, "%Y-%m-%d")
+    except ValueError:
+        raise AppException("Invalid date format. Use YYYY-MM-DD")
+    
+    # Set time to start of day UTC
+    date_obj = date_obj.replace(hour=0, minute=0, second=0, microsecond=0)
+    
+    # Remove from booked_dates array
+    query_filter = {"_id": ObjectId(farmhouse_id)}
+    update_data = {
+        "$pull": {"booked_dates": date_obj}
+    }
+    
+    result = db_update_one("farmhouses", query_filter, update_data)
+    
+    if not result:
+        raise AppException("Failed to remove booked date")
+    
+    return {
+        "success": True,
+        "message": "Date unmarked",
+        "date": date_string
+    }

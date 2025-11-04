@@ -1,0 +1,739 @@
+/* ========================================
+   🎨 BEAUTIFUL FULLCALENDAR STYLING
+   Elegant & Modern Design
+======================================== */
+
+/* Calendar Wrapper */
+.fullcalendar-wrapper {
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 
+    0 20px 60px rgba(50, 205, 50, 0.15),
+    0 10px 30px rgba(0, 0, 0, 0.08);
+  background: linear-gradient(159deg, rgb(173, 183, 223) 0%, rgba(50,205,50,1) 100%);
+  padding: 4px;
+  transition: all 0.3s ease;
+}
+
+.fullcalendar-wrapper:hover {
+  box-shadow: 
+    0 25px 70px rgba(50, 205, 50, 0.2),
+    0 15px 40px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+}
+
+.fullcalendar-wrapper .fc {
+  background: linear-gradient(to bottom, #ffffff 0%, #fafbfc 100%);
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+/* ========== TOOLBAR ========== */
+.fc .fc-toolbar {
+  background: linear-gradient(159deg, rgba(173,223,173,1) 0%, rgba(50,205,50,1) 100%);
+  padding: 20px 24px;
+  margin-bottom: 0 !important;
+  border-radius: 14px 14px 0 0;
+  box-shadow: 0 4px 12px rgba(50, 205, 50, 0.2);
+}
+
+.fc .fc-toolbar-title {
+  font-size: 22px !important;
+  font-weight: 800 !important;
+  color: white !important;
+  text-shadow: 
+    0 2px 4px rgba(0, 0, 0, 0.1),
+    0 4px 12px rgba(50, 205, 50, 0.3);
+  letter-spacing: 1px;
+  position: relative;
+}
+
+.fc .fc-button {
+  background: rgba(255, 255, 255, 0.25) !important;
+  border: 2px solid rgba(255, 255, 255, 0.4) !important;
+  color: white !important;
+  font-weight: 700 !important;
+  padding: 8px 16px !important;
+  border-radius: 12px !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  text-transform: uppercase;
+  font-size: 12px;
+  letter-spacing: 1px;
+  backdrop-filter: blur(20px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.fc .fc-button:hover {
+  background: white !important;
+  color: #32cd32 !important;
+  border-color: white !important;
+  transform: translateY(-3px);
+  box-shadow: 
+    0 8px 20px rgba(50, 205, 50, 0.3),
+    0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.fc .fc-button:active,
+.fc .fc-button-active {
+  background: white !important;
+  color: #32cd32 !important;
+  border-color: white !important;
+  transform: scale(0.95);
+  box-shadow: 
+    0 4px 12px rgba(50, 205, 50, 0.2),
+    inset 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.fc .fc-button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ========== HEADER (Day Names) ========== */
+.fc .fc-col-header {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-bottom: 3px solid #32cd32;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.fc .fc-col-header-cell {
+  padding: 12px 6px !important;
+  font-weight: 700 !important;
+  font-size: 13px !important;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  color: #2c3e50 !important;
+  border: none !important;
+  transition: all 0.2s ease;
+}
+
+.fc .fc-col-header-cell:hover {
+  background: rgba(50, 205, 50, 0.05);
+}
+
+.fc .fc-col-header-cell-cushion {
+  color: #2c3e50;
+  text-decoration: none;
+  font-weight: 800;
+}
+
+/* ========== DAY CELLS ========== */
+.fc .fc-daygrid-day {
+  border: 1px solid #e9ecef !important;
+  transition: all 0.2s ease;
+  position: relative;
+  min-height: 90px;
+}
+
+/* Month View */
+.fc .fc-view-harness {
+  height: auto !important;
+  overflow: visible !important;
+}
+
+.fc .fc-daygrid-body {
+  height: auto !important;
+  overflow: visible !important;
+}
+
+.fc .fc-scrollgrid {
+  border: 1px solid #e9ecef !important;
+  overflow: visible !important;
+}
+
+/* Remove scroll */
+.fc .fc-scroller {
+  overflow: visible !important;
+  height: auto !important;
+}
+
+.fc .fc-scroller-liquid-absolute {
+  position: relative !important;
+}
+
+.fc .fc-daygrid-day:hover {
+  background: linear-gradient(135deg, rgba(173, 223, 173, 0.15), rgba(50, 205, 50, 0.15)) !important;
+  transform: scale(1.02);
+  z-index: 10;
+  box-shadow: 
+    0 6px 16px rgba(50, 205, 50, 0.25),
+    inset 0 1px 2px rgba(255, 255, 255, 0.8);
+  border-color: #32cd32 !important;
+}
+
+.fc .fc-daygrid-day-frame {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  height: 100%;
+  padding: 8px;
+}
+
+.fc .fc-daygrid-day-top {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.fc .fc-daygrid-day-number {
+  padding: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #212529;
+  text-decoration: none !important;
+  display: inline-block;
+}
+
+/* Today Highlight */
+.fc .fc-day-today {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.12), rgba(96, 165, 250, 0.12)) !important;
+  border: 2px solid #3b82f6 !important;
+  box-shadow: 
+    inset 0 0 0 2px rgba(59, 130, 246, 0.2),
+    0 4px 12px rgba(59, 130, 246, 0.15);
+  position: relative;
+  overflow: hidden;
+}
+
+.fc .fc-day-today::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, #3b82f6, transparent);
+  animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 1; }
+}
+
+.fc .fc-day-today .fc-daygrid-day-number {
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  color: white !important;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  box-shadow: 
+    0 4px 12px rgba(59, 130, 246, 0.4),
+    0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 0 !important;
+  transition: all 0.3s ease;
+}
+
+.fc .fc-day-today .fc-daygrid-day-number:hover {
+  transform: scale(1.1);
+  box-shadow: 
+    0 6px 16px rgba(59, 130, 246, 0.5),
+    0 3px 6px rgba(0, 0, 0, 0.15);
+}
+
+/* ========== CUSTOM DATE STATES ========== */
+
+/* Past Dates */
+.fc .fc-past-date {
+  background: linear-gradient(135deg, #f8f9fa, #e9ecef) !important;
+  cursor: not-allowed !important;
+  opacity: 0.6;
+  position: relative;
+}
+
+.fc .fc-past-date::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 10px,
+    rgba(0, 0, 0, 0.03) 10px,
+    rgba(0, 0, 0, 0.03) 20px
+  );
+  pointer-events: none;
+}
+
+.fc .fc-past-date:hover {
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+.fc .fc-past-date .fc-daygrid-day-number {
+  color: #adb5bd !important;
+}
+
+/* Booked Dates */
+.fc .fc-booked-date {
+  background: 
+    repeating-linear-gradient(
+      45deg,
+      rgba(239, 68, 68, 0.08),
+      rgba(239, 68, 68, 0.08) 10px,
+      rgba(220, 38, 38, 0.12) 10px,
+      rgba(220, 38, 38, 0.12) 20px
+    ) !important;
+  border: 2px solid rgba(220, 38, 38, 0.4) !important;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  box-shadow: 
+    inset 0 0 20px rgba(220, 38, 38, 0.1),
+    0 2px 8px rgba(220, 38, 38, 0.2);
+}
+
+.fc .fc-booked-date::before {
+  content: '🔒';
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  font-size: 16px;
+  opacity: 0.7;
+  animation: pulse 2s infinite;
+  z-index: 1;
+}
+
+@keyframes pulse {
+  0%, 100% { 
+    opacity: 0.6;
+    transform: scale(1);
+  }
+  50% { 
+    opacity: 1;
+    transform: scale(1.1);
+  }
+}
+
+.fc .fc-booked-date::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(220, 38, 38, 0.1), transparent);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.fc .fc-booked-date:hover::after {
+  opacity: 1;
+}
+
+.fc .fc-booked-date:hover {
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(220, 38, 38, 0.2)) !important;
+  border-color: #dc2626 !important;
+  box-shadow: 
+    0 6px 16px rgba(220, 38, 38, 0.35),
+    inset 0 1px 2px rgba(255, 255, 255, 0.2);
+  transform: scale(1.02);
+}
+
+.fc .fc-booked-date .fc-daygrid-day-number {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  color: white;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  box-shadow: 
+    0 4px 12px rgba(220, 38, 38, 0.45),
+    0 2px 4px rgba(0, 0, 0, 0.15);
+  padding: 0 !important;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.fc .fc-booked-date .fc-daygrid-day-number::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  animation: shine 3s infinite;
+}
+
+@keyframes shine {
+  0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+  100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+}
+
+.fc .fc-booked-date .fc-daygrid-day-number:hover {
+  transform: scale(1.1);
+  box-shadow: 
+    0 6px 16px rgba(220, 38, 38, 0.55),
+    0 3px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Booked Label */
+.fc-booked-label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 8px;
+  padding: 5px 10px;
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  border-radius: 8px;
+  box-shadow: 
+    0 3px 8px rgba(220, 38, 38, 0.35),
+    0 1px 3px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.fc-booked-label::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  animation: slide 2s infinite;
+}
+
+@keyframes slide {
+  0% { left: -100%; }
+  100% { left: 100%; }
+}
+
+.fc-booked-label span {
+  color: white;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  position: relative;
+  z-index: 1;
+}
+
+/* Available Dates */
+.fc .fc-available-date {
+  cursor: pointer;
+  background: white;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+}
+
+.fc .fc-available-date::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(circle at center, rgba(16, 185, 129, 0.15), transparent);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.fc .fc-available-date:hover::before {
+  opacity: 1;
+}
+
+.fc .fc-available-date:hover {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.08), rgba(5, 150, 105, 0.08)) !important;
+  border-color: #10b981 !important;
+  box-shadow: 
+    0 4px 12px rgba(16, 185, 129, 0.2),
+    inset 0 1px 2px rgba(255, 255, 255, 0.8);
+  transform: scale(1.02);
+}
+
+.fc .fc-available-date:hover .fc-daygrid-day-number {
+  color: #10b981;
+  transform: scale(1.12);
+  font-weight: 700;
+  text-shadow: 0 1px 3px rgba(16, 185, 129, 0.3);
+}
+
+/* ========== EVENTS ========== */
+/* Hide default event container since we use custom rendering */
+.fc .fc-daygrid-event-harness {
+  display: none !important;
+}
+
+.fc .fc-event {
+  display: none !important;
+}
+
+/* ========== SCROLLBAR (DISABLED) ========== */
+/* Scrolling is disabled, calendar shows all days */
+.fc-scroller::-webkit-scrollbar {
+  display: none;
+}
+
+/* ========== RESPONSIVE ========== */
+
+/* Mobile Phones (Portrait) */
+@media (max-width: 480px) {
+  .fullcalendar-wrapper {
+    border-radius: 16px;
+    padding: 3px;
+    width: 100%;
+  }
+
+  .fullcalendar-wrapper:hover {
+    transform: none;
+  }
+
+  .fullcalendar-wrapper .fc {
+    border-radius: 13px;
+    width: 100%;
+  }
+
+  /* Fix calendar width */
+  .fc .fc-view-harness {
+    width: 100% !important;
+  }
+
+  .fc .fc-scrollgrid {
+    width: 100% !important;
+  }
+
+  .fc table {
+    width: 100% !important;
+  }
+
+  .fc .fc-daygrid-body {
+    width: 100% !important;
+  }
+
+  .fc .fc-toolbar {
+    padding: 12px 8px;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .fc .fc-toolbar-title {
+    font-size: 16px !important;
+    text-align: center;
+  }
+
+  .fc .fc-button {
+    padding: 6px 12px !important;
+    font-size: 10px !important;
+    border-radius: 6px !important;
+  }
+
+  .fc .fc-toolbar .fc-toolbar-chunk {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+  }
+
+  .fc .fc-col-header-cell {
+    padding: 8px 2px !important;
+    font-size: 10px !important;
+    letter-spacing: 0.3px;
+  }
+
+  .fc .fc-daygrid-day {
+    min-height: 44px !important;
+    border: 1px solid #e9ecef !important;
+  }
+
+  .fc .fc-daygrid-day-frame {
+    padding: 2px 1px;
+  }
+
+  .fc .fc-daygrid-day-number {
+    font-size: 10px !important;
+    padding: 2px !important;
+  }
+
+  .fc .fc-day-today .fc-daygrid-day-number {
+    width: 20px !important;
+    height: 20px !important;
+    font-size: 10px !important;
+  }
+
+  .fc .fc-booked-date .fc-daygrid-day-number {
+    width: 20px !important;
+    height: 20px !important;
+    font-size: 10px !important;
+  }
+
+  .fc-booked-label {
+    margin-top: 2px;
+    padding: 1px 2px;
+    font-size: 7px !important;
+  }
+
+  .fc-booked-label span {
+    font-size: 7px !important;
+    letter-spacing: 0.1px;
+  }
+
+  .fc .fc-daygrid-day:hover {
+    transform: none !important;
+  }
+}
+
+/* Tablets (Portrait) */
+@media (min-width: 481px) and (max-width: 768px) {
+  .fc .fc-toolbar {
+    padding: 16px;
+    flex-direction: row;
+    gap: 12px;
+  }
+
+  .fc .fc-toolbar-title {
+    font-size: 18px !important;
+  }
+
+  .fc .fc-button {
+    padding: 7px 14px !important;
+    font-size: 11px !important;
+  }
+
+  .fc .fc-col-header-cell {
+    padding: 10px 4px !important;
+    font-size: 12px !important;
+  }
+
+  .fc .fc-daygrid-day {
+    min-height: 75px !important;
+  }
+
+  .fc .fc-daygrid-day-number {
+    font-size: 13px;
+    padding: 6px;
+  }
+
+  .fc-booked-label {
+    font-size: 9px !important;
+  }
+
+  .fc-booked-label span {
+    font-size: 9px !important;
+  }
+}
+
+/* Large tablets and small desktops */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .fc .fc-daygrid-day {
+    min-height: 80px !important;
+  }
+}
+
+/* ========== LEGEND ENHANCEMENT ========== */
+.calendar-legend {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+  margin-top: 24px;
+  padding: 16px;
+  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+  border-radius: 12px;
+  border: 1px solid #e9ecef;
+}
+
+.calendar-legend > div {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 20px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 
+    0 3px 10px rgba(0, 0, 0, 0.08),
+    0 1px 3px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  position: relative;
+  overflow: hidden;
+}
+
+.calendar-legend > div::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(50, 205, 50, 0.05), transparent);
+  transition: left 0.5s ease;
+}
+
+.calendar-legend > div:hover::before {
+  left: 100%;
+}
+
+.calendar-legend > div:hover {
+  transform: translateY(-3px);
+  box-shadow: 
+    0 6px 20px rgba(50, 205, 50, 0.15),
+    0 3px 8px rgba(0, 0, 0, 0.08);
+  border-color: rgba(50, 205, 50, 0.2);
+}
+
+.calendar-legend .w-4 {
+  width: 20px;
+  height: 20px;
+  border-radius: 8px;
+  box-shadow: 
+    0 3px 8px rgba(0, 0, 0, 0.12),
+    inset 0 1px 2px rgba(255, 255, 255, 0.5);
+  transition: transform 0.3s ease;
+}
+
+.calendar-legend > div:hover .w-4 {
+  transform: scale(1.1) rotate(5deg);
+}
+
+.calendar-legend span {
+  font-weight: 600;
+  color: #2c3e50;
+  font-size: 14px;
+  letter-spacing: 0.3px;
+  position: relative;
+  z-index: 1;
+}
+
+/* Mobile Legend */
+@media (max-width: 480px) {
+  .calendar-legend {
+    gap: 10px;
+    margin-top: 16px;
+  }
+
+  .calendar-legend > div {
+    padding: 8px 12px;
+    gap: 8px;
+    flex: 1 1 auto;
+    min-width: calc(50% - 5px);
+  }
+
+  .calendar-legend .w-4 {
+    width: 16px;
+    height: 16px;
+  }
+
+  .calendar-legend span {
+    font-size: 11px;
+  }
+
+  .calendar-legend > div:hover {
+    transform: none;
+  }
+}
