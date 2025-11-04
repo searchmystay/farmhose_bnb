@@ -9,7 +9,7 @@ function SearchPage() {
     checkIn: '',
     checkOut: '',
     propertyType: 'both',
-    numberOfPeople: ''
+    numberOfPeople: 'flexible'
   })
 
   useEffect(() => {
@@ -20,7 +20,7 @@ function SearchPage() {
         checkIn: parsedData.checkIn || '',
         checkOut: parsedData.checkOut || '',
         propertyType: parsedData.propertyType || 'both',
-        numberOfPeople: parsedData.numberOfPeople || ''
+        numberOfPeople: parsedData.numberOfPeople || 'flexible'
       })
     }
   }, [])
@@ -37,7 +37,7 @@ function SearchPage() {
       checkIn: formData.checkIn,
       checkOut: formData.checkOut,
       propertyType: formData.propertyType,
-      numberOfPeople: parseInt(formData.numberOfPeople) || 1
+      numberOfPeople: formData.numberOfPeople === 'flexible' ? 'flexible' : parseInt(formData.numberOfPeople)
     }
     
     sessionStorage.setItem('searchCriteria', JSON.stringify(searchData))
@@ -123,7 +123,14 @@ function SearchPage() {
   const renderNumberOfPeople = () => (
     <div>
       <label htmlFor="numberOfPeople" className="block text-sm font-medium text-gray-700 mb-2">Number of People</label>
-      <input type="number" id="numberOfPeople" name="numberOfPeople" value={formData.numberOfPeople} onChange={handleInputChange} min="1" max="50" placeholder="Enter number of people" className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors duration-200" />
+      <select id="numberOfPeople" name="numberOfPeople" value={formData.numberOfPeople} onChange={handleInputChange} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors duration-200">
+        <option value="flexible">Flexible</option>
+        {[...Array(20)].map((_, i) => (
+          <option key={i + 1} value={i + 1}>
+            {i + 1} {i + 1 === 1 ? 'Person' : 'People'}
+          </option>
+        ))}
+      </select>
     </div>
   )
 
