@@ -7,10 +7,15 @@ import json
 website_bp = Blueprint('website', __name__)
 
 
-@website_bp.route('/farmhouse-list', methods=['GET'])
+@website_bp.route('/farmhouse-list', methods=['POST'])
 @handle_route_exceptions
 def list_farmhouses():
-    farmhouses_data = get_approved_farmhouses()
+    data = request.get_json() or {}
+    check_in_date = data.get('checkInDate')
+    check_out_date = data.get('checkOutDate')
+    number_of_people = data.get('numberOfPeople')
+    
+    farmhouses_data = get_approved_farmhouses(check_in_date, check_out_date, number_of_people)
     
     response_data = {
         "success": True,
