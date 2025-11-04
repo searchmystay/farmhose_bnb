@@ -75,7 +75,7 @@ function HeroSection({ onWishlistClick }) {
         </p>
         <div className="flex justify-center">
           <button 
-            onClick={() => {}}
+            onClick={() => navigate('/search')}
             className="bg-white text-gray-900 px-10 py-4 rounded-full text-lg font-medium hover:bg-gray-100 transition-all duration-200"
           >
             Search Your Stay
