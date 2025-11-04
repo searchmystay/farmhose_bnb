@@ -1,10 +1,10 @@
-from src.database.db_common_operations import db_find_many, db_find_one, db_insert_one, db_update_one, db_append_to_array, db_remove_from_array
+from src.database.db_common_operations import db_find_many, db_find_one, db_insert_one, db_update_one, db_append_to_array, db_remove_from_array, db_exists
 from src.database.db_owner_analysis_operations import record_visit, record_contact
 from src.utils.exception_handler import handle_exceptions, AppException
 from src.logics.cloudfare_bucket import upload_farmhouse_image_to_r2, upload_farmhouse_document_to_r2
 from src.config import LEAD_COST_RUPEES, MINIMUM_BALANCE_THRESHOLD
 from bson import ObjectId
-from datetime import datetime
+from datetime import datetime, timedelta
 import pytz
 
 
@@ -155,7 +155,18 @@ def process_farmhouse_for_listing(farmhouse_data):
 
 
 @handle_exceptions
-def get_approved_properties_by_type(query_filter):
+def get_date_range(start_date, end_date):
+    date_range = []
+    current_date = start_date
+    while current_date < end_date:
+        date_range.append(current_date)
+        current_date += timedelta(days=1)
+    
+    return date_range
+
+
+@handle_exceptions
+def get_approved_properties_by_type(query_filter, number_of_people=None, check_in_date=None, check_out_date=None):
     projection = {
         "_id": 1,
         "name": 1,
@@ -163,6 +174,15 @@ def get_approved_properties_by_type(query_filter):
         "images": 1,
         "amenities": 1
     }
+
+    if number_of_people and not isinstance(number_of_people, str):
+        query_filter["max_people"] = {"$gte": number_of_people}
+    
+    if check_in_date and check_out_date:
+        check_in_date = datetime.strptime(check_in_date, '%Y-%m-%d')
+        check_out_date = datetime.strptime(check_out_date, '%Y-%m-%d')
+        date_range = get_date_range(check_in_date, check_out_date)
+        query_filter["booked_dates"] = {"$nin": date_range}
     
     properties_list = db_find_many("farmhouses", query_filter, projection)
     
@@ -212,9 +232,9 @@ def get_property_details(property_id, lead_email=None):
 
 
 @handle_exceptions
-def get_approved_farmhouses():
+def get_approved_farmhouses(number_of_people=None, check_in_date=None, check_out_date=None):
     query_filter = {"status": "active", "type": "farmhouse"}
-    farmhouses_list = get_approved_properties_by_type(query_filter)
+    farmhouses_list = get_approved_properties_by_type(query_filter, number_of_people, check_in_date, check_out_date)
     return farmhouses_list
 
 
@@ -566,3 +586,35 @@ def get_user_wishlist(email):
         processed_properties.append(processed_property)
     
     return processed_properties
+
+
+@handle_exceptions
+def submit_review(farmhouse_id, reviewer_name, rating, review_comment):
+    farmhouse_exists = db_exists("farmhouses", {"_id": farmhouse_id})
+    
+    if not farmhouse_exists:
+        raise AppException("Farmhouse not found")
+    
+    if not isinstance(rating, int) or rating < 1 or rating > 5:
+        raise AppException("Rating must be an integer between 1 and 5")
+    
+    review_data = {
+        "farmhouse_id": farmhouse_id,
+        "reviewer_name": reviewer_name,
+        "rating": rating,
+        "review_comment": review_comment
+    }
+    
+    db_insert_one("pending_reviews", review_data)
+    return True
+
+
+@handle_exceptions
+def get_farmhouse_name(farmhouse_id):
+    farmhouse_data = db_find_one("farmhouses", {"_id": farmhouse_id}, {"name": 1})
+    
+    if not farmhouse_data:
+        raise AppException("Farmhouse not found")
+    
+    farmhouse_name = farmhouse_data["name"]
+    return farmhouse_name

@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify, request
-from src.logics.website_logic import get_approved_farmhouses, get_approved_bnbs, get_property_details, register_property, process_whatsapp_contact, get_fav_properties, toggle_wishlist, create_lead, get_user_wishlist
+from src.logics.website_logic import *
 from src.utils.exception_handler import handle_route_exceptions, AppException
 from bson import ObjectId
 import json
@@ -7,10 +7,15 @@ import json
 website_bp = Blueprint('website', __name__)
 
 
-@website_bp.route('/farmhouse-list', methods=['GET'])
+@website_bp.route('/farmhouse-list', methods=['POST'])
 @handle_route_exceptions
 def list_farmhouses():
-    farmhouses_data = get_approved_farmhouses()
+    data = request.get_json() or {}
+    check_in_date = data.get('checkInDate')
+    check_out_date = data.get('checkOutDate')
+    number_of_people = data.get('numberOfPeople')
+    
+    farmhouses_data = get_approved_farmhouses(check_in_date, check_out_date, number_of_people)
     
     response_data = {
         "success": True,
@@ -177,6 +182,52 @@ def get_wishlist_route():
     response_data = {
         "success": True,
         "backend_data": wishlist_properties,
+    }
+    
+    return jsonify(response_data), 200
+
+
+@website_bp.route('/submit-review', methods=['POST'])
+@handle_route_exceptions
+def submit_review_route():
+    data = request.get_json()
+    
+    farmhouse_id = data.get('farmhouse_id')
+    reviewer_name = data.get('reviewer_name')
+    rating = data.get('rating')
+    review_comment = data.get('review_comment')
+    
+    if not farmhouse_id:
+        raise AppException("Farmhouse ID is required")
+    if not reviewer_name:
+        raise AppException("Reviewer name is required")
+    if not rating:
+        raise AppException("Rating is required")
+    if not review_comment:
+        raise AppException("Review comment is required")
+    
+    object_id = ObjectId(farmhouse_id)
+    submit_review(object_id, reviewer_name, rating, review_comment)
+    
+    response_data = {
+        "success": True,
+        "message": "Review submitted successfully for approval"
+    }
+    
+    return jsonify(response_data), 200
+
+
+@website_bp.route('/farmhouse-name/<farmhouse_id>', methods=['GET'])
+@handle_route_exceptions
+def get_farmhouse_name_route(farmhouse_id):
+    object_id = ObjectId(farmhouse_id)
+    farmhouse_name = get_farmhouse_name(object_id)
+    
+    response_data = {
+        "success": True,
+        "backend_data": {
+            "farmhouse_name": farmhouse_name
+        }
     }
     
     return jsonify(response_data), 200

@@ -143,3 +143,36 @@ export const getUserWishlist = async (email) => {
     throw new Error('Failed to fetch wishlist, Network error')
   }
 }
+
+export const submitReview = async (farmhouseId, reviewerName, rating, reviewComment) => {
+  try {
+    const response = await apiClient.post('/submit-review', {
+      farmhouse_id: farmhouseId,
+      reviewer_name: reviewerName,
+      rating: rating,
+      review_comment: reviewComment
+    })
+    const result = response.data
+    return result
+  } catch (error) {
+    if (error.response && error.response.data) {
+      const backendError = error.response.data
+      throw new Error(backendError.message || 'Failed to submit review')
+    }
+    throw new Error('Failed to submit review, Network error')
+  }
+}
+
+export const getFarmhouseName = async (farmhouseId) => {
+  try {
+    const response = await apiClient.get(`/farmhouse-name/${farmhouseId}`)
+    const result = response.data
+    return result
+  } catch (error) {
+    if (error.response && error.response.data) {
+      const backendError = error.response.data
+      throw new Error(backendError.message || 'Failed to fetch farmhouse name')
+    }
+    throw new Error('Failed to fetch farmhouse name, Network error')
+  }
+}

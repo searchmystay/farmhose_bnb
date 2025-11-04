@@ -3,7 +3,7 @@ from typing import Dict
 def get_farmhouse_schema() -> Dict:
     return {
         "bsonType": "object",
-        "required": ["name", "description", "type", "phone_number", "location", "credit_balance", "status", "created_at", "updated_at"],
+        "required": ["name", "description", "type", "phone_number", "location", "credit_balance", "status", "max_people" "created_at"],
         "properties": {
             "_id": {
                 "bsonType": "objectId",
@@ -30,6 +30,12 @@ def get_farmhouse_schema() -> Dict:
                 "bsonType": "string",
                 "description": "Phone number for property owner",
                 "pattern": "^[0-9]{10}$"
+            },
+            "max_people": {
+                "bsonType": "int",
+                "description": "Maximum number of people that can stay at the property",
+                "minimum": 1,
+                "maximum": 100
             },
             "location": {
                 "bsonType": "object",
@@ -647,6 +653,37 @@ def get_lead_schema() -> Dict:
                 "items": {
                     "bsonType": "objectId"
                 }
+            }
+        }
+    }
+
+
+def get_pending_reviews_schema() -> Dict:
+    return {
+        "bsonType": "object",
+        "required": ["farmhouse_id", "reviewer_name", "rating", "review_comment"],
+        "properties": {
+            "_id": {
+                "bsonType": "objectId",
+                "description": "Unique identifier for the review"
+            },
+            "farmhouse_id": {
+                "bsonType": "objectId",
+                "description": "Reference to the farmhouse/property _id"
+            },
+            "reviewer_name": {
+                "bsonType": "string",
+                "description": "Name of the person writing the review"
+            },
+            "rating": {
+                "bsonType": "int",
+                "minimum": 1,
+                "maximum": 5,
+                "description": "Star rating from 1-5"
+            },
+            "review_comment": {
+                "bsonType": "string",
+                "description": "Review description/comment"
             }
         }
     }
