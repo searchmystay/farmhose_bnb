@@ -539,7 +539,7 @@ def get_payment_schema() -> Dict:
     }
 
 
-def get_owner_analysis_schema() -> Dict:
+def get_farmhouse_analysis_schema() -> Dict:
     return {
         "bsonType": "object",
         "required": ["farmhouse_id", "total_views", "total_leads", "daily", "created_at", "updated_at"],
@@ -578,6 +578,32 @@ def get_owner_analysis_schema() -> Dict:
                         "leads": {
                             "bsonType": "int",
                             "description": "Leads on this date"
+                        }
+                    }
+                }
+            },
+            "monthly_summary": {
+                "bsonType": "array",
+                "description": "Monthly summary (contains only last complete month)",
+                "items": {
+                    "bsonType": "object",
+                    "required": ["month", "total_leads", "total_views", "created_at"],
+                    "properties": {
+                        "month": {
+                            "bsonType": "string",
+                            "description": "Month in YYYY-MM format"
+                        },
+                        "total_leads": {
+                            "bsonType": "int",
+                            "description": "Total leads for the month"
+                        },
+                        "total_views": {
+                            "bsonType": "int",
+                            "description": "Total views for the month"
+                        },
+                        "created_at": {
+                            "bsonType": "date",
+                            "description": "Timestamp when summary was created"
                         }
                     }
                 }
