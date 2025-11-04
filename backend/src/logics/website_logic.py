@@ -1,4 +1,4 @@
-from src.database.db_common_operations import db_find_many, db_find_one, db_insert_one, db_update_one, db_append_to_array, db_remove_from_array
+from src.database.db_common_operations import db_find_many, db_find_one, db_insert_one, db_update_one, db_append_to_array, db_remove_from_array, db_exists
 from src.database.db_owner_analysis_operations import record_visit, record_contact
 from src.utils.exception_handler import handle_exceptions, AppException
 from src.logics.cloudfare_bucket import upload_farmhouse_image_to_r2, upload_farmhouse_document_to_r2
@@ -566,3 +566,24 @@ def get_user_wishlist(email):
         processed_properties.append(processed_property)
     
     return processed_properties
+
+
+@handle_exceptions
+def submit_review(farmhouse_id, reviewer_name, rating, review_comment):
+    farmhouse_exists = db_exists("farmhouses", {"_id": farmhouse_id})
+    
+    if not farmhouse_exists:
+        raise AppException("Farmhouse not found")
+    
+    if not isinstance(rating, int) or rating < 1 or rating > 5:
+        raise AppException("Rating must be an integer between 1 and 5")
+    
+    review_data = {
+        "farmhouse_id": farmhouse_id,
+        "reviewer_name": reviewer_name,
+        "rating": rating,
+        "review_comment": review_comment
+    }
+    
+    db_insert_one("pending_reviews", review_data)
+    return True
