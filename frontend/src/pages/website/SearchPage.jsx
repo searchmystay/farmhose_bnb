@@ -52,6 +52,16 @@ function SearchPage() {
     }
   }
 
+  const handleClearSearch = () => {
+    sessionStorage.removeItem('searchCriteria')
+    setFormData({
+      checkIn: '',
+      checkOut: '',
+      propertyType: 'both',
+      numberOfPeople: 'flexible'
+    })
+  }
+
   const getTodayDate = () => {
     const today = new Date()
     return today.toISOString().split('T')[0]
@@ -166,9 +176,12 @@ function SearchPage() {
                 {renderDateSelection()}
                 {renderNumberOfPeople()}
                 
-                <div className="pt-4">
+                <div className="pt-4 space-y-3">
                   <button type="submit" className="w-full bg-green-600 text-white py-3 md:py-4 px-6 rounded-lg font-medium text-base md:text-lg hover:bg-green-700 focus:ring-4 focus:ring-green-200 transition-all duration-200 transform hover:scale-[1.02]">
                     Search Properties
+                  </button>
+                  <button type="button" onClick={handleClearSearch} className="w-full bg-gray-100 text-gray-700 py-3 md:py-4 px-6 rounded-lg font-medium text-base md:text-lg hover:bg-gray-200 focus:ring-4 focus:ring-gray-200 transition-all duration-200 border border-gray-300">
+                    Clear Search Details
                   </button>
                 </div>
               </form>
