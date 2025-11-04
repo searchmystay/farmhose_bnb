@@ -172,7 +172,8 @@ def get_approved_properties_by_type(query_filter, number_of_people=None, check_i
         "name": 1,
         "description": 1,
         "images": 1,
-        "amenities": 1
+        "amenities": 1,
+        "type":1
     }
 
     if number_of_people and not isinstance(number_of_people, str):
@@ -243,6 +244,12 @@ def get_approved_bnbs(number_of_people=None, check_in_date=None, check_out_date=
     query_filter = {"status": "active", "type": "bnb"}
     bnbs_list = get_approved_properties_by_type(query_filter, number_of_people, check_in_date, check_out_date)
     return bnbs_list
+
+@handle_exceptions
+def get_all_approved_properties(number_of_people=None, check_in_date=None, check_out_date=None):
+    query_filter = {"status": "active"}
+    properties_list = get_approved_properties_by_type(query_filter, number_of_people, check_in_date, check_out_date)
+    return properties_list
 
 
 @handle_exceptions
