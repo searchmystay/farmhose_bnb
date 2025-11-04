@@ -31,6 +31,12 @@ def get_farmhouse_schema() -> Dict:
                 "description": "Phone number for property owner",
                 "pattern": "^[0-9]{10}$"
             },
+            "max_people": {
+                "bsonType": "int",
+                "description": "Maximum number of people that can stay at the property",
+                "minimum": 1,
+                "maximum": 100
+            },
             "location": {
                 "bsonType": "object",
                 "description": "Property location details",
