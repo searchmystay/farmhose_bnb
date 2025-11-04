@@ -587,3 +587,14 @@ def submit_review(farmhouse_id, reviewer_name, rating, review_comment):
     
     db_insert_one("pending_reviews", review_data)
     return True
+
+
+@handle_exceptions
+def get_farmhouse_name(farmhouse_id):
+    farmhouse_data = db_find_one("farmhouses", {"_id": farmhouse_id}, {"name": 1})
+    
+    if not farmhouse_data:
+        raise AppException("Farmhouse not found")
+    
+    farmhouse_name = farmhouse_data["name"]
+    return farmhouse_name

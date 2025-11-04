@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify, request
-from src.logics.website_logic import get_approved_farmhouses, get_approved_bnbs, get_property_details, register_property, process_whatsapp_contact, get_fav_properties, toggle_wishlist, create_lead, get_user_wishlist, submit_review
+from src.logics.website_logic import *
 from src.utils.exception_handler import handle_route_exceptions, AppException
 from bson import ObjectId
 import json
@@ -207,6 +207,22 @@ def submit_review_route():
     response_data = {
         "success": True,
         "message": "Review submitted successfully for approval"
+    }
+    
+    return jsonify(response_data), 200
+
+
+@website_bp.route('/farmhouse-name/<farmhouse_id>', methods=['GET'])
+@handle_route_exceptions
+def get_farmhouse_name_route(farmhouse_id):
+    object_id = ObjectId(farmhouse_id)
+    farmhouse_name = get_farmhouse_name(object_id)
+    
+    response_data = {
+        "success": True,
+        "backend_data": {
+            "farmhouse_name": farmhouse_name
+        }
     }
     
     return jsonify(response_data), 200
