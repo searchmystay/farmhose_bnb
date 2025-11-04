@@ -11,25 +11,31 @@ const apiClient = axios.create({
 })
 
 export const fetchFarmhouseList = async () => {
-  const response = await apiClient.get('/farmhouse-list')
-  const result = response.data
-  
-  if (result.success === false) {
-    throw new Error(result.message || 'Failed to fetch farmhouses')
+  try {
+    const response = await apiClient.post('/farmhouse-list', {})
+    const result = response.data
+    return result
+  } catch (error) {
+    if (error.response && error.response.data) {
+      const backendError = error.response.data
+      throw new Error(backendError.message || 'Failed to fetch farmhouses')
+    }
+    throw new Error('Failed to fetch farmhouses, Network error')
   }
-  
-  return result
 }
 
 export const fetchBnbList = async () => {
-  const response = await apiClient.get('/bnb-list')
-  const result = response.data
-  
-  if (result.success === false) {
-    throw new Error(result.message || 'Failed to fetch BnBs')
+  try {
+    const response = await apiClient.post('/bnb-list', {})
+    const result = response.data
+    return result
+  } catch (error) {
+    if (error.response && error.response.data) {
+      const backendError = error.response.data
+      throw new Error(backendError.message || 'Failed to fetch BnBs')
+    }
+    throw new Error('Failed to fetch BnBs, Network error')
   }
-  
-  return result
 }
 
 export const fetchTopProperties = async () => {
