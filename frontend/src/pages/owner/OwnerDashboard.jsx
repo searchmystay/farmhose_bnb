@@ -1,7 +1,7 @@
 import { Helmet } from 'react-helmet-async'
 import { useParams } from 'react-router-dom'
 import { useState } from 'react'
-import { CurrencyCircleDollar, TrendUp, Eye, Users, CalendarBlank, ChartBar, House, CreditCard, Gear } from '@phosphor-icons/react'
+import { CurrencyCircleDollar, TrendUp, Eye, Users, CalendarBlank, ChartBar, House, CreditCard, Gear, Copy, Check } from '@phosphor-icons/react'
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
 import FullCalendar from '@fullcalendar/react'
 import dayGridPlugin from '@fullcalendar/daygrid'
@@ -23,6 +23,7 @@ function OwnerDashboard() {
   const [activeTab, setActiveTab] = useState('dashboard')
   const [sidebarExpanded, setSidebarExpanded] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [copied, setCopied] = useState(false)
 
   const handlePaymentSuccess = () => {
     toast.success('Payment successful! Credits added to your account.')
@@ -33,7 +34,19 @@ function OwnerDashboard() {
 
   const { initiatePayment, loading: paymentLoading } = useRazorpay(farmhouseId, handlePaymentSuccess)
 
-  const renderKpiCard = (icon, title, value, color, lastMonthValue = null) => {
+  const handleCopyReviewLink = async () => {
+    const reviewUrl = 'https://mystate.xyz'
+    try {
+      await navigator.clipboard.writeText(reviewUrl)
+      setCopied(true)
+      toast.success('Review link copied to clipboard!')
+      setTimeout(() => setCopied(false), 2000)
+    } catch (err) {
+      toast.error('Failed to copy link')
+    }
+  }
+
+  const renderKpiCard = (icon, title, value, color, lastMonthValue = null, reviewLink = null) => {
     return (
       <div 
         className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1 p-6 cursor-pointer border border-gray-100"
@@ -49,6 +62,27 @@ function OwnerDashboard() {
             <div className="text-right">
               <p className="text-gray-700 font-semibold text-base">{lastMonthValue}</p>
               <p className="text-xs text-gray-400">vs last month</p>
+            </div>
+          )}
+          {reviewLink && (
+            <div className="text-right">
+              <span className="text-xs font-semibold text-gray-600 block mb-2">Review Link:</span>
+              <button
+                onClick={handleCopyReviewLink}
+                className="flex items-center gap-2 px-3 py-2 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-lg transition-colors text-xs font-medium border border-blue-200"
+              >
+                {copied ? (
+                  <>
+                    <Check size={14} weight="bold" />
+                    <span>Copied!</span>
+                  </>
+                ) : (
+                  <>
+                    <Copy size={14} />
+                    <span>Copy Link</span>
+                  </>
+                )}
+              </button>
             </div>
           )}
         </div>
@@ -163,14 +197,14 @@ function OwnerDashboard() {
             </button>
             <img src={Logo} alt="Company Logo" className="h-8 sm:h-10" style={{ filter: 'brightness(0)' }}/>
           </div>
-          <div className="flex items-center gap-4 sm:gap-8 text-xs sm:text-sm">
+          <div className="flex items-center gap-3 sm:gap-6 text-xs sm:text-sm">
             <div className="text-right">
-              <span className="text-black font-bold hidden sm:inline">Owner : </span>
+              <span className="text-black font-bold hidden sm:inline">Owner: </span>
               <span className="font-semibold text-gray-900">{ownerInfo.name || 'N/A'}</span>
             </div>
-            <div className="text-right hidden sm:block">
-              <span className="text-black font-bold">ID : </span>
-              <span className="font-semibold text-black">{ownerInfo.farmhouse_id || 'N/A'}</span>
+            <div className="text-right">
+              <span className="text-black font-bold">Credits Left: </span>
+              <span className="font-semibold text-green-600">₹{paymentKpis.total_cost_left || 0}</span>
             </div>
           </div>
         </header>
@@ -289,7 +323,7 @@ function OwnerDashboard() {
                   {renderKpiCard(
                     <CurrencyCircleDollar size={40} weight="duotone" />, 
                     'Total Money Spent', 
-                    `₹${row2Kpis.total_money_spent || 0}`, 
+                    `₹${paymentKpis.total_cost_given || 0}`, 
                     '#dc2626',
                     null
                   )}
@@ -310,28 +344,13 @@ function OwnerDashboard() {
                   {renderKpiCard(
                     <TrendUp size={40} weight="duotone" />, 
                     'Total Rating out of 5', 
-                    row2Kpis.total_rating || 0, 
+                    row2Kpis.review_average || 0, 
                     '#f59e0b',
-                    null
+                    null,
+                    true
                   )}
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
-                  {renderKpiCard(
-                    <CurrencyCircleDollar size={40} weight="duotone" />, 
-                    'Total Cost Given', 
-                    `₹${paymentKpis.total_cost_given || 0}`, 
-                    '#3b82f6',
-                    null
-                  )}
-                  {renderKpiCard(
-                    <CurrencyCircleDollar size={40} weight="duotone" />, 
-                    'Total Cost Left', 
-                    `₹${paymentKpis.total_cost_left || 0}`, 
-                    '#10b981',
-                    null
-                  )}
-                </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                   {renderLineChart()}
@@ -399,26 +418,13 @@ function OwnerDashboard() {
               <div className="p-4 sm:p-6 md:p-8 lg:p-10">
                 <div className="bg-white rounded-2xl shadow-md p-4 sm:p-6 md:p-6 lg:p-8">
                   <div className="mb-4 sm:mb-6">
-                    <div className="flex justify-between items-start mb-2">
-                      <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 flex items-center gap-2 sm:gap-3">
-                        <CalendarBlank size={24} weight="duotone" className="text-blue-600 sm:hidden" />
-                        <CalendarBlank size={28} weight="duotone" className="text-blue-600 hidden sm:block md:hidden" />
-                        <CalendarBlank size={32} weight="duotone" className="text-blue-600 hidden md:block" />
-                        <span>Booking Calendar</span>
-                      </h2>
-                      <div className="text-right">
-                        <span className="text-sm font-semibold text-gray-700">Review Form Link: </span>
-                        <a 
-                          href="https://mystate.xyz" 
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                          className="text-sm text-blue-600 hover:text-blue-800 hover:underline"
-                        >
-                          mystate.xyz
-                        </a>
-                      </div>
-                    </div>
-                    <p className="text-gray-600 text-xs sm:text-sm">Click on dates to mark them as booked. Past dates are disabled.</p>
+                    <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 flex items-center gap-2 sm:gap-3 mb-2">
+                      <CalendarBlank size={24} weight="duotone" className="text-blue-600 sm:hidden" />
+                      <CalendarBlank size={28} weight="duotone" className="text-blue-600 hidden sm:block md:hidden" />
+                      <CalendarBlank size={32} weight="duotone" className="text-blue-600 hidden md:block" />
+                      <span>Booking Calendar</span>
+                    </h2>
+                    <p className="text-gray-600 text-xs sm:text-sm">Click on dates to mark them as booked. Drag across multiple dates to book a range. Past dates are disabled.</p>
                   </div>
 
                   {calendarLoading ? (
@@ -438,12 +444,67 @@ function OwnerDashboard() {
                         }}
                         height="auto"
                         contentHeight="auto"
-                        selectable={false}
-                        selectMirror={false}
+                        selectable={true}
+                        selectMirror={true}
                         dayMaxEvents={false}
                         weekends={true}
                         events={[]}
                         fixedWeekCount={false}
+                        select={async (info) => {
+                          // Handle date range selection (drag-to-select)
+                          const startDate = new Date(info.startStr)
+                          const endDate = new Date(info.endStr)
+                          
+                          // Get today's date
+                          const today = new Date()
+                          const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`
+                          
+                          // Generate array of dates in the selected range
+                          const datesToBook = []
+                          const currentDate = new Date(startDate)
+                          
+                          while (currentDate < endDate) {
+                            const year = currentDate.getFullYear()
+                            const month = String(currentDate.getMonth() + 1).padStart(2, '0')
+                            const day = String(currentDate.getDate()).padStart(2, '0')
+                            const dateStr = `${year}-${month}-${day}`
+                            
+                            // Only add future/today dates
+                            if (dateStr >= todayStr) {
+                              datesToBook.push(dateStr)
+                            }
+                            
+                            currentDate.setDate(currentDate.getDate() + 1)
+                          }
+                          
+                          if (datesToBook.length === 0) {
+                            toast.error('Cannot book past dates')
+                            return
+                          }
+                          
+                          // Check if all dates are booked (for unbooking)
+                          const allBooked = datesToBook.every(date => bookedDates.includes(date))
+                          
+                          if (allBooked) {
+                            // Unbook all dates in range
+                            for (const dateStr of datesToBook) {
+                              await removeBookedDate(dateStr)
+                            }
+                            toast.success(`${datesToBook.length} date(s) unbooked`)
+                          } else {
+                            // Book all dates that aren't already booked
+                            let bookedCount = 0
+                            for (const dateStr of datesToBook) {
+                              if (!bookedDates.includes(dateStr)) {
+                                await addBookedDate(dateStr)
+                                bookedCount++
+                              }
+                            }
+                            if (bookedCount > 0) {
+                              toast.success(`${bookedCount} date(s) booked`)
+                            }
+                          }
+                        }}
                         dateClick={async (info) => {
                           // Use the exact date string from info.dateStr (already in YYYY-MM-DD format)
                           const clickedDateStr = info.dateStr
