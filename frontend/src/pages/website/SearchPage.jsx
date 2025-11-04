@@ -19,7 +19,16 @@ function SearchPage() {
 
   const handleSubmit = (e) => {
     e.preventDefault()
-    console.log('Search form data:', formData)
+    
+    const searchData = {
+      checkIn: formData.checkIn,
+      checkOut: formData.checkOut,
+      propertyType: formData.propertyType,
+      numberOfPeople: parseInt(formData.numberOfPeople) || 1
+    }
+    
+    sessionStorage.setItem('searchCriteria', JSON.stringify(searchData))
+    console.log('Search data saved to session storage:', searchData)
     
     if (formData.propertyType === 'farmhouse') {
       navigate('/farmhouse')
