@@ -220,13 +220,16 @@ def build_pending_reviews_response(farmhouse_reviews, farmhouse_names):
     for farmhouse_id, reviews in farmhouse_reviews.items():
         farmhouse_name = farmhouse_names.get(farmhouse_id, "Unknown Property")
         
-        farmhouse_data = {
-            "farmhouse_id": str(farmhouse_id),
-            "farmhouse_name": farmhouse_name,
-            "reviews": reviews,
-            "total_reviews": len(reviews)
-        }
-        result.append(farmhouse_data)
+        for review in reviews:
+            review_item = {
+                "farmhouse_id": str(farmhouse_id),
+                "farmhouse_name": farmhouse_name,
+                "review_id": review["review_id"],
+                "reviewer_name": review["reviewer_name"],
+                "review_comment": review["review_comment"],
+                "rating": review["rating"]
+            }
+            result.append(review_item)
     
     return result
 
