@@ -1,9 +1,50 @@
-from flask import Blueprint, jsonify, request
-from src.logics.owner_dashboard_logic import get_owner_dashboard_data, get_booked_dates, add_booked_date, remove_booked_date
+from flask import Blueprint, jsonify, request, make_response
+from src.logics.owner_dashboard_logic import get_owner_dashboard_data, get_booked_dates, add_booked_date, remove_booked_date, authenticate_owner
 from src.utils.exception_handler import handle_route_exceptions, AppException
 
 
 owner_bp = Blueprint('owner', __name__)
+
+
+@owner_bp.route('/owner-login', methods=['POST'])
+@handle_route_exceptions
+def owner_login_route():
+    data = request.get_json()
+    owner_id = data.get('owner_id')
+    password = data.get('password')
+    
+    if not owner_id or not password:
+        raise AppException("Owner ID and password are required")
+    
+    auth_result = authenticate_owner(owner_id, password)
+    
+    response = make_response(jsonify({
+        "success": True,
+        "data": auth_result
+    }), 200)
+    
+    response.set_cookie(
+        'owner_token',
+        auth_result['token'],
+        httponly=True,
+        secure=False,
+        samesite='Lax',
+        max_age=24 * 60 * 60
+    )
+    
+    return response
+
+
+@owner_bp.route('/owner-logout', methods=['POST'])
+@handle_route_exceptions
+def owner_logout_route():
+    response = make_response(jsonify({
+        "success": True,
+        "message": "Logged out successfully"
+    }), 200)
+    
+    response.set_cookie('owner_token', '', expires=0)
+    return response
 
 
 @owner_bp.route('/owner-dashboard/<farmhouse_id>', methods=['GET'])

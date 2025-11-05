@@ -78,9 +78,10 @@ def get_farmhouse_schema() -> Dict:
             },
             "booked_dates": {
                 "bsonType": "array",
-                "description": "Array of all future booked dates",
+                "description": "Array of all future booked dates (YYYY-MM-DD format)",
                 "items": {
-                    "bsonType": "date"
+                    "bsonType": "string",
+                    "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
                 }
             },
             "images": {
@@ -453,6 +454,12 @@ def get_farmhouse_schema() -> Dict:
                 "bsonType": "object",
                 "description": "Details about the farmhouse owner",
                 "properties": {
+                    "owner_name": {
+                        "bsonType": "string",
+                        "description": "Name of the farmhouse owner",
+                        "minLength": 3,
+                        "maxLength": 100
+                    },
                     "owner_photo": {
                         "bsonType": "string",
                         "description": "Photo URL of the farmhouse owner"
@@ -460,6 +467,17 @@ def get_farmhouse_schema() -> Dict:
                     "owner_description": {
                         "bsonType": "string",
                         "description": "Description about the farmhouse owner",
+                    },
+                    "owner_dashboard_id": {
+                        "bsonType": "string",
+                        "description": "Unique owner dashboard login ID",
+                        "minLength": 3,
+                        "maxLength": 50
+                    },
+                    "owner_dashboard_password": {
+                        "bsonType": "string",
+                        "description": "Owner dashboard password for authentication",
+                        "minLength": 6
                     }
                 }
             },

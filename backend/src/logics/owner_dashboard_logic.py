@@ -2,9 +2,13 @@ from src.database.db_owner_analysis_operations import get_total_visits, get_tota
 from src.database.db_payment_operations import get_farmhouse_credit_balance
 from src.database.db_common_operations import db_find_many, db_aggregate, db_find_one, db_update_one
 from src.utils.exception_handler import handle_exceptions, AppException
+from src.config import JWT_SECRET_KEY
 from bson import ObjectId
 from datetime import datetime, timedelta
+from functools import wraps
+from flask import request, jsonify
 import pytz
+import jwt
 
 
 @handle_exceptions
@@ -150,11 +154,8 @@ def get_owner_dashboard_data(farmhouse_id):
     return dashboard_data
 
 
-# ============== BOOKED DATES MANAGEMENT ==============
-
 @handle_exceptions
 def get_booked_dates(farmhouse_id):
-    """Get all booked dates for a farmhouse"""
     farmhouse = db_find_one("farmhouses", {"_id": ObjectId(farmhouse_id)})
     
     if not farmhouse:
@@ -162,40 +163,28 @@ def get_booked_dates(farmhouse_id):
     
     booked_dates = farmhouse.get("booked_dates", [])
     
-    # Convert datetime objects to ISO string format
-    formatted_dates = []
-    for date in booked_dates:
-        if isinstance(date, datetime):
-            formatted_dates.append(date.strftime("%Y-%m-%d"))
-        else:
-            formatted_dates.append(str(date))
-    
     return {
-        "booked_dates": formatted_dates
+        "booked_dates": booked_dates
     }
 
 
 @handle_exceptions
 def add_booked_date(farmhouse_id, date_string):
-    """Add a date to booked_dates array"""
     # Parse the date string (YYYY-MM-DD format)
     try:
         date_obj = datetime.strptime(date_string, "%Y-%m-%d")
     except ValueError:
         raise AppException("Invalid date format. Use YYYY-MM-DD")
     
-    # Set time to start of day UTC
-    date_obj = date_obj.replace(hour=0, minute=0, second=0, microsecond=0)
-    
     # Check if date is not in the past
     today = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
     if date_obj < today:
         raise AppException("Cannot book past dates")
     
-    # Add to booked_dates array (use $addToSet to avoid duplicates)
+    # Add to booked_dates array as string (use $addToSet to avoid duplicates)
     query_filter = {"_id": ObjectId(farmhouse_id)}
     update_data = {
-        "$addToSet": {"booked_dates": date_obj}
+        "$addToSet": {"booked_dates": date_string}
     }
     
     result = db_update_one("farmhouses", query_filter, update_data)
@@ -212,20 +201,16 @@ def add_booked_date(farmhouse_id, date_string):
 
 @handle_exceptions
 def remove_booked_date(farmhouse_id, date_string):
-    """Remove a date from booked_dates array"""
-    # Parse the date string
+    # Validate the date string
     try:
-        date_obj = datetime.strptime(date_string, "%Y-%m-%d")
+        datetime.strptime(date_string, "%Y-%m-%d")
     except ValueError:
         raise AppException("Invalid date format. Use YYYY-MM-DD")
     
-    # Set time to start of day UTC
-    date_obj = date_obj.replace(hour=0, minute=0, second=0, microsecond=0)
-    
-    # Remove from booked_dates array
+    # Remove from booked_dates array as string
     query_filter = {"_id": ObjectId(farmhouse_id)}
     update_data = {
-        "$pull": {"booked_dates": date_obj}
+        "$pull": {"booked_dates": date_string}
     }
     
     result = db_update_one("farmhouses", query_filter, update_data)
@@ -238,3 +223,101 @@ def remove_booked_date(farmhouse_id, date_string):
         "message": "Date unmarked",
         "date": date_string
     }
+
+
+@handle_exceptions
+def validate_owner_credentials(owner_id, password):
+    query = {"owner_details.owner_dashboard_id": owner_id}
+    projection = {"_id": 1, "owner_details": 1, "name": 1}
+    owner = db_find_one("farmhouses", query, projection)
+    
+    if not owner:
+        raise AppException("Invalid owner ID or password")
+    
+    owner_details = owner.get("owner_details", {})
+    stored_password = owner_details.get("owner_dashboard_password")
+    
+    if not stored_password or stored_password != password:
+        raise AppException("Invalid owner ID or password")
+    
+    return owner
+
+
+@handle_exceptions
+def generate_owner_jwt_token(farmhouse_id, owner_id):
+    if not JWT_SECRET_KEY:
+        raise AppException("JWT secret not configured")
+    
+    payload = {
+        "farmhouse_id": str(farmhouse_id),
+        "owner_id": owner_id,
+        "owner": True,
+        "exp": datetime.utcnow() + timedelta(hours=24),
+        "iat": datetime.utcnow()
+    }
+    
+    token = jwt.encode(payload, JWT_SECRET_KEY, algorithm='HS256')
+    return token
+
+
+@handle_exceptions
+def verify_owner_jwt_token(token):
+    if not JWT_SECRET_KEY:
+        raise AppException("JWT secret not configured")
+    
+    try:
+        payload = jwt.decode(token, JWT_SECRET_KEY, algorithms=['HS256'])
+        
+        if not payload.get('owner'):
+            raise AppException("Invalid owner token")
+        
+        return payload
+        
+    except jwt.ExpiredSignatureError:
+        raise AppException("Token has expired")
+    except jwt.InvalidTokenError:
+        raise AppException("Invalid token")
+
+
+@handle_exceptions
+def authenticate_owner(owner_id, password):
+    owner = validate_owner_credentials(owner_id, password)
+    farmhouse_id = owner["_id"]
+    owner_details = owner.get("owner_details", {})
+    owner_token = generate_owner_jwt_token(farmhouse_id, owner_id)
+    
+    auth_result = {
+        "token": owner_token,
+        "farmhouse_id": str(farmhouse_id),
+        "farmhouse_name": owner.get("name"),
+        "owner_name": owner_details.get("owner_name"),
+        "expires_in": 24 * 60 * 60,
+        "owner": True
+    }
+    
+    return auth_result
+
+
+def owner_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        token = request.cookies.get('owner_token')
+        
+        if not token:
+            return jsonify({
+                "success": False,
+                "message": "Authentication required"
+            }), 401
+        
+        try:
+            payload = verify_owner_jwt_token(token)
+            request.owner = payload
+            return f(*args, **kwargs)
+            
+        except AppException as e:
+            return jsonify({
+                "success": False,
+                "message": str(e)
+            }), 401
+    
+    return decorated_function
