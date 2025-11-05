@@ -1,1 +1,44 @@
 @import "tailwindcss";
+
+/* 
+  ====================================
+  HERO HEADING FONT - EASY TO CHANGE
+  ====================================
+  
+  To change the font, simply uncomment ONE of the options below:
+  
+  Option 1: Playfair Display (Elegant serif - CURRENTLY ACTIVE)
+  Option 2: Cormorant Garamond (Classic luxury serif)
+  Option 3: Cinzel (Bold elegant serif)
+  Option 4: Marcellus (Clean sophisticated serif)
+  Option 5: Lora (Modern readable serif)
+  Option 6: Libre Baskerville (Traditional bookish)
+  Option 7: Montserrat (Modern sans-serif)
+  Option 8: Poppins (Friendly modern sans-serif)
+*/
+
+.hero-heading {
+  /* Option 1: Playfair Display - Elegant & Luxurious ✓ ACTIVE */
+  font-family: 'Playfair Display', serif;
+  
+  /* Option 2: Cormorant Garamond - Classic & Refined */
+  /* font-family: 'Cormorant Garamond', serif; */
+  
+  /* Option 3: Cinzel - Bold & Majestic */
+  /* font-family: 'Cinzel', serif; */
+  
+  /* Option 4: Marcellus - Clean & Sophisticated */
+  /* font-family: 'Marcellus', serif; */
+  
+  /* Option 5: Lora - Modern & Balanced */
+  /* font-family: 'Lora', serif; */
+  
+  /* Option 6: Libre Baskerville - Traditional & Bookish */
+  /* font-family: 'Libre Baskerville', serif; */
+  
+  /* Option 7: Montserrat - Modern Sans-Serif */
+  /* font-family: 'Montserrat', sans-serif; */
+  
+  /* Option 8: Poppins - Friendly & Modern Sans-Serif */
+  /* font-family: 'Poppins', sans-serif; */
+}

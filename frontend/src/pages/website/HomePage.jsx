@@ -64,7 +64,7 @@ function HeroSection({ onWishlistClick }) {
       </div>
 
       <div className="relative z-10 h-full flex flex-col items-center justify-center text-center px-6 max-w-4xl mx-auto">
-        <h1 className="text-5xl md:text-7xl font-light text-white mb-6 tracking-tight">
+        <h1 className="hero-heading text-5xl md:text-7xl font-medium text-white mb-6 tracking-tight">
           Find Your Perfect Stay
         </h1>
         <p className="text-lg md:text-xl text-white/90 mb-4 max-w-2xl leading-relaxed">
