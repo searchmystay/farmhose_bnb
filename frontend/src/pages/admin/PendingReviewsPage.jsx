@@ -9,37 +9,48 @@ function PendingReviewsPage() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center py-12">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-        <span className="ml-3 text-gray-600">Loading pending reviews...</span>
+      <div className="flex items-center justify-center min-h-[50vh] px-4">
+        <div className="text-center max-w-md mx-auto">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-3"></div>
+          <span className="text-gray-600 text-sm sm:text-base">Loading pending reviews...</span>
+        </div>
       </div>
     )
   }
 
   if (error) {
     return (
-      <div className="text-center py-12">
-        <p className="text-red-600 mb-4">{error}</p>
-        <button
-          onClick={refetch}
-          className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors"
-        >
-          Try Again
-        </button>
+      <div className="flex items-center justify-center min-h-[50vh] px-4">
+        <div className="text-center max-w-md mx-auto">
+          <div className="text-red-500 mb-4">
+            <svg className="mx-auto h-12 w-12 sm:h-16 sm:w-16 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.728-.833-2.498 0L4.316 16.5c-.77.833.192 2.5 1.732 2.5z" />
+            </svg>
+          </div>
+          <p className="text-red-600 mb-4 text-sm sm:text-base">{error}</p>
+          <button
+            onClick={refetch}
+            className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors text-sm sm:text-base"
+          >
+            Try Again
+          </button>
+        </div>
       </div>
     )
   }
 
   if (pendingReviews.length === 0) {
     return (
-      <div className="text-center py-12">
-        <div className="text-gray-400 mb-4">
-          <svg className="mx-auto h-16 w-16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-          </svg>
+      <div className="flex items-center justify-center min-h-[50vh] px-4">
+        <div className="text-center max-w-md mx-auto">
+          <div className="text-gray-400 mb-4">
+            <svg className="mx-auto h-12 w-12 sm:h-16 sm:w-16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+          </div>
+          <p className="text-gray-600 text-base sm:text-lg">No pending reviews</p>
+          <p className="text-gray-500 text-sm sm:text-base mt-2">All reviews have been processed</p>
         </div>
-        <p className="text-gray-600 text-lg">No pending reviews</p>
-        <p className="text-gray-500 text-sm mt-2">All reviews have been processed</p>
       </div>
     )
   }
