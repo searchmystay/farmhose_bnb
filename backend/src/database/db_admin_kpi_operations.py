@@ -55,8 +55,9 @@ def aggregate_total_credits():
 
 
 @handle_exceptions
-def calculate_platform_revenue(total_recharged, total_credits_left):
-    total_revenue = total_recharged - total_credits_left
+def calculate_platform_revenue(total_leads, total_recharged, total_credits_left):
+    per_lead_cost = 40
+    total_revenue = total_leads * per_lead_cost
     revenue_data = {
         "total_revenue": total_revenue,
         "total_recharged": total_recharged,
@@ -67,9 +68,10 @@ def calculate_platform_revenue(total_recharged, total_credits_left):
 
 @handle_exceptions
 def get_total_platform_revenue():
+    total_leads = aggregate_total_leads()
     total_recharged = aggregate_total_payments()
     total_credits_left = aggregate_total_credits()
-    revenue_data = calculate_platform_revenue(total_recharged, total_credits_left)
+    revenue_data = calculate_platform_revenue(total_leads, total_recharged, total_credits_left)
     return revenue_data
 
 
