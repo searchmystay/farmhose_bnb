@@ -110,7 +110,6 @@ function AllPropertiesPage({ onViewDetails }) {
                   : (property.favourite ? 'Remove Favourite' : 'Add Favourite')
                 }
               </span>
-              <span className="sm:hidden">{property.favourite ? '★' : '☆'}</span>
             </button>
           </div>
         </div>
