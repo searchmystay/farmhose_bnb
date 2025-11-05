@@ -186,3 +186,31 @@ def get_pending_reviews_route():
     }
     
     return jsonify(response_data), 200
+
+
+@admin_bp.route('/accept_comment/<review_id>', methods=['POST'])
+@admin_required
+@handle_route_exceptions
+def accept_comment_route(review_id):
+    accept_pending_review(review_id)
+    
+    response_data = {
+        "success": True,
+        "message": "Review accepted and moved to farmhouse successfully"
+    }
+    
+    return jsonify(response_data), 200
+
+
+@admin_bp.route('/reject_comment/<review_id>', methods=['DELETE'])
+@admin_required
+@handle_route_exceptions
+def reject_comment_route(review_id):
+    reject_pending_review(review_id)
+    
+    response_data = {
+        "success": True,
+        "message": "Review rejected and deleted successfully"
+    }
+    
+    return jsonify(response_data), 200

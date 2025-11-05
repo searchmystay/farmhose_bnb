@@ -247,3 +247,82 @@ def get_pending_reviews():
     final_result = build_pending_reviews_response(farmhouse_reviews, farmhouse_names)
     
     return final_result
+
+
+@handle_exceptions
+def get_pending_review_by_id(review_id):
+    query_filter = {"_id": ObjectId(review_id)}
+    review_data = db_find_one("pending_reviews", query_filter)
+    
+    if not review_data:
+        raise AppException("Pending review not found")
+    
+    return review_data
+
+
+@handle_exceptions
+def calculate_review_average(farmhouse_id):
+    farmhouse_filter = {"_id": ObjectId(farmhouse_id)}
+    farmhouse_data = db_find_one("farmhouses", farmhouse_filter, {"reviews": 1})
+    
+    if not farmhouse_data:
+        raise AppException("Farmhouse not found")
+    
+    reviews = farmhouse_data.get("reviews", [])
+    
+    if not reviews:
+        new_average = 0.0
+    else:
+        total_rating = sum(review.get("rating", 0) for review in reviews)
+        new_average = round(total_rating / len(reviews), 2)
+    
+    return new_average
+
+
+@handle_exceptions
+def update_farmhouse_analysis_review_average(farmhouse_id, new_average):
+    analysis_filter = {"farmhouse_id": ObjectId(farmhouse_id)}
+    update_data = {"$set": {"review_average": new_average}}
+    db_update_one("farmhouse_analysis", analysis_filter, update_data)
+    return True
+
+
+@handle_exceptions
+def accept_pending_review(review_id):
+    review_data = get_pending_review_by_id(review_id)
+    
+    farmhouse_id = review_data.get("farmhouse_id")
+    reviewer_name = review_data.get("reviewer_name")
+    review_comment = review_data.get("review_comment")
+    rating = review_data.get("rating")
+    
+    farmhouse_filter = {"_id": ObjectId(farmhouse_id)}
+    farmhouse_exists = db_find_one("farmhouses", farmhouse_filter, {"_id": 1})
+    
+    if not farmhouse_exists:
+        raise AppException("Farmhouse not found")
+    
+    review_object = {
+        "reviewer_name": reviewer_name,
+        "review_comment": review_comment,
+        "rating": rating
+    }
+    
+    update_data = {"$push": {"reviews": review_object}}
+    db_update_one("farmhouses", farmhouse_filter, update_data)
+    
+    new_average = calculate_review_average(farmhouse_id)
+    update_farmhouse_analysis_review_average(farmhouse_id, new_average)
+    
+    query_filter = {"_id": ObjectId(review_id)}
+    db_delete_one("pending_reviews", query_filter)
+    return True
+
+
+@handle_exceptions
+def reject_pending_review(review_id):
+    get_pending_review_by_id(review_id)
+    
+    query_filter = {"_id": ObjectId(review_id)}
+    db_delete_one("pending_reviews", query_filter)
+    return True
