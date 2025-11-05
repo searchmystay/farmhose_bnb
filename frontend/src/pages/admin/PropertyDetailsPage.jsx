@@ -35,40 +35,119 @@ function PropertyDetailsPage({ propertyId, onBack }) {
     </div>
   )
 
+  const renderAmenities = (amenities) => {
+    if (!amenities || Object.keys(amenities).length === 0) {
+      return (
+        <div className="text-gray-500 text-center py-4">
+          No amenities information available
+        </div>
+      )
+    }
+
+    const categoryLabels = {
+      core_amenities: 'Core Amenities',
+      bedroom_bathroom: 'Bedroom & Bathroom',
+      outdoor_garden: 'Outdoor & Garden',
+      food_dining: 'Food & Dining',
+      entertainment_activities: 'Entertainment & Activities',
+      pet_family_friendly: 'Pet & Family Friendly',
+      safety_security: 'Safety & Security',
+      experience_luxury_addons: 'Experience & Luxury Add-ons',
+      house_rules_services: 'House Rules & Services'
+    }
+
+    return (
+      <div className="space-y-4">
+        {Object.entries(amenities).map(([categoryKey, categoryValue]) => {
+          if (!categoryValue || Object.keys(categoryValue).length === 0) return null
+          
+          const categoryLabel = categoryLabels[categoryKey] || categoryKey.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
+          
+          return (
+            <details key={categoryKey} className="border border-gray-200 rounded-lg">
+              <summary className="cursor-pointer bg-gray-50 px-4 py-3 font-medium text-gray-900 hover:bg-gray-100 transition-colors">
+                {categoryLabel}
+              </summary>
+              <div className="p-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                {Object.entries(categoryValue).map(([amenityKey, amenityValue]) => {
+                  const amenityLabel = amenityKey.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
+                  
+                  let displayValue = ''
+                  let statusClass = ''
+                  
+                  if (typeof amenityValue === 'boolean') {
+                    displayValue = amenityValue ? 'Available' : 'Not Available'
+                    statusClass = amenityValue ? 'text-green-600 bg-green-50' : 'text-red-600 bg-red-50'
+                  } else if (typeof amenityValue === 'number') {
+                    displayValue = amenityValue.toString()
+                    statusClass = 'text-blue-600 bg-blue-50'
+                  } else {
+                    displayValue = amenityValue || 'Not specified'
+                    statusClass = 'text-gray-600 bg-gray-50'
+                  }
+                  
+                  return (
+                    <div key={amenityKey} className="flex justify-between items-center py-2 px-3 bg-white border border-gray-100 rounded">
+                      <span className="text-sm text-gray-700">{amenityLabel}</span>
+                      <span className={`text-xs px-2 py-1 rounded-full ${statusClass}`}>
+                        {displayValue}
+                      </span>
+                    </div>
+                  )
+                })}
+              </div>
+            </details>
+          )
+        })}
+      </div>
+    )
+  }
+
   const renderTabNavigation = () => (
     <div className="border-b border-gray-200 mb-6">
-      <nav className="-mb-px flex space-x-8">
+      <div className="flex items-center justify-between">
+        <nav className="-mb-px flex space-x-8">
+          <button
+            onClick={() => setActiveTab('basic')}
+            className={`py-2 px-1 border-b-2 font-medium text-sm ${
+              activeTab === 'basic'
+                ? 'border-blue-500 text-blue-600'
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+            }`}
+          >
+            Basic Details
+          </button>
+          <button
+            onClick={() => setActiveTab('owner')}
+            className={`py-2 px-1 border-b-2 font-medium text-sm ${
+              activeTab === 'owner'
+                ? 'border-blue-500 text-blue-600'
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+            }`}
+          >
+            Owner Details
+          </button>
+          <button
+            onClick={() => setActiveTab('documents')}
+            className={`py-2 px-1 border-b-2 font-medium text-sm ${
+              activeTab === 'documents'
+                ? 'border-blue-500 text-blue-600'
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+            }`}
+          >
+            Documents & Images
+          </button>
+        </nav>
         <button
-          onClick={() => setActiveTab('basic')}
-          className={`py-2 px-1 border-b-2 font-medium text-sm ${
-            activeTab === 'basic'
-              ? 'border-blue-500 text-blue-600'
-              : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-          }`}
+          onClick={onBack}
+          className="text-blue-600 hover:text-blue-800 flex items-center text-sm py-2 px-3 rounded-md hover:bg-blue-50 transition-colors"
         >
-          Basic Details
+          <svg className="w-4 h-4 sm:mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          </svg>
+          <span className="hidden sm:inline">Back to Properties</span>
         </button>
-        <button
-          onClick={() => setActiveTab('owner')}
-          className={`py-2 px-1 border-b-2 font-medium text-sm ${
-            activeTab === 'owner'
-              ? 'border-blue-500 text-blue-600'
-              : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-          }`}
-        >
-          Owner Details
-        </button>
-        <button
-          onClick={() => setActiveTab('documents')}
-          className={`py-2 px-1 border-b-2 font-medium text-sm ${
-            activeTab === 'documents'
-              ? 'border-blue-500 text-blue-600'
-              : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-          }`}
-        >
-          Documents & Images
-        </button>
-      </nav>
+      </div>
     </div>
   )
 
@@ -101,6 +180,10 @@ function PropertyDetailsPage({ propertyId, onBack }) {
             <p className="text-gray-900 bg-gray-50 p-3 rounded-md">₹{basic.per_day_cost || 0}</p>
           </div>
           <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Max People Allowed</label>
+            <p className="text-gray-900 bg-gray-50 p-3 rounded-md">{basic.max_people || 0} people</p>
+          </div>
+          <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Address</label>
             <p className="text-gray-900 bg-gray-50 p-3 rounded-md">{basic.address || 'Not provided'}</p>
           </div>
@@ -108,6 +191,11 @@ function PropertyDetailsPage({ propertyId, onBack }) {
             <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
             <p className="text-gray-900 bg-gray-50 p-3 rounded-md min-h-[100px] whitespace-pre-wrap">{basic.description || 'No description provided'}</p>
           </div>
+        </div>
+        
+        <div className="mt-8">
+          <h4 className="text-lg font-semibold text-gray-900 mb-4">Amenities</h4>
+          {renderAmenities(basic.amenities)}
         </div>
       </div>
     )
@@ -245,28 +333,7 @@ function PropertyDetailsPage({ propertyId, onBack }) {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <button
-            onClick={onBack}
-            className="text-blue-600 hover:text-blue-800 mb-2 flex items-center text-sm"
-          >
-            <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
-            Back to Properties
-          </button>
-          <h1 className="text-2xl font-bold text-gray-900">
-            {propertyDetails?.basic_details?.name || 'Property Details'}
-          </h1>
-        </div>
-      </div>
-
-      {/* Tab Navigation */}
       {renderTabNavigation()}
-
-      {/* Tab Content */}
       {renderTabContent()}
     </div>
   )

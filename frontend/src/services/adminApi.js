@@ -39,6 +39,20 @@ export const fetchPendingProperties = async () => {
   }
 }
 
+export const fetchAllProperties = async () => {
+  try {
+    const response = await adminApiClient.get('/admin_all_properties')
+    const result = response.data
+    return result
+  } catch (error) {
+    if (error.response && error.response.data) {
+      const backendError = error.response.data
+      throw new Error(backendError.message || 'Failed to fetch all properties')
+    }
+    throw new Error('Failed to fetch all properties, Network error')
+  }
+}
+
 export const fetchPendingPropertyDetails = async (propertyId) => {
   try {
     const response = await adminApiClient.get(`/pending_property/${propertyId}`)

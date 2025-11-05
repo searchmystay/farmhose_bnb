@@ -136,7 +136,7 @@ function MainAdminPage() {
         return <DashboardPage />
       
       case 'all':
-        return <AllPropertiesPage />
+        return <AllPropertiesPage onViewDetails={handleViewPropertyDetails} />
       
       case 'pending':
         return <PendingPropertiesPage onViewDetails={handleViewPropertyDetails} />

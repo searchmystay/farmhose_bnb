@@ -62,7 +62,9 @@ def process_admin_property_details(property_data):
         "address": build_complete_address(property_data.get("location", {})),
         "opening_time": property_data.get("opening_time", ""),
         "closing_time": property_data.get("closing_time", ""),
-        "per_day_cost": property_data.get("per_day_cost", 0)
+        "per_day_cost": property_data.get("per_day_cost", 0),
+        "max_people": property_data.get("max_people", 0),
+        "amenities": property_data.get("amenities", {})
     }
     
     owner_details_data = property_data.get("owner_details", {})
@@ -123,6 +125,8 @@ def get_admin_property_details(property_id):
         "opening_time": 1,
         "closing_time": 1,
         "per_day_cost": 1,
+        "max_people": 1,
+        "amenities": 1,
         "owner_details": 1,
         "documents": 1,
         "images": 1
@@ -359,3 +363,32 @@ def reject_pending_review(review_id):
     query_filter = {"_id": ObjectId(review_id)}
     db_delete_one("pending_reviews", query_filter)
     return True
+
+
+@handle_exceptions
+def get_all_properties():
+    query_filter = {"status": {"$ne": "pending_approval"}} 
+    projection = {
+        "_id": 1,
+        "name": 1,
+        "type": 1,
+        "phone_number": 1,
+        "status": 1,
+        "favourite": 1
+    }
+    
+    all_properties = db_find_many("farmhouses", query_filter, projection)
+    
+    processed_properties = []
+    for property_data in all_properties:
+        processed_property = {
+            "id": str(property_data.get("_id")),
+            "name": property_data.get("name", ""),
+            "type": property_data.get("type", ""),
+            "phone_number": property_data.get("phone_number", ""),
+            "status": property_data.get("status", ""),
+            "favourite": property_data.get("favourite", False)
+        }
+        processed_properties.append(processed_property)
+    
+    return processed_properties

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
-import { adminLogin, fetchPendingReviews, acceptReview, rejectReview, fetchPendingProperties, approveProperty, rejectProperty, fetchAdminPropertyDetails } from '../services/adminApi'
+import { adminLogin, fetchPendingReviews, acceptReview, rejectReview, fetchPendingProperties, approveProperty, rejectProperty, fetchAdminPropertyDetails, fetchAllProperties, markPropertyAsFavourite } from '../services/adminApi'
 
 export const useAdminAuth = () => {
   const [isLoading, setIsLoading] = useState(false)
@@ -194,4 +194,57 @@ export const useAdminPropertyDetails = (propertyId) => {
   }, [propertyId])
 
   return {propertyDetails, isLoading, error, refetch: fetchPropertyDetails}
+}
+
+export const useAllProperties = () => {
+  const [allProperties, setAllProperties] = useState([])
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState(null)
+  const [actionLoading, setActionLoading] = useState(null)
+
+  const fetchProperties = async () => {
+    setIsLoading(true)
+    setError(null)
+    try {
+      const result = await fetchAllProperties()
+      if (result.success && result.backend_data?.properties) {
+        setAllProperties(result.backend_data.properties)
+      } else {
+        setAllProperties([])
+      }
+    } catch (error) {
+      setError(error.message || 'Failed to fetch all properties')
+      toast.error(error.message || 'Failed to fetch all properties')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleToggleFavourite = async (propertyId, currentFavouriteStatus) => {
+    setActionLoading(propertyId)
+    try {
+      const newFavouriteStatus = !currentFavouriteStatus
+      const result = await markPropertyAsFavourite(propertyId, newFavouriteStatus)
+      if (result.success) {
+        toast.success(result.message || `Property ${newFavouriteStatus ? 'added to' : 'removed from'} favourites`)
+        setAllProperties(prevProperties => 
+          prevProperties.map(property => 
+            property.id === propertyId 
+              ? { ...property, favourite: newFavouriteStatus }
+              : property
+          )
+        )
+      }
+    } catch (error) {
+      toast.error(error.message || 'Failed to update favourite status')
+    } finally {
+      setActionLoading(null)
+    }
+  }
+
+  useEffect(() => {
+    fetchProperties()
+  }, [])
+
+  return {allProperties, isLoading, error, actionLoading, refetch: fetchProperties, handleToggleFavourite}
 }

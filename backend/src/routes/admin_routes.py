@@ -217,6 +217,24 @@ def reject_comment_route(review_id):
     return jsonify(response_data), 200
 
 
+
+@admin_bp.route('/admin_all_properties', methods=['GET'])
+@admin_required
+@handle_route_exceptions
+def get_all_properties_route():
+    all_properties = get_all_properties()
+    
+    response_data = {
+        "success": True,
+        "backend_data": {
+            "properties": all_properties,
+            "total_count": len(all_properties)
+        }
+    }
+
+    return jsonify(response_data), 200
+
+
 @admin_bp.route('/analytics', methods=['GET'])
 @admin_required
 @handle_route_exceptions
