@@ -113,7 +113,7 @@ function PendingReviewsPage() {
         Review Comment:
       </h5>
       <p className="text-gray-700 text-sm leading-relaxed">
-        {review.comment || review.description || review.review_text || 'No comment provided'}
+        {review.review_comment || 'No comment provided'}
       </p>
     </div>
   )
