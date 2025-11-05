@@ -1,7 +1,7 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
-import { adminLogin } from '../services/adminApi'
+import { adminLogin, fetchPendingReviews } from '../services/adminApi'
 
 export const useAdminAuth = () => {
   const [isLoading, setIsLoading] = useState(false)
@@ -26,8 +26,35 @@ export const useAdminAuth = () => {
     }
   }
 
-  return {
-    login,
-    isLoading
+  return {login, isLoading}
+}
+
+export const usePendingReviews = () => {
+  const [pendingReviews, setPendingReviews] = useState([])
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState(null)
+
+  const fetchReviews = async () => {
+    setIsLoading(true)
+    setError(null)
+    try {
+      const result = await fetchPendingReviews()
+      if (result.success && result.backend_data?.pending_reviews) {
+        setPendingReviews(result.backend_data.pending_reviews)
+      } else {
+        setPendingReviews([])
+      }
+    } catch (error) {
+      setError(error.message || 'Failed to fetch pending reviews')
+      toast.error(error.message || 'Failed to fetch pending reviews')
+    } finally {
+      setIsLoading(false)
+    }
   }
+
+  useEffect(() => {
+    fetchReviews()
+  }, [])
+
+  return {pendingReviews, isLoading, error, refetch: fetchReviews}
 }
