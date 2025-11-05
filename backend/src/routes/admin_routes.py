@@ -86,11 +86,11 @@ def get_pending_properties_route():
     return jsonify(response_data), 200
 
 
-@admin_bp.route('/pending_property/<property_id>', methods=['GET'])
+@admin_bp.route('/admin_property/<property_id>', methods=['GET'])
 @admin_required
 @handle_route_exceptions
-def get_pending_property_details_route(property_id):
-    property_details = get_pending_property_details(property_id)
+def get_admin_property_details_route(property_id):
+    property_details = get_admin_property_details(property_id)
     
     response_data = {
         "success": True,

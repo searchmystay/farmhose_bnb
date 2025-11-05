@@ -53,6 +53,20 @@ export const fetchPendingPropertyDetails = async (propertyId) => {
   }
 }
 
+export const fetchAdminPropertyDetails = async (propertyId) => {
+  try {
+    const response = await adminApiClient.get(`/admin_property/${propertyId}`)
+    const result = response.data
+    return result
+  } catch (error) {
+    if (error.response && error.response.data) {
+      const backendError = error.response.data
+      throw new Error(backendError.message || 'Failed to fetch admin property details')
+    }
+    throw new Error('Failed to fetch admin property details, Network error')
+  }
+}
+
 export const approveProperty = async (propertyId) => {
   try {
     const response = await adminApiClient.post(`/approve_property/${propertyId}`)

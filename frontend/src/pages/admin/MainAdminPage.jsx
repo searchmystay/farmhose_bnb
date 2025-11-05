@@ -6,11 +6,14 @@ import DashboardPage from './DashboardPage'
 import AllPropertiesPage from './AllPropertiesPage'
 import PendingPropertiesPage from './PendingPropertiesPage'
 import PendingReviewsPage from './PendingReviewsPage'
+import PropertyDetailsPage from './PropertyDetailsPage'
 
 function MainAdminPage() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [activeTab, setActiveTab] = useState('dashboard')
   const [dropdownOpen, setDropdownOpen] = useState(false)
+  const [viewingPropertyDetails, setViewingPropertyDetails] = useState(false)
+  const [selectedPropertyId, setSelectedPropertyId] = useState(null)
   const navigate = useNavigate()
 
   const menuItems = [
@@ -26,7 +29,19 @@ function MainAdminPage() {
 
   const handleMenuClick = (itemId) => {
     setActiveTab(itemId)
-    setSidebarOpen(false) 
+    setSidebarOpen(false)
+    setViewingPropertyDetails(false)
+    setSelectedPropertyId(null)
+  }
+
+  const handleViewPropertyDetails = (propertyId) => {
+    setSelectedPropertyId(propertyId)
+    setViewingPropertyDetails(true)
+  }
+
+  const handleBackToProperties = () => {
+    setViewingPropertyDetails(false)
+    setSelectedPropertyId(null)
   }
 
   const handleLogout = async () => {
@@ -109,6 +124,13 @@ function MainAdminPage() {
   )
 
   const renderContent = () => {
+    if (viewingPropertyDetails && selectedPropertyId) {
+      return <PropertyDetailsPage 
+        propertyId={selectedPropertyId} 
+        onBack={handleBackToProperties}
+      />
+    }
+
     switch (activeTab) {
       case 'dashboard':
         return <DashboardPage />
@@ -117,7 +139,7 @@ function MainAdminPage() {
         return <AllPropertiesPage />
       
       case 'pending':
-        return <PendingPropertiesPage />
+        return <PendingPropertiesPage onViewDetails={handleViewPropertyDetails} />
       
       case 'reviews':
         return <PendingReviewsPage />
@@ -125,6 +147,13 @@ function MainAdminPage() {
       default:
         return <div>Select a menu item</div>
     }
+  }
+
+  const getPageTitle = () => {
+    if (viewingPropertyDetails) {
+      return 'Property Details'
+    }
+    return menuItems.find(item => item.id === activeTab)?.name || 'Dashboard'
   }
 
   return (
@@ -145,7 +174,7 @@ function MainAdminPage() {
             <div className="max-w-full">
               <div className="mb-6">
                 <h2 className="text-2xl font-semibold text-gray-900">
-                  {menuItems.find(item => item.id === activeTab)?.name || 'Dashboard'}
+                  {getPageTitle()}
                 </h2>
               </div>
               

@@ -32,7 +32,7 @@ def get_pending_properties():
         "_id": 1,
         "name": 1,
         "type": 1,
-        "created_at": 1
+        "phone_number": 1
     }
     
     pending_properties = db_find_many("farmhouses", query_filter, projection)
@@ -43,7 +43,7 @@ def get_pending_properties():
             "id": str(property_data.get("_id")),
             "name": property_data.get("name", ""),
             "type": property_data.get("type", ""),
-            "created_at": property_data.get("created_at")
+            "phone_number": property_data.get("phone_number", "")
         }
         processed_properties.append(processed_property)
     
@@ -53,52 +53,85 @@ def get_pending_properties():
 @handle_exceptions
 def process_admin_property_details(property_data):
     property_id = str(property_data.get("_id"))
-    name = property_data.get("name", "")
-    full_description = property_data.get("description", "")
-    images = property_data.get("images", [])
-    amenities_data = property_data.get("amenities", [])
-    location_data = property_data.get("location", {})
-    documents = property_data.get("documents", [])
-    whatsapp_link = property_data.get("whatsapp_link", "")
-    property_type = property_data.get("type", "")
     
-    all_amenities = extract_all_amenities(amenities_data)
-    complete_address = build_complete_address(location_data)
+    basic_details = {
+        "id": property_id,
+        "name": property_data.get("name", ""),
+        "description": property_data.get("description", ""),
+        "type": property_data.get("type", ""),
+        "address": build_complete_address(property_data.get("location", {})),
+        "opening_time": property_data.get("opening_time", ""),
+        "closing_time": property_data.get("closing_time", ""),
+        "per_day_cost": property_data.get("per_day_cost", 0)
+    }
+    
+    owner_details_data = property_data.get("owner_details", {})
+    owner_details = {
+        "owner_name": owner_details_data.get("owner_name", ""),
+        "owner_photo": owner_details_data.get("owner_photo", ""),
+        "owner_description": owner_details_data.get("owner_description", ""),
+        "owner_dashboard_id": owner_details_data.get("owner_dashboard_id", ""),
+        "owner_dashboard_password": owner_details_data.get("owner_dashboard_password", "")
+    }
+    
+    documents_data = property_data.get("documents", {})
+    documents_list = []
+    
+    if documents_data.get("aadhar_card"):
+        documents_list.append({
+            "type": "aadhar_card",
+            "url": documents_data.get("aadhar_card")
+        })
+    
+    if documents_data.get("pan_card"):
+        documents_list.append({
+            "type": "pan_card", 
+            "url": documents_data.get("pan_card")
+        })
+    
+    property_docs = documents_data.get("property_docs", [])
+    for doc_url in property_docs:
+        if doc_url:
+            documents_list.append({
+                "type": "property_document",
+                "url": doc_url
+            })
+    
+    documents_images = {
+        "documents": documents_list,
+        "images": property_data.get("images", [])
+    }
     
     processed_data = {
-        "id": property_id,
-        "name": name,
-        "description": full_description,
-        "type": property_type,
-        "images": images,
-        "amenities": all_amenities,
-        "address": complete_address,
-        "documents": documents,
-        "whatsapp_link": whatsapp_link
+        "basic_details": basic_details,
+        "owner_details": owner_details,
+        "documents_images": documents_images
     }
     
     return processed_data
 
 
 @handle_exceptions
-def get_pending_property_details(property_id):
-    query_filter = {"_id": ObjectId(property_id), "status": "pending_approval"}
+def get_admin_property_details(property_id):
+    query_filter = {"_id": ObjectId(property_id)}
     projection = {
         "_id": 1,
         "name": 1,
         "description": 1,
-        "images": 1,
-        "amenities": 1,
+        "type": 1,
         "location": 1,
+        "opening_time": 1,
+        "closing_time": 1,
+        "per_day_cost": 1,
+        "owner_details": 1,
         "documents": 1,
-        "whatsapp_link": 1,
-        "type": 1
+        "images": 1
     }
     
     property_data = db_find_one("farmhouses", query_filter, projection)
     
     if not property_data:
-        raise AppException("Pending property not found")
+        raise AppException("Property not found")
     
     processed_property = process_admin_property_details(property_data)
     return processed_property

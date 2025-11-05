@@ -491,6 +491,11 @@ def get_farmhouse_schema() -> Dict:
                 "description": "Closing time of the farmhouse (12-hour format with AM/PM)",
                 "pattern": "^(1[0-2]|0?[1-9]):[0-5][0-9] (AM|PM)$"
             },
+            "per_day_cost": {
+                "bsonType": "number",
+                "description": "Cost per day for booking the farmhouse in rupees",
+                "minimum": 0
+            },
             "credit_balance": {
                 "bsonType": "number",
                 "description": "Available credit balance for lead charges (40 rupees per lead)",
