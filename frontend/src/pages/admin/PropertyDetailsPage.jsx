@@ -121,14 +121,12 @@ function PropertyDetailsPage({ propertyId, onBack }) {
       <div className="bg-white rounded-lg border border-gray-200 p-6">
         <h3 className="text-lg font-semibold text-gray-900 mb-4">Owner Information</h3>
         <div className="flex flex-col lg:flex-row gap-6">
-          {/* Left side - Owner details */}
           <div className="flex-1 space-y-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Owner Name</label>
               <p className="text-gray-900 bg-gray-50 p-3 rounded-md">{owner.owner_name || 'Not provided'}</p>
             </div>
             
-            {/* Dashboard ID and Password in same row */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Dashboard ID</label>
@@ -146,7 +144,6 @@ function PropertyDetailsPage({ propertyId, onBack }) {
             </div>
           </div>
           
-          {/* Right side - Owner photo */}
           {owner.owner_photo && (
             <div className="flex-shrink-0 lg:w-48">
               <label className="block text-sm font-medium text-gray-700 mb-3">Owner Photo</label>
