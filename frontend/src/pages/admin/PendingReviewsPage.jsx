@@ -1,15 +1,7 @@
 import { usePendingReviews } from '../../hooks/useAdmin'
 
 function PendingReviewsPage() {
-  const { pendingReviews, isLoading, error, refetch } = usePendingReviews()
-
-  const handleApproveReview = (reviewId) => {
-    console.log('Approve review:', reviewId)
-  }
-
-  const handleRejectReview = (reviewId) => {
-    console.log('Reject review:', reviewId)
-  }
+  const { pendingReviews, isLoading, error, actionLoading, refetch, handleAcceptReview, handleRejectReview } = usePendingReviews()
 
   const renderLoadingState = () => (
     <div className="flex items-center justify-center min-h-[50vh] px-4">
@@ -74,22 +66,43 @@ function PendingReviewsPage() {
     </div>
   )
 
-  const renderActionButtons = (reviewId) => (
-    <div className="flex gap-3">
-      <button onClick={() => handleApproveReview(reviewId)} className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition-colors text-sm font-medium flex items-center gap-2">
-        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-        </svg>
-        Approve
-      </button>
-      <button onClick={() => handleRejectReview(reviewId)} className="bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-red-700 transition-colors text-sm font-medium flex items-center gap-2">
-        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-        </svg>
-        Reject
-      </button>
-    </div>
-  )
+  const renderActionButtons = (reviewId) => {
+    const isAcceptLoading = actionLoading === reviewId
+    const isRejectLoading = actionLoading === reviewId
+    
+    return (
+      <div className="flex gap-3">
+        <button 
+          onClick={() => handleAcceptReview(reviewId)} 
+          disabled={actionLoading === reviewId}
+          className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 disabled:bg-green-400 disabled:cursor-not-allowed transition-colors text-sm font-medium flex items-center gap-2"
+        >
+          {isAcceptLoading ? (
+            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+          ) : (
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            </svg>
+          )}
+          {isAcceptLoading ? 'Accepting...' : 'Accept'}
+        </button>
+        <button 
+          onClick={() => handleRejectReview(reviewId)} 
+          disabled={actionLoading === reviewId}
+          className="bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-red-700 disabled:bg-red-400 disabled:cursor-not-allowed transition-colors text-sm font-medium flex items-center gap-2"
+        >
+          {isRejectLoading ? (
+            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+          ) : (
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          )}
+          {isRejectLoading ? 'Rejecting...' : 'Reject'}
+        </button>
+      </div>
+    )
+  }
 
   const renderReviewComment = (review) => (
     <div className="bg-gray-50 rounded-lg p-4">

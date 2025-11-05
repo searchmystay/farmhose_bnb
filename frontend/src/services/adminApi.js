@@ -123,6 +123,34 @@ export const fetchPendingReviews = async () => {
   }
 }
 
+export const acceptReview = async (reviewId) => {
+  try {
+    const response = await adminApiClient.post(`/accept_comment/${reviewId}`)
+    const result = response.data
+    return result
+  } catch (error) {
+    if (error.response && error.response.data) {
+      const backendError = error.response.data
+      throw new Error(backendError.message || 'Failed to accept review')
+    }
+    throw new Error('Failed to accept review, Network error')
+  }
+}
+
+export const rejectReview = async (reviewId) => {
+  try {
+    const response = await adminApiClient.delete(`/reject_comment/${reviewId}`)
+    const result = response.data
+    return result
+  } catch (error) {
+    if (error.response && error.response.data) {
+      const backendError = error.response.data
+      throw new Error(backendError.message || 'Failed to reject review')
+    }
+    throw new Error('Failed to reject review, Network error')
+  }
+}
+
 export const checkAuthStatus = async () => {
   try {
     const response = await adminApiClient.get('/auto_login')

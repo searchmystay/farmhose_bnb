@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
-import { adminLogin, fetchPendingReviews } from '../services/adminApi'
+import { adminLogin, fetchPendingReviews, acceptReview, rejectReview } from '../services/adminApi'
 
 export const useAdminAuth = () => {
   const [isLoading, setIsLoading] = useState(false)
@@ -36,6 +36,7 @@ export const usePendingReviews = () => {
   const [pendingReviews, setPendingReviews] = useState([])
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState(null)
+  const [actionLoading, setActionLoading] = useState(null)
 
   const fetchReviews = async () => {
     setIsLoading(true)
@@ -55,9 +56,39 @@ export const usePendingReviews = () => {
     }
   }
 
+  const handleAcceptReview = async (reviewId) => {
+    setActionLoading(reviewId)
+    try {
+      const result = await acceptReview(reviewId)
+      if (result.success) {
+        toast.success(result.message || 'Review accepted successfully')
+        await fetchReviews()
+      }
+    } catch (error) {
+      toast.error(error.message || 'Failed to accept review')
+    } finally {
+      setActionLoading(null)
+    }
+  }
+
+  const handleRejectReview = async (reviewId) => {
+    setActionLoading(reviewId)
+    try {
+      const result = await rejectReview(reviewId)
+      if (result.success) {
+        toast.success(result.message || 'Review rejected successfully')
+        await fetchReviews()
+      }
+    } catch (error) {
+      toast.error(error.message || 'Failed to reject review')
+    } finally {
+      setActionLoading(null)
+    }
+  }
+
   useEffect(() => {
     fetchReviews()
   }, [])
 
-  return {pendingReviews, isLoading, error, refetch: fetchReviews}
+  return {pendingReviews, isLoading, error, actionLoading,refetch: fetchReviews, handleAcceptReview, handleRejectReview}
 }
