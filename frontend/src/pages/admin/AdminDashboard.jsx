@@ -45,22 +45,23 @@ function AdminDashboard() {
 
   const renderNavbar = () => (
     <header className="fixed top-0 left-0 right-0 z-40 bg-white border-b border-gray-200 shadow-sm">
-      <div className="flex items-center justify-between h-16 px-4 sm:px-6">
+      <div className="flex items-center justify-between h-16 px-4 sm:px-6 lg:pl-20">
         <div className="flex items-center">
           <button
             onClick={toggleSidebar}
-            className="lg:hidden p-2 rounded-md text-gray-500 hover:text-gray-700 hover:bg-gray-100 mr-2 transition-colors"
+            className="lg:hidden p-2 rounded-md text-gray-500 hover:text-gray-700 hover:bg-gray-100 mr-2 transition-colors flex items-center justify-center"
           >
             <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
             </svg>
           </button>
           
-          <div className="cursor-pointer" onClick={() => window.location.href = '/'}>
+          <div className="cursor-pointer flex items-center" onClick={() => window.location.href = '/'}>
             <img 
               src="/search_my_stay_logo.svg" 
               alt="Search My Stay" 
-              className="h-8 w-8 sm:h-10 sm:w-10"
+              className="h-6 sm:h-7 lg:h-8 w-auto"
+              style={{ filter: 'brightness(0)' }}
             />
           </div>
         </div>
