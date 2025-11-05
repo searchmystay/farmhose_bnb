@@ -12,6 +12,7 @@ import RegisterPropertyPage from './pages/website/RegisterPropertyPage'
 import WishlistPage from './pages/website/WishlistPage'
 import AdminLogin from './pages/admin/AdminLogin'
 import MainAdminPage from './pages/admin/MainAdminPage'
+import OwnerLogin from './pages/owner/OwnerLogin'
 import OwnerDashboard from './pages/owner/OwnerDashboard'
 import ReviewSubmissionPage from './pages/website/ReviewSubmissionPage'
 
@@ -65,7 +66,8 @@ function App() {
               </ProtectedRoute>
             } />
             <Route path="/admin/login" element={<AdminLogin />} />
-            <Route path="/owner-dashboard/:farmhouseId" element={<OwnerDashboard />} />
+            <Route path="/owner/login" element={<OwnerLogin />} />
+            <Route path="/owner/dashboard/:farmhouseId" element={<OwnerDashboard />} />
           </Routes>
           <Toaster position="bottom-left" richColors />
         </div>

@@ -251,7 +251,7 @@ function FarmhouseCarousel({ title, properties, loading, error, navigateTo }) {
           <>
             <div className="relative overflow-hidden">
               <div 
-                className={`flex gap-6 ${isTransitioning ? 'transition-transform duration-700 ease-in-out' : ''}`}
+                className={`flex gap-6 pr-6 ${isTransitioning ? 'transition-transform duration-700 ease-in-out' : ''}`}
                 style={{
                   transform: `translateX(-${currentIndex * (320 + 24)}px)`,
                   width: `${extendedProperties.length * (320 + 24)}px`
@@ -282,12 +282,12 @@ function FarmhouseCarousel({ title, properties, loading, error, navigateTo }) {
         ) : (
           <div className={`${
             properties.length === 1 ? 'flex justify-center' : 
-            properties.length === 2 ? 'grid grid-cols-1 md:grid-cols-2 gap-6 justify-items-center max-w-4xl mx-auto' :
-            properties.length === 3 ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center max-w-5xl mx-auto' :
-            'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 justify-items-center max-w-6xl mx-auto'
+            properties.length === 2 ? 'grid grid-cols-1 md:grid-cols-2 gap-6 justify-items-center' :
+            properties.length === 3 ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center' :
+            'flex gap-6 justify-center flex-wrap'
           }`}>
             {properties.map((property, index) => (
-              <div key={`${property.id || property.name}-${index}`} className="w-full max-w-sm">
+              <div key={`${property.id || property.name}-${index}`}>
                 <FarmhouseCard property={property} />
               </div>
             ))}
@@ -427,15 +427,13 @@ function HomePage() {
       <div className="min-h-screen bg-white">
         <HeroSection onWishlistClick={handleWishlistClick} />
         
-        <div className="pt-1 md:pt-2 bg-gray-50">
-          <FarmhouseCarousel 
-            title="Popular Farmhouses in Jaipur" 
-            properties={topFarmhouses} 
-            loading={loading} 
-            error={error} 
-            navigateTo="/farmhouse"
-          />
-        </div>
+        <FarmhouseCarousel 
+          title="Popular Farmhouses in Jaipur" 
+          properties={topFarmhouses} 
+          loading={loading} 
+          error={error} 
+          navigateTo="/farmhouse"
+        />
         
         <FarmhouseCarousel 
           title="Popular BnB in Jaipur" 
