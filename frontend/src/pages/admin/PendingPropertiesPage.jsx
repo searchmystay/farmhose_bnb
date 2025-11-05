@@ -42,78 +42,62 @@ function PendingPropertiesPage() {
     </div>
   )
 
-  const renderPropertyType = (property) => (
-    <div className="flex items-center text-sm text-gray-600">
-      <svg className="w-4 h-4 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-      </svg>
-      <span className="font-medium">Type: </span>
-      <span className="ml-1 text-gray-900 font-medium">{property.type || 'Not specified'}</span>
-    </div>
-  )
-
-  const renderPhoneNumber = (property) => (
-    <div className="flex items-center text-sm text-gray-600">
-      <svg className="w-4 h-4 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-      </svg>
-      <span className="font-medium">Phone: </span>
-      <span className="ml-1 text-gray-900 font-medium">{property.phone_number || 'Not provided'}</span>
-    </div>
-  )
-
-  const renderActionButtons = (propertyId) => {
-    const isApproveLoading = actionLoading === propertyId
-    const isRejectLoading = actionLoading === propertyId
-    
-    return (
-      <div className="flex gap-3">
-        <button 
-          onClick={() => handleApproveProperty(propertyId)} 
-          disabled={actionLoading === propertyId}
-          className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 disabled:bg-green-400 disabled:cursor-not-allowed transition-colors text-sm font-medium flex items-center gap-2"
-        >
-          {isApproveLoading ? (
-            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-          ) : (
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-            </svg>
-          )}
-          {isApproveLoading ? 'Approving...' : 'Approve'}
-        </button>
-        <button 
-          onClick={() => handleRejectProperty(propertyId)} 
-          disabled={actionLoading === propertyId}
-          className="bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-red-700 disabled:bg-red-400 disabled:cursor-not-allowed transition-colors text-sm font-medium flex items-center gap-2"
-        >
-          {isRejectLoading ? (
-            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-          ) : (
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          )}
-          {isRejectLoading ? 'Rejecting...' : 'Reject'}
-        </button>
-      </div>
-    )
+  const handleApproveClick = (propertyId) => {
+    console.log('Approve clicked for property:', propertyId)
+    handleApproveProperty(propertyId)
   }
 
-  const renderPropertyCard = (property) => (
-    <div key={property.id} className="bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow">
-      <div className="bg-gray-50 px-6 py-3 border-b border-gray-200">
-        <h4 className="text-lg font-semibold text-gray-900">
-          {property.name || 'Unknown Property'}
-        </h4>
-      </div>
-      <div className="p-6">
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-          <div className="flex flex-col sm:flex-row sm:items-center gap-4 lg:gap-6">
-            {renderPropertyType(property)}
-            {renderPhoneNumber(property)}
-          </div>
-          {renderActionButtons(property.id)}
+  const handleRejectClick = (propertyId) => {
+    console.log('Reject clicked for property:', propertyId)
+    handleRejectProperty(propertyId)
+  }
+
+  const renderPropertyRow = (property) => (
+    <div key={property.id} className="bg-white border border-gray-200 rounded-lg p-3 sm:p-4 shadow-sm hover:shadow-md transition-shadow">
+      <div className="flex flex-col md:flex-row md:items-center gap-3 md:gap-6">
+        <div className="flex-1 min-w-0">
+          <div className="text-xs font-medium text-gray-500 mb-1">Property Name</div>
+          <span className="font-semibold text-gray-900 text-sm md:text-base block truncate">{property.name || 'Unknown Property'}</span>
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="text-xs font-medium text-gray-500 mb-1">Type</div>
+          <span className="text-gray-600 text-sm block truncate">{property.type || 'Not specified'}</span>
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="text-xs font-medium text-gray-500 mb-1">Phone Number</div>
+          <span className="text-gray-600 text-sm block truncate">{property.phone_number || 'Not provided'}</span>
+        </div>
+        <div className="flex gap-2 md:gap-3 flex-shrink-0 w-full md:w-auto">
+          <button 
+            onClick={() => handleApproveClick(property.id)} 
+            disabled={actionLoading === property.id}
+            className="bg-green-600 text-white px-3 py-2 md:px-6 rounded-lg hover:bg-green-700 disabled:bg-green-400 disabled:cursor-not-allowed transition-colors text-xs md:text-sm font-medium flex items-center justify-center gap-1 md:gap-2 flex-1 md:flex-none"
+          >
+            {actionLoading === property.id ? (
+              <div className="animate-spin rounded-full h-3 w-3 md:h-4 md:w-4 border-b-2 border-white"></div>
+            ) : (
+              <svg className="w-3 h-3 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+            )}
+            <span className="hidden md:inline">{actionLoading === property.id ? 'Approving...' : 'Approve'}</span>
+            <span className="md:hidden">✓</span>
+          </button>
+          <button 
+            onClick={() => handleRejectClick(property.id)} 
+            disabled={actionLoading === property.id}
+            className="bg-red-600 text-white px-3 py-2 md:px-6 rounded-lg hover:bg-red-700 disabled:bg-red-400 disabled:cursor-not-allowed transition-colors text-xs md:text-sm font-medium flex items-center justify-center gap-1 md:gap-2 flex-1 md:flex-none"
+          >
+            {actionLoading === property.id ? (
+              <div className="animate-spin rounded-full h-3 w-3 md:h-4 md:w-4 border-b-2 border-white"></div>
+            ) : (
+              <svg className="w-3 h-3 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            )}
+            <span className="hidden md:inline">{actionLoading === property.id ? 'Rejecting...' : 'Reject'}</span>
+            <span className="md:hidden">✕</span>
+          </button>
         </div>
       </div>
     </div>
@@ -124,8 +108,8 @@ function PendingPropertiesPage() {
   if (pendingProperties.length === 0) return renderEmptyState()
 
   return (
-    <div className="grid gap-6">
-      {pendingProperties.map(renderPropertyCard)}
+    <div className="grid gap-4">
+      {pendingProperties.map(renderPropertyRow)}
     </div>
   )
 }
