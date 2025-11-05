@@ -54,53 +54,59 @@ function PendingPropertiesPage({ onViewDetails }) {
 
   const renderPropertyRow = (property) => (
     <div key={property.id} className="bg-white border border-gray-200 rounded-lg p-3 sm:p-4 shadow-sm hover:shadow-md transition-shadow">
-      <div className="flex flex-col md:flex-row md:items-center gap-3 md:gap-6">
-        <div className="flex-1 min-w-0">
+      <div className="flex flex-col lg:flex-row lg:items-center gap-4 lg:gap-6">
+        <div className="flex-1 lg:flex-[2] min-w-0">
           <div className="text-xs font-medium text-gray-500 mb-1">Property Name</div>
           <button
             onClick={() => onViewDetails && onViewDetails(property.id)}
-            className="font-semibold text-blue-600 hover:text-blue-800 text-sm md:text-base block truncate text-left transition-colors"
+            className="font-semibold text-blue-600 hover:text-blue-800 text-sm md:text-base block truncate text-left transition-colors w-full"
           >
             {property.name || 'Unknown Property'}
           </button>
         </div>
-        <div className="flex-1 min-w-0">
-          <div className="text-xs font-medium text-gray-500 mb-1">Type</div>
-          <span className="text-gray-600 text-sm block truncate">{property.type || 'Not specified'}</span>
+        
+        <div className="flex flex-col sm:flex-row sm:gap-4 lg:gap-6 lg:flex-[2]">
+          <div className="flex-1 min-w-0 mb-3 sm:mb-0">
+            <div className="text-xs font-medium text-gray-500 mb-1">Type</div>
+            <span className="text-gray-600 text-sm block truncate">{property.type || 'Not specified'}</span>
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="text-xs font-medium text-gray-500 mb-1">Phone Number</div>
+            <span className="text-gray-600 text-sm block truncate">{property.phone_number || 'Not provided'}</span>
+          </div>
         </div>
-        <div className="flex-1 min-w-0">
-          <div className="text-xs font-medium text-gray-500 mb-1">Phone Number</div>
-          <span className="text-gray-600 text-sm block truncate">{property.phone_number || 'Not provided'}</span>
-        </div>
-        <div className="flex gap-2 md:gap-3 flex-shrink-0 w-full md:w-auto">
+        
+        <div className="flex flex-col sm:flex-row sm:items-center sm:gap-4 lg:gap-6 lg:flex-[1]">
+          <div className="flex gap-2 sm:gap-3 flex-shrink-0 w-full sm:w-auto">
           <button 
             onClick={() => handleApproveClick(property.id)} 
             disabled={actionLoading === property.id}
-            className="bg-green-600 text-white px-3 py-2 md:px-6 rounded-lg hover:bg-green-700 disabled:bg-green-400 disabled:cursor-not-allowed transition-colors text-xs md:text-sm font-medium flex items-center justify-center gap-1 md:gap-2 flex-1 md:flex-none"
+            className="bg-green-600 text-white px-4 py-2.5 sm:px-5 lg:px-6 rounded-lg hover:bg-green-700 disabled:bg-green-400 disabled:cursor-not-allowed transition-all duration-200 text-sm font-medium flex items-center justify-center gap-2 flex-1 sm:flex-none whitespace-nowrap min-w-[100px] sm:min-w-[120px]"
           >
             {actionLoading === property.id ? (
-              <div className="animate-spin rounded-full h-3 w-3 md:h-4 md:w-4 border-b-2 border-white"></div>
+              <div className="animate-spin rounded-full h-3 w-3 sm:h-4 sm:w-4 border-b-2 border-white"></div>
             ) : (
-              <svg className="w-3 h-3 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-3 h-3 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
             )}
-            <span className="hidden md:inline">{actionLoading === property.id ? 'Approving...' : 'Approve'}</span>
+            <span className="hidden sm:inline">{actionLoading === property.id ? 'Approving...' : 'Approve'}</span>
           </button>
           <button 
             onClick={() => handleRejectClick(property.id)} 
             disabled={actionLoading === property.id}
-            className="bg-red-600 text-white px-3 py-2 md:px-6 rounded-lg hover:bg-red-700 disabled:bg-red-400 disabled:cursor-not-allowed transition-colors text-xs md:text-sm font-medium flex items-center justify-center gap-1 md:gap-2 flex-1 md:flex-none"
+            className="bg-red-600 text-white px-4 py-2.5 sm:px-5 lg:px-6 rounded-lg hover:bg-red-700 disabled:bg-red-400 disabled:cursor-not-allowed transition-all duration-200 text-sm font-medium flex items-center justify-center gap-2 flex-1 sm:flex-none whitespace-nowrap min-w-[100px] sm:min-w-[120px]"
           >
             {actionLoading === property.id ? (
-              <div className="animate-spin rounded-full h-3 w-3 md:h-4 md:w-4 border-b-2 border-white"></div>
+              <div className="animate-spin rounded-full h-3 w-3 sm:h-4 sm:w-4 border-b-2 border-white"></div>
             ) : (
-              <svg className="w-3 h-3 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-3 h-3 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
             )}
-            <span className="hidden md:inline">{actionLoading === property.id ? 'Rejecting...' : 'Reject'}</span>
+            <span className="hidden sm:inline">{actionLoading === property.id ? 'Rejecting...' : 'Reject'}</span>
           </button>
+          </div>
         </div>
       </div>
     </div>
