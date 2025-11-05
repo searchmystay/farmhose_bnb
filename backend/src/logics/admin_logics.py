@@ -369,7 +369,8 @@ def get_all_properties():
         "name": 1,
         "type": 1,
         "phone_number": 1,
-        "status": 1
+        "status": 1,
+        "favourite": 1
     }
     
     all_properties = db_find_many("farmhouses", query_filter, projection)
@@ -381,7 +382,8 @@ def get_all_properties():
             "name": property_data.get("name", ""),
             "type": property_data.get("type", ""),
             "phone_number": property_data.get("phone_number", ""),
-            "status": property_data.get("status", "")
+            "status": property_data.get("status", ""),
+            "favourite": property_data.get("favourite", False)
         }
         processed_properties.append(processed_property)
     
