@@ -32,7 +32,8 @@ def get_pending_properties():
         "_id": 1,
         "name": 1,
         "type": 1,
-        "created_at": 1
+        "created_at": 1,
+        "phone_number": 1
     }
     
     pending_properties = db_find_many("farmhouses", query_filter, projection)
@@ -43,7 +44,8 @@ def get_pending_properties():
             "id": str(property_data.get("_id")),
             "name": property_data.get("name", ""),
             "type": property_data.get("type", ""),
-            "created_at": property_data.get("created_at")
+            "created_at": property_data.get("created_at"),
+            "phone_number": property_data.get("phone_number", "")
         }
         processed_properties.append(processed_property)
     
