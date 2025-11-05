@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify, request, make_response
-from src.logics.owner_dashboard_logic import get_owner_dashboard_data, get_booked_dates, add_booked_date, remove_booked_date, authenticate_owner
+from src.logics.owner_dashboard_logic import get_owner_dashboard_data, get_booked_dates, add_booked_date, remove_booked_date, authenticate_owner, owner_required
 from src.utils.exception_handler import handle_route_exceptions, AppException
 
 
@@ -47,7 +47,23 @@ def owner_logout_route():
     return response
 
 
+@owner_bp.route('/owner-auto-login', methods=['GET'])
+@owner_required
+@handle_route_exceptions
+def owner_auto_login():
+    owner_data = request.owner
+    return jsonify({
+        "status": "success",
+        "backend_data": {
+            "owner": True,
+            "farmhouse_id": owner_data.get("farmhouse_id"),
+            "owner_id": owner_data.get("owner_id")
+        }
+    }), 200
+
+
 @owner_bp.route('/owner-dashboard/<farmhouse_id>', methods=['GET'])
+@owner_required
 @handle_route_exceptions
 def get_owner_dashboard_route(farmhouse_id):
     if not farmhouse_id:
@@ -64,6 +80,7 @@ def get_owner_dashboard_route(farmhouse_id):
 
 
 @owner_bp.route('/booked-dates/<farmhouse_id>', methods=['GET'])
+@owner_required
 @handle_route_exceptions
 def get_booked_dates_route(farmhouse_id):
     if not farmhouse_id:
@@ -80,6 +97,7 @@ def get_booked_dates_route(farmhouse_id):
 
 
 @owner_bp.route('/booked-dates/<farmhouse_id>', methods=['POST'])
+@owner_required
 @handle_route_exceptions
 def add_booked_date_route(farmhouse_id):
     if not farmhouse_id:
@@ -102,6 +120,7 @@ def add_booked_date_route(farmhouse_id):
 
 
 @owner_bp.route('/booked-dates/<farmhouse_id>', methods=['DELETE'])
+@owner_required
 @handle_route_exceptions
 def remove_booked_date_route(farmhouse_id):
     if not farmhouse_id:

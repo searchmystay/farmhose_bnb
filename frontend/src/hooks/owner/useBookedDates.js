@@ -16,7 +16,9 @@ function useBookedDates(farmhouseId) {
     setError(null)
 
     try {
-      const response = await fetch(`${API_BASE_URL}/booked-dates/${farmhouseId}`)
+      const response = await fetch(`${API_BASE_URL}/booked-dates/${farmhouseId}`, {
+        credentials: 'include'
+      })
       const result = await response.json()
 
       if (result.success) {
@@ -40,6 +42,7 @@ function useBookedDates(farmhouseId) {
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include',
         body: JSON.stringify({ date: dateString }),
       })
 
@@ -66,6 +69,7 @@ function useBookedDates(farmhouseId) {
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include',
         body: JSON.stringify({ date: dateString }),
       })
 

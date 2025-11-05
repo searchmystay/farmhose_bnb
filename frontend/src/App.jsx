@@ -4,6 +4,7 @@ import { Toaster } from 'sonner'
 import { useState, useEffect } from 'react'
 import React from 'react'
 import { checkAuthStatus } from './services/adminApi'
+import { checkOwnerAuthStatus } from './services/ownerApi'
 import HomePage from './pages/website/HomePage'
 import SearchPage from './pages/website/SearchPage'
 import PropertiesPage from './pages/website/PropertiesPage'
@@ -46,6 +47,36 @@ function ProtectedRoute({ children }) {
   return isAuthenticated ? React.cloneElement(children, { userData }) : <Navigate to="/admin/login" replace />
 }
 
+function OwnerProtectedRoute({ children }) {
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [loading, setLoading] = useState(true)
+  const [ownerData, setOwnerData] = useState(null)
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const response = await checkOwnerAuthStatus()
+        setIsAuthenticated(response.status === 'success')
+        if (response.status === 'success') {
+          setOwnerData(response.backend_data)
+        }
+      } catch (error) {
+        setIsAuthenticated(false)
+        setOwnerData(null)
+      } finally {
+        setLoading(false)
+      }
+    }
+    checkAuth()
+  }, [])
+
+  if (loading) {
+    return <div>Loading...</div>
+  }
+
+  return isAuthenticated ? React.cloneElement(children, { ownerData }) : <Navigate to="/owner/login" replace />
+}
+
 function App() {
   return (
     <HelmetProvider>
@@ -67,7 +98,11 @@ function App() {
             } />
             <Route path="/admin/login" element={<AdminLogin />} />
             <Route path="/owner/login" element={<OwnerLogin />} />
-            <Route path="/owner/dashboard/:farmhouseId" element={<OwnerDashboard />} />
+            <Route path="/owner/dashboard/:farmhouseId" element={
+              <OwnerProtectedRoute>
+                <OwnerDashboard />
+              </OwnerProtectedRoute>
+            } />
           </Routes>
           <Toaster position="bottom-left" richColors />
         </div>
