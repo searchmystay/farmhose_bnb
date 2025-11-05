@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
-import { adminLogin, fetchPendingReviews, acceptReview, rejectReview, fetchPendingProperties, approveProperty, rejectProperty } from '../services/adminApi'
+import { adminLogin, fetchPendingReviews, acceptReview, rejectReview, fetchPendingProperties, approveProperty, rejectProperty, fetchAdminPropertyDetails } from '../services/adminApi'
 
 export const useAdminAuth = () => {
   const [isLoading, setIsLoading] = useState(false)
@@ -160,4 +160,38 @@ export const usePendingProperties = () => {
   }, [])
 
   return {pendingProperties, isLoading, error, actionLoading, refetch: fetchProperties, handleApproveProperty, handleRejectProperty}
+}
+
+export const useAdminPropertyDetails = (propertyId) => {
+  const [propertyDetails, setPropertyDetails] = useState(null)
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState(null)
+
+  const fetchPropertyDetails = async () => {
+    if (!propertyId) return
+    
+    setIsLoading(true)
+    setError(null)
+    try {
+      const result = await fetchAdminPropertyDetails(propertyId)
+      if (result.success && result.backend_data) {
+        setPropertyDetails(result.backend_data)
+      } else {
+        setError('No property data found')
+      }
+    } catch (error) {
+      setError(error.message || 'Failed to fetch property details')
+      toast.error(error.message || 'Failed to fetch property details')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    if (propertyId) {
+      fetchPropertyDetails()
+    }
+  }, [propertyId])
+
+  return {propertyDetails, isLoading, error, refetch: fetchPropertyDetails}
 }

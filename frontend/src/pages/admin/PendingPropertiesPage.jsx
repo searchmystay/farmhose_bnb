@@ -1,6 +1,6 @@
 import { usePendingProperties } from '../../hooks/useAdmin'
 
-function PendingPropertiesPage() {
+function PendingPropertiesPage({ onViewDetails }) {
   const { pendingProperties, isLoading, error, actionLoading, refetch, handleApproveProperty, handleRejectProperty } = usePendingProperties()
 
   const renderLoadingState = () => (
@@ -57,7 +57,12 @@ function PendingPropertiesPage() {
       <div className="flex flex-col md:flex-row md:items-center gap-3 md:gap-6">
         <div className="flex-1 min-w-0">
           <div className="text-xs font-medium text-gray-500 mb-1">Property Name</div>
-          <span className="font-semibold text-gray-900 text-sm md:text-base block truncate">{property.name || 'Unknown Property'}</span>
+          <button
+            onClick={() => onViewDetails && onViewDetails(property.id)}
+            className="font-semibold text-blue-600 hover:text-blue-800 text-sm md:text-base block truncate text-left transition-colors"
+          >
+            {property.name || 'Unknown Property'}
+          </button>
         </div>
         <div className="flex-1 min-w-0">
           <div className="text-xs font-medium text-gray-500 mb-1">Type</div>
