@@ -86,7 +86,6 @@ function PendingPropertiesPage({ onViewDetails }) {
               </svg>
             )}
             <span className="hidden md:inline">{actionLoading === property.id ? 'Approving...' : 'Approve'}</span>
-            <span className="md:hidden">✓</span>
           </button>
           <button 
             onClick={() => handleRejectClick(property.id)} 
@@ -101,7 +100,6 @@ function PendingPropertiesPage({ onViewDetails }) {
               </svg>
             )}
             <span className="hidden md:inline">{actionLoading === property.id ? 'Rejecting...' : 'Reject'}</span>
-            <span className="md:hidden">✕</span>
           </button>
         </div>
       </div>
