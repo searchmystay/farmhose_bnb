@@ -8,7 +8,7 @@ import PropertyDetailPage from './pages/website/PropertyDetailPage'
 import RegisterPropertyPage from './pages/website/RegisterPropertyPage'
 import WishlistPage from './pages/website/WishlistPage'
 import AdminLogin from './pages/admin/AdminLogin'
-import AdminDashboard from './pages/admin/AdminDashboard'
+import MainAdminPage from './pages/admin/MainAdminPage'
 import OwnerDashboard from './pages/owner/OwnerDashboard'
 import ReviewSubmissionPage from './pages/website/ReviewSubmissionPage'
 
@@ -26,8 +26,8 @@ function App() {
             <Route path="/register-property" element={<RegisterPropertyPage />} />
             <Route path="/wishlist" element={<WishlistPage />} />
             <Route path="/reviews/:farmhouseId" element={<ReviewSubmissionPage />} />
-            <Route path="/admin" element={<AdminLogin />} />
-            <Route path="/admin/dashboard" element={<AdminDashboard />} />
+            <Route path="/admin" element={<MainAdminPage />} />
+            <Route path="/admin/login" element={<AdminLogin />} />
             <Route path="/owner-dashboard/:farmhouseId" element={<OwnerDashboard />} />
           </Routes>
           <Toaster position="bottom-left" richColors />

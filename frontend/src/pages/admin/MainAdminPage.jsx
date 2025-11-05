@@ -1,7 +1,11 @@
 import { useState } from 'react'
 import { Helmet } from 'react-helmet-async'
+import DashboardPage from './DashboardPage'
+import AllPropertiesPage from './AllPropertiesPage'
+import PendingPropertiesPage from './PendingPropertiesPage'
+import PendingReviewsPage from './PendingReviewsPage'
 
-function AdminDashboard() {
+function MainAdminPage() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [activeTab, setActiveTab] = useState('dashboard')
   const [dropdownOpen, setDropdownOpen] = useState(false)
@@ -97,93 +101,16 @@ function AdminDashboard() {
   const renderContent = () => {
     switch (activeTab) {
       case 'dashboard':
-        return (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-gray-500">Pending Properties</p>
-                  <p className="text-2xl font-semibold text-gray-900 mt-1">12</p>
-                </div>
-                <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center">
-                  <span className="text-orange-600 text-lg">⋯</span>
-                </div>
-              </div>
-            </div>
-            
-            <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-gray-500">Approved Properties</p>
-                  <p className="text-2xl font-semibold text-gray-900 mt-1">45</p>
-                </div>
-                <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
-                  <span className="text-green-600 text-lg">✓</span>
-                </div>
-              </div>
-            </div>
-            
-            <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-gray-500">Rejected Properties</p>
-                  <p className="text-2xl font-semibold text-gray-900 mt-1">8</p>
-                </div>
-                <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
-                  <span className="text-red-600 text-lg">✕</span>
-                </div>
-              </div>
-            </div>
-            
-            <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-gray-500">Total Users</p>
-                  <p className="text-2xl font-semibold text-gray-900 mt-1">128</p>
-                </div>
-                <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                  <span className="text-blue-600 text-lg">👥</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        )
+        return <DashboardPage />
       
       case 'all':
-        return (
-          <div className="bg-white rounded-lg shadow-sm border border-gray-100">
-            <div className="px-6 py-4 border-b border-gray-100">
-              <h3 className="text-lg font-semibold text-gray-900">All Properties</h3>
-            </div>
-            <div className="p-6">
-              <p className="text-gray-600">All properties list will be displayed here...</p>
-            </div>
-          </div>
-        )
+        return <AllPropertiesPage />
       
       case 'pending':
-        return (
-          <div className="bg-white rounded-lg shadow-sm border border-gray-100">
-            <div className="px-6 py-4 border-b border-gray-100">
-              <h3 className="text-lg font-semibold text-gray-900">Pending Properties</h3>
-            </div>
-            <div className="p-6">
-              <p className="text-gray-600">Pending properties list will be displayed here...</p>
-            </div>
-          </div>
-        )
+        return <PendingPropertiesPage />
       
       case 'reviews':
-        return (
-          <div className="bg-white rounded-lg shadow-sm border border-gray-100">
-            <div className="px-6 py-4 border-b border-gray-100">
-              <h3 className="text-lg font-semibold text-gray-900">Pending Reviews</h3>
-            </div>
-            <div className="p-6">
-              <p className="text-gray-600">Pending reviews list will be displayed here...</p>
-            </div>
-          </div>
-        )
+        return <PendingReviewsPage />
       
       default:
         return <div>Select a menu item</div>
@@ -235,4 +162,4 @@ function AdminDashboard() {
   )
 }
 
-export default AdminDashboard
+export default MainAdminPage
