@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import { Helmet } from 'react-helmet-async'
+import { useNavigate } from 'react-router-dom'
+import { toast } from 'sonner'
 import DashboardPage from './DashboardPage'
 import AllPropertiesPage from './AllPropertiesPage'
 import PendingPropertiesPage from './PendingPropertiesPage'
@@ -9,6 +11,7 @@ function MainAdminPage() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [activeTab, setActiveTab] = useState('dashboard')
   const [dropdownOpen, setDropdownOpen] = useState(false)
+  const navigate = useNavigate()
 
   const menuItems = [
     { id: 'dashboard', name: 'Dashboard', icon: '▦' },
@@ -24,6 +27,10 @@ function MainAdminPage() {
   const handleMenuClick = (itemId) => {
     setActiveTab(itemId)
     setSidebarOpen(false) 
+  }
+
+  const handleLogout = async () => {
+    console.log("will logout")
   }
 
   const renderSidebar = () => (
@@ -87,7 +94,10 @@ function MainAdminPage() {
           {dropdownOpen && (
             <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg border border-gray-200 z-50">
               <div className="py-1">
-                <button className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors">
+                <button 
+                  onClick={handleLogout}
+                  className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+                >
                   Logout
                 </button>
               </div>

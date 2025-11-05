@@ -1,4 +1,4 @@
-from src.logics.admin_auth import authenticate_super_admin
+from src.logics.admin_auth import authenticate_admin
 from src.utils.exception_handler import handle_exceptions, AppException
 from src.database.db_common_operations import db_find_many, db_find_one, db_update_one, db_delete_one
 from src.logics.website_logic import process_property_for_detail, extract_all_amenities, build_complete_address
@@ -13,7 +13,7 @@ def process_admin_login(login_data):
     if not password:
         raise AppException("Password is required")
     
-    auth_result = authenticate_super_admin(password)
+    auth_result = authenticate_admin(password)
     
     login_response = {
         "message": "Login successful",

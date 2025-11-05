@@ -13,7 +13,7 @@ const adminApiClient = axios.create({
 
 export const adminLogin = async (loginData) => {
   try {
-    const response = await adminApiClient.post('/super_admin_login', loginData)
+    const response = await adminApiClient.post('/admin_login', loginData)
     const result = response.data
     return result
   } catch (error) {
@@ -120,5 +120,14 @@ export const fetchPendingReviews = async () => {
       throw new Error(backendError.message || 'Failed to fetch pending reviews')
     }
     throw new Error('Failed to fetch pending reviews, Network error')
+  }
+}
+
+export const checkAuthStatus = async () => {
+  try {
+    const response = await adminApiClient.get('/auto_login')
+    return response.data
+  } catch (error) {
+    throw error.response?.data || { status: 'error', message: 'Failed to check auth status' }
   }
 }

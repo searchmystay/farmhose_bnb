@@ -7,7 +7,7 @@ from src.config import ADMIN_PASSWORD, JWT_SECRET_KEY
 
 
 @handle_exceptions
-def validate_super_admin_password(password):
+def validate_admin_password(password):
     if not ADMIN_PASSWORD:
         raise AppException("Admin password not configured")
     
@@ -18,12 +18,12 @@ def validate_super_admin_password(password):
 
 
 @handle_exceptions
-def generate_super_admin_jwt_token():
+def generate_admin_jwt_token():
     if not JWT_SECRET_KEY:
-        raise AppException("JWT secret not configured")
+        raise Exception("JWT secret not configured")
     
     payload = {
-        "superadmin": True,
+        "admin": True,
         "exp": datetime.utcnow() + timedelta(hours=24),
         "iat": datetime.utcnow()
     }
@@ -33,15 +33,15 @@ def generate_super_admin_jwt_token():
 
 
 @handle_exceptions
-def verify_super_admin_jwt_token(token):
+def verify_admin_jwt_token(token):
     if not JWT_SECRET_KEY:
-        raise AppException("JWT secret not configured")
+        raise Exception("JWT secret not configured")
     
     try:
         payload = jwt.decode(token, JWT_SECRET_KEY, algorithms=['HS256'])
         
-        if not payload.get('superadmin'):
-            raise AppException("Invalid superadmin token")
+        if not payload.get('admin'):
+            raise AppException("Invalid admin token")
         
         return payload
         
@@ -52,20 +52,20 @@ def verify_super_admin_jwt_token(token):
 
 
 @handle_exceptions
-def authenticate_super_admin(password):
-    validate_super_admin_password(password)
-    admin_token = generate_super_admin_jwt_token()
+def authenticate_admin(password):
+    validate_admin_password(password)
+    admin_token = generate_admin_jwt_token()
     
     auth_result = {
         "token": admin_token,
         "expires_in": 24 * 60 * 60,
-        "superadmin": True
+        "admin": True
     }
     
     return auth_result
 
 
-def super_admin_required(f):
+def admin_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         token = request.cookies.get('admin_token')
@@ -77,7 +77,7 @@ def super_admin_required(f):
             }), 401
         
         try:
-            payload = verify_super_admin_jwt_token(token)
+            payload = verify_admin_jwt_token(token)
             request.admin = payload
             return f(*args, **kwargs)
             

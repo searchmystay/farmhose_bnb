@@ -16,7 +16,10 @@ export const useAdminAuth = () => {
     setIsLoading(true)
     try {
       const result = await adminLogin({ password })
-      navigate('/admin/dashboard')
+      if (result.success) {
+        toast.success('Login successful')
+        navigate('/admin')
+      }
       return result
     } catch (error) {
       toast.error(error.message || 'Login failed')

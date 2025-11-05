@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify, request, make_response
 from src.logics.admin_logics import *
-from src.logics.admin_auth import super_admin_required
+from src.logics.admin_auth import admin_required
 from src.utils.exception_handler import handle_route_exceptions, AppException
 
 
@@ -39,8 +39,39 @@ def admin_login():
     return response
 
 
+@admin_bp.route('/admin_logout', methods=['POST'])
+@handle_route_exceptions
+def admin_logout():
+    response_data = {
+        "success": True,
+        "message": "Logged out successfully"
+    }
+    
+    response = make_response(jsonify(response_data), 200)
+    response.set_cookie(
+        'admin_token',
+        '',
+        max_age=0,
+        httponly=True,
+        secure=False,
+        samesite='Lax'
+    )
+    
+    return response
+
+
+@admin_bp.route('/auto_login', methods=['GET'])
+@admin_required
+@handle_route_exceptions
+def auto_login():
+    return jsonify({
+        "status": "success",
+        "backend_data": {"admin": True, "role": "admin"}
+    }), 200
+
+
 @admin_bp.route('/pending_properties', methods=['GET'])
-@super_admin_required
+@admin_required
 @handle_route_exceptions
 def get_pending_properties_route():
     pending_properties = get_pending_properties()
@@ -56,7 +87,7 @@ def get_pending_properties_route():
 
 
 @admin_bp.route('/pending_property/<property_id>', methods=['GET'])
-@super_admin_required
+@admin_required
 @handle_route_exceptions
 def get_pending_property_details_route(property_id):
     property_details = get_pending_property_details(property_id)
@@ -70,7 +101,7 @@ def get_pending_property_details_route(property_id):
 
 
 @admin_bp.route('/approve_property/<property_id>', methods=['POST'])
-@super_admin_required
+@admin_required
 @handle_route_exceptions
 def approve_property_route(property_id):
     approve_pending_property(property_id)
@@ -84,7 +115,7 @@ def approve_property_route(property_id):
 
 
 @admin_bp.route('/reject_property/<property_id>', methods=['DELETE'])
-@super_admin_required
+@admin_required
 @handle_route_exceptions
 def reject_property_route(property_id):
     reject_pending_property(property_id)
@@ -98,7 +129,7 @@ def reject_property_route(property_id):
 
 
 @admin_bp.route('/add_credit/<property_id>', methods=['POST'])
-@super_admin_required
+@admin_required
 @handle_route_exceptions
 def add_credit_balance_route(property_id):
     request_data = request.get_json()
@@ -118,7 +149,7 @@ def add_credit_balance_route(property_id):
 
 
 @admin_bp.route('/mark_favourite/<property_id>', methods=['POST'])
-@super_admin_required
+@admin_required
 @handle_route_exceptions
 def mark_property_favourite_route(property_id):
     request_data = request.get_json()
@@ -142,7 +173,7 @@ def mark_property_favourite_route(property_id):
 
 
 @admin_bp.route('/pending_reviews', methods=['GET'])
-@super_admin_required
+@admin_required
 @handle_route_exceptions
 def get_pending_reviews_route():
     pending_reviews = get_pending_reviews()
