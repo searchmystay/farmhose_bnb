@@ -33,7 +33,7 @@ def calculate_monthly_totals(month_data):
 
 
 @handle_exceptions
-def create_monthly_summary(month, total_leads, total_views):
+def create_last_month_summary(month, total_leads, total_views):
     summary = {
         "month": month,
         "total_leads": total_leads,
@@ -44,10 +44,10 @@ def create_monthly_summary(month, total_leads, total_views):
 
 
 @handle_exceptions
-def save_to_monthly_summary(farmhouse_id, summary):
+def save_to_last_month_summary(farmhouse_id, summary):
     result = db["farmhouse_analysis"].update_one(
         {"_id": farmhouse_id},
-        {"$set": {"monthly_summary": [summary]}}
+        {"$set": {"last_month_summary": summary}}
     )
     return result.modified_count > 0
 
@@ -70,10 +70,10 @@ def process_farmhouse_aggregation(farmhouse_doc, month):
         return False
     
     total_leads, total_views = calculate_monthly_totals(month_data)
-    summary = create_monthly_summary(month, total_leads, total_views)
+    summary = create_last_month_summary(month, total_leads, total_views)
     
     farmhouse_id = farmhouse_doc["_id"]
-    save_to_monthly_summary(farmhouse_id, summary)
+    save_to_last_month_summary(farmhouse_id, summary)
     delete_monthly_daily_data(farmhouse_id, month)
     
     return True

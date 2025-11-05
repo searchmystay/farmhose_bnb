@@ -3,7 +3,7 @@ from typing import Dict
 def get_farmhouse_schema() -> Dict:
     return {
         "bsonType": "object",
-        "required": ["name", "description", "type", "phone_number", "location", "credit_balance", "status", "max_people", "created_at", "updated_at"],
+        "required": ["name", "description", "type", "phone_number", "location", "credit_balance", "status", "created_at", "updated_at"],
         "properties": {
             "_id": {
                 "bsonType": "objectId",
@@ -588,31 +588,34 @@ def get_farmhouse_analysis_schema() -> Dict:
                     }
                 }
             },
-            "monthly_summary": {
-                "bsonType": "array",
-                "description": "Monthly summary (contains only last complete month)",
-                "items": {
-                    "bsonType": "object",
-                    "required": ["month", "total_leads", "total_views", "created_at"],
-                    "properties": {
-                        "month": {
-                            "bsonType": "string",
-                            "description": "Month in YYYY-MM format"
-                        },
-                        "total_leads": {
-                            "bsonType": "int",
-                            "description": "Total leads for the month"
-                        },
-                        "total_views": {
-                            "bsonType": "int",
-                            "description": "Total views for the month"
-                        },
-                        "created_at": {
-                            "bsonType": "date",
-                            "description": "Timestamp when summary was created"
-                        }
+            "last_month_summary": {
+                "bsonType": "object",
+                "description": "Last month summary (last complete month only)",
+                "required": ["month", "total_leads", "total_views", "created_at"],
+                "properties": {
+                    "month": {
+                        "bsonType": "string",
+                        "description": "Month in YYYY-MM format"
+                    },
+                    "total_leads": {
+                        "bsonType": "int",
+                        "description": "Total leads for the month"
+                    },
+                    "total_views": {
+                        "bsonType": "int",
+                        "description": "Total views for the month"
+                    },
+                    "created_at": {
+                        "bsonType": "date",
+                        "description": "Timestamp when summary was created"
                     }
                 }
+            },
+            "review_average": {
+                "bsonType": "double",
+                "description": "Average review rating out of 5",
+                "minimum": 0,
+                "maximum": 5
             },
             "created_at": {
                 "bsonType": "date",

@@ -198,10 +198,11 @@ def get_last_month_string():
 
 
 @handle_exceptions
-def find_month_in_summary(monthly_summary, month_str):
-    for summary in monthly_summary:
-        if summary.get("month") == month_str:
-            return summary
+def check_summary_month(last_month_summary, month_str):
+    if not last_month_summary:
+        return None
+    if last_month_summary.get("month") == month_str:
+        return last_month_summary
     return None
 
 
@@ -215,8 +216,8 @@ def get_last_month_leads(farmhouse_id):
         return 0
     
     last_month_str = get_last_month_string()
-    monthly_summary = doc.get("monthly_summary", [])
-    month_data = find_month_in_summary(monthly_summary, last_month_str)
+    last_month_summary = doc.get("last_month_summary")
+    month_data = check_summary_month(last_month_summary, last_month_str)
     
     if month_data:
         total = month_data.get("total_leads", 0)
@@ -262,8 +263,8 @@ def get_last_month_views(farmhouse_id):
         return 0
     
     last_month_str = get_last_month_string()
-    monthly_summary = doc.get("monthly_summary", [])
-    month_data = find_month_in_summary(monthly_summary, last_month_str)
+    last_month_summary = doc.get("last_month_summary")
+    month_data = check_summary_month(last_month_summary, last_month_str)
     
     if month_data:
         total = month_data.get("total_views", 0)
