@@ -694,17 +694,20 @@ def get_pending_reviews_schema() -> Dict:
             },
             "reviewer_name": {
                 "bsonType": "string",
-                "description": "Name of the person writing the review"
-            },
-            "rating": {
-                "bsonType": "int",
-                "minimum": 1,
-                "maximum": 5,
-                "description": "Star rating from 1-5"
+                "description": "Name of the person who reviewed the farmhouse",
+                "minLength": 2,
+                "maxLength": 100
             },
             "review_comment": {
                 "bsonType": "string",
-                "description": "Review description/comment"
+                "description": "Review comment or feedback about the farmhouse",
+                "minLength": 10,
+            },
+            "rating": {
+                "bsonType": "number",
+                "description": "Rating given by the reviewer (1-5 stars)",
+                "minimum": 0,
+                "maximum": 5
             }
         }
     }

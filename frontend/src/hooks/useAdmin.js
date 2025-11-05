@@ -62,7 +62,9 @@ export const usePendingReviews = () => {
       const result = await acceptReview(reviewId)
       if (result.success) {
         toast.success(result.message || 'Review accepted successfully')
-        await fetchReviews()
+        setPendingReviews(prevReviews => 
+          prevReviews.filter(review => review.review_id !== reviewId)
+        )
       }
     } catch (error) {
       toast.error(error.message || 'Failed to accept review')
@@ -77,7 +79,9 @@ export const usePendingReviews = () => {
       const result = await rejectReview(reviewId)
       if (result.success) {
         toast.success(result.message || 'Review rejected successfully')
-        await fetchReviews()
+        setPendingReviews(prevReviews => 
+          prevReviews.filter(review => review.review_id !== reviewId)
+        )
       }
     } catch (error) {
       toast.error(error.message || 'Failed to reject review')
