@@ -38,3 +38,16 @@ export const ownerLogout = async () => {
     throw new Error('Failed to logout, Network error')
   }
 }
+
+export const checkOwnerAuthStatus = async () => {
+  try {
+    const response = await ownerApiClient.get('/owner-auto-login')
+    return response.data
+  } catch (error) {
+    if (error.response && error.response.data) {
+      const backendError = error.response.data
+      throw new Error(backendError.message || 'Not authenticated')
+    }
+    throw new Error('Authentication check failed')
+  }
+}
