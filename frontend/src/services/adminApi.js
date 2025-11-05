@@ -108,3 +108,17 @@ export const markPropertyAsFavourite = async (propertyId, favouriteStatus) => {
     throw new Error('Failed to update favourite status, Network error')
   }
 }
+
+export const fetchPendingReviews = async () => {
+  try {
+    const response = await adminApiClient.get('/pending_reviews')
+    const result = response.data
+    return result
+  } catch (error) {
+    if (error.response && error.response.data) {
+      const backendError = error.response.data
+      throw new Error(backendError.message || 'Failed to fetch pending reviews')
+    }
+    throw new Error('Failed to fetch pending reviews, Network error')
+  }
+}
