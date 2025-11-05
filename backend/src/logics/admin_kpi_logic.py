@@ -1,0 +1,76 @@
+from ..database.db_admin_kpi_operations import (
+    get_property_counts_by_type,
+    get_total_platform_revenue,
+    get_this_month_revenue,
+    get_total_leads,
+    get_most_viewed_property_this_month,
+    get_top_properties_last_month
+)
+from ..utils.exception_handler import handle_exceptions
+
+
+@handle_exceptions
+def build_property_counts_data(property_counts):
+    counts_data = {
+        "total_farmhouses": property_counts["farmhouse"],
+        "total_bnbs": property_counts["bnb"],
+        "total_properties": property_counts["farmhouse"] + property_counts["bnb"]
+    }
+    return counts_data
+
+
+@handle_exceptions
+def build_revenue_data(revenue_info, monthly_revenue):
+    revenue_data = {
+        "total_platform_revenue": revenue_info["total_revenue"],
+        "this_month_revenue": monthly_revenue,
+        "total_recharged": revenue_info["total_recharged"],
+        "credits_left": revenue_info["credits_left"]
+    }
+    return revenue_data
+
+
+@handle_exceptions
+def build_engagement_data(total_leads, most_viewed):
+    if most_viewed:
+        most_viewed_data = most_viewed
+    else:
+        most_viewed_data = {
+            "property_name": "N/A",
+            "property_type": "N/A",
+            "views": 0
+        }
+    
+    engagement_data = {
+        "total_leads": total_leads,
+        "most_viewed_this_month": most_viewed_data
+    }
+    return engagement_data
+
+
+@handle_exceptions
+def build_kpis_response(counts_data, revenue_data, engagement_data, top_properties):
+    kpis = {
+        "property_counts": counts_data,
+        "revenue": revenue_data,
+        "engagement": engagement_data,
+        "top_properties_last_month": top_properties
+    }
+    return kpis
+
+
+@handle_exceptions
+def get_admin_dashboard_kpis():
+    property_counts = get_property_counts_by_type()
+    revenue_info = get_total_platform_revenue()
+    monthly_revenue = get_this_month_revenue()
+    total_leads = get_total_leads()
+    most_viewed = get_most_viewed_property_this_month()
+    top_properties = get_top_properties_last_month(limit=5)
+    
+    counts_data = build_property_counts_data(property_counts)
+    revenue_data = build_revenue_data(revenue_info, monthly_revenue)
+    engagement_data = build_engagement_data(total_leads, most_viewed)
+    kpis = build_kpis_response(counts_data, revenue_data, engagement_data, top_properties)
+    
+    return kpis

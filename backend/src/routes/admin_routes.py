@@ -214,3 +214,17 @@ def reject_comment_route(review_id):
     }
     
     return jsonify(response_data), 200
+
+
+@admin_bp.route('/analytics', methods=['GET'])
+@admin_required
+@handle_route_exceptions
+def get_admin_kpis_route():
+    kpis = get_admin_dashboard_kpis()
+    
+    response_data = {
+        "success": True,
+        "backend_data": kpis
+    }
+    
+    return jsonify(response_data), 200

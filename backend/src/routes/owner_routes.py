@@ -69,6 +69,10 @@ def get_owner_dashboard_route(farmhouse_id):
     if not farmhouse_id:
         raise AppException("Farmhouse ID is required")
     
+    owner_farmhouse_id = request.owner.get('farmhouse_id')
+    if str(owner_farmhouse_id) != str(farmhouse_id):
+        raise AppException("Unauthorized access to this farmhouse")
+    
     dashboard_data = get_owner_dashboard_data(farmhouse_id)
     
     response_data = {
@@ -85,6 +89,10 @@ def get_owner_dashboard_route(farmhouse_id):
 def get_booked_dates_route(farmhouse_id):
     if not farmhouse_id:
         raise AppException("Farmhouse ID is required")
+  
+    owner_farmhouse_id = request.owner.get('farmhouse_id')
+    if str(owner_farmhouse_id) != str(farmhouse_id):
+        raise AppException("Unauthorized access to this farmhouse")
     
     result = get_booked_dates(farmhouse_id)
     
@@ -102,6 +110,11 @@ def get_booked_dates_route(farmhouse_id):
 def add_booked_date_route(farmhouse_id):
     if not farmhouse_id:
         raise AppException("Farmhouse ID is required")
+    
+    # Verify owner owns this farmhouse
+    owner_farmhouse_id = request.owner.get('farmhouse_id')
+    if str(owner_farmhouse_id) != str(farmhouse_id):
+        raise AppException("Unauthorized access to this farmhouse")
     
     data = request.get_json()
     date_string = data.get('date')
@@ -125,6 +138,10 @@ def add_booked_date_route(farmhouse_id):
 def remove_booked_date_route(farmhouse_id):
     if not farmhouse_id:
         raise AppException("Farmhouse ID is required")
+    
+    owner_farmhouse_id = request.owner.get('farmhouse_id')
+    if str(owner_farmhouse_id) != str(farmhouse_id):
+        raise AppException("Unauthorized access to this farmhouse")
     
     data = request.get_json()
     date_string = data.get('date')
