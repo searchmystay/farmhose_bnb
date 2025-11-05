@@ -359,3 +359,30 @@ def reject_pending_review(review_id):
     query_filter = {"_id": ObjectId(review_id)}
     db_delete_one("pending_reviews", query_filter)
     return True
+
+
+@handle_exceptions
+def get_all_properties():
+    query_filter = {"status": {"$ne": "pending_approval"}} 
+    projection = {
+        "_id": 1,
+        "name": 1,
+        "type": 1,
+        "phone_number": 1,
+        "status": 1
+    }
+    
+    all_properties = db_find_many("farmhouses", query_filter, projection)
+    
+    processed_properties = []
+    for property_data in all_properties:
+        processed_property = {
+            "id": str(property_data.get("_id")),
+            "name": property_data.get("name", ""),
+            "type": property_data.get("type", ""),
+            "phone_number": property_data.get("phone_number", ""),
+            "status": property_data.get("status", "")
+        }
+        processed_properties.append(processed_property)
+    
+    return processed_properties
