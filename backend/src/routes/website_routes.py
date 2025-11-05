@@ -42,6 +42,23 @@ def list_bnbs():
     
     return jsonify(response_data)
 
+@website_bp.route('/property-list', methods=['POST'])
+@handle_route_exceptions
+def list_properties():
+    data = request.get_json() or {}
+    number_of_people = data.get('numberOfPeople')
+    check_in_date = data.get('checkInDate')
+    check_out_date = data.get('checkOutDate')
+    
+    properties_data = get_all_approved_properties(number_of_people, check_in_date, check_out_date)
+    
+    response_data = {
+        "success": True,
+        "backend_data": properties_data,
+    }
+    
+    return jsonify(response_data)
+
 
 @website_bp.route('/property-detail/<property_id>', methods=['POST'])
 @handle_route_exceptions
