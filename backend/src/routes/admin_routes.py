@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify, request, make_response
-from src.logics.admin_logics import process_admin_login, get_pending_properties, get_pending_property_details, approve_pending_property, reject_pending_property, add_credit_balance, mark_property_as_favourite
+from src.logics.admin_logics import *
 from src.logics.admin_auth import super_admin_required
 from src.utils.exception_handler import handle_route_exceptions, AppException
 
@@ -136,6 +136,22 @@ def mark_property_favourite_route(property_id):
     response_data = {
         "success": True,
         "message": f"Property {action} successfully",
+    }
+    
+    return jsonify(response_data), 200
+
+
+@admin_bp.route('/pending_reviews', methods=['GET'])
+@super_admin_required
+@handle_route_exceptions
+def get_pending_reviews_route():
+    pending_reviews = get_pending_reviews()
+    
+    response_data = {
+        "success": True,
+        "backend_data": {
+            "pending_reviews": pending_reviews
+        }
     }
     
     return jsonify(response_data), 200

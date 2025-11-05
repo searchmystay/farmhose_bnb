@@ -160,3 +160,87 @@ def mark_property_as_favourite(property_id, favourite_status):
     update_data = {"favourite": favourite_status}
     db_update_one("farmhouses", query_filter, {"$set": update_data})
     return True
+
+
+@handle_exceptions
+def fetch_pending_reviews_data():
+    projection = {
+        "_id": 1,
+        "farmhouse_id": 1,
+        "reviewer_name": 1,
+        "rating": 1,
+        "review_comment": 1
+    }
+    pending_reviews = db_find_many("pending_reviews", {}, projection)
+    return pending_reviews
+
+
+@handle_exceptions
+def group_reviews_by_farmhouse(pending_reviews):
+    farmhouse_reviews = {}
+    farmhouse_ids = set()
+    
+    for review in pending_reviews:
+        farmhouse_id = review.get("farmhouse_id")
+        farmhouse_ids.add(farmhouse_id)
+        
+        if farmhouse_id not in farmhouse_reviews:
+            farmhouse_reviews[farmhouse_id] = []
+        
+        review_data = {
+            "review_id": str(review.get("_id")),
+            "reviewer_name": review.get("reviewer_name", ""),
+            "rating": review.get("rating", 0),
+            "review_comment": review.get("review_comment", "")
+        }
+        farmhouse_reviews[farmhouse_id].append(review_data)
+    
+    return farmhouse_reviews, farmhouse_ids
+
+
+@handle_exceptions
+def fetch_farmhouse_names(farmhouse_ids):
+    farmhouse_ids_list = [ObjectId(fid) for fid in farmhouse_ids]
+    query_filter = {"_id": {"$in": farmhouse_ids_list}}
+    projection = {"_id": 1, "name": 1}
+    farmhouses = db_find_many("farmhouses", query_filter, projection)
+    
+    farmhouse_names = {}
+    for farmhouse in farmhouses:
+        farmhouse_id = farmhouse.get("_id")
+        farmhouse_name = farmhouse.get("name", "Unknown Property")
+        farmhouse_names[farmhouse_id] = farmhouse_name
+    
+    return farmhouse_names
+
+
+@handle_exceptions
+def build_pending_reviews_response(farmhouse_reviews, farmhouse_names):
+    result = []
+    for farmhouse_id, reviews in farmhouse_reviews.items():
+        farmhouse_name = farmhouse_names.get(farmhouse_id, "Unknown Property")
+        
+        farmhouse_data = {
+            "farmhouse_id": str(farmhouse_id),
+            "farmhouse_name": farmhouse_name,
+            "reviews": reviews,
+            "total_reviews": len(reviews)
+        }
+        result.append(farmhouse_data)
+    
+    return result
+
+
+@handle_exceptions
+def get_pending_reviews():
+    pending_reviews = fetch_pending_reviews_data()
+    
+    if not pending_reviews:
+        empty_list = []
+        return empty_list
+    
+    farmhouse_reviews, farmhouse_ids = group_reviews_by_farmhouse(pending_reviews)
+    farmhouse_names = fetch_farmhouse_names(farmhouse_ids)
+    final_result = build_pending_reviews_response(farmhouse_reviews, farmhouse_names)
+    
+    return final_result
