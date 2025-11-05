@@ -53,6 +53,12 @@ PROPERTY_TYPES_WORDS = [
     "Lodge", "Resort", "Getaway", "Palace", "Mansion", "Bungalow", "Home"
 ]
 
+OWNER_NAMES = [
+    "Rajesh Kumar", "Suresh Patel", "Mahesh Singh", "Ramesh Gupta", "Dinesh Sharma",
+    "Anil Verma", "Vijay Yadav", "Sanjay Reddy", "Rakesh Mehta", "Manoj Agarwal",
+    "Kiran Shah", "Ravi Malhotra", "Ashok Goel", "Prakash Jain", "Santosh Tiwari"
+]
+
 REVIEWER_NAMES = [
     "Amit Sharma", "Priya Gupta", "Rahul Singh", "Sneha Patel", "Vikash Kumar",
     "Neha Agarwal", "Rohit Verma", "Kavya Reddy", "Arjun Mehta", "Pooja Jain",
@@ -258,12 +264,18 @@ def generate_reviews():
 
 
 def generate_owner_details():
+    owner_name = random.choice(OWNER_NAMES)
     owner_photo = random.choice(OWNER_PHOTOS)
     owner_description = random.choice(OWNER_DESCRIPTIONS)
+    owner_id = generate_random_string(8).lower()
+    owner_password = generate_random_string(10)
     
     return {
+        "owner_name": owner_name,
         "owner_photo": owner_photo,
-        "owner_description": owner_description
+        "owner_description": owner_description,
+        "owner_dashboard_id": owner_id,
+        "owner_dashboard_password": owner_password
     }
 
 
