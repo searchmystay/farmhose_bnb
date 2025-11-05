@@ -187,3 +187,17 @@ export const checkAuthStatus = async () => {
     throw error.response?.data || { status: 'error', message: 'Failed to check auth status' }
   }
 }
+
+export const fetchAnalytics = async () => {
+  try {
+    const response = await adminApiClient.get('/analytics')
+    const result = response.data
+    return result
+  } catch (error) {
+    if (error.response && error.response.data) {
+      const backendError = error.response.data
+      throw new Error(backendError.message || 'Failed to fetch analytics')
+    }
+    throw new Error('Failed to fetch analytics, Network error')
+  }
+}

@@ -1,6 +1,7 @@
 from flask import Blueprint, jsonify, request, make_response
 from src.logics.admin_logics import *
 from src.logics.admin_auth import admin_required
+from src.logics.admin_kpi_logic import get_admin_dashboard_kpis
 from src.utils.exception_handler import handle_route_exceptions, AppException
 
 
@@ -216,6 +217,7 @@ def reject_comment_route(review_id):
     return jsonify(response_data), 200
 
 
+
 @admin_bp.route('/admin_all_properties', methods=['GET'])
 @admin_required
 @handle_route_exceptions
@@ -228,6 +230,20 @@ def get_all_properties_route():
             "properties": all_properties,
             "total_count": len(all_properties)
         }
+    }
+
+    return jsonify(response_data), 200
+
+
+@admin_bp.route('/analytics', methods=['GET'])
+@admin_required
+@handle_route_exceptions
+def get_admin_kpis_route():
+    kpis = get_admin_dashboard_kpis()
+    
+    response_data = {
+        "success": True,
+        "backend_data": kpis
     }
     
     return jsonify(response_data), 200

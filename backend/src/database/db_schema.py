@@ -684,7 +684,7 @@ def get_lead_schema() -> Dict:
     }
 
 
-def get_pending_reviews_schema() -> Dict:
+def get_pending_reviews_schema():
     return {
         "bsonType": "object",
         "required": ["farmhouse_id", "reviewer_name", "rating", "review_comment"],
@@ -716,3 +716,57 @@ def get_pending_reviews_schema() -> Dict:
             }
         }
     }
+
+
+def get_monthly_top_properties_schema():
+    schema = {
+        "bsonType": "object",
+        "required": ["month", "top_properties", "created_at"],
+        "properties": {
+            "_id": {
+                "bsonType": "objectId",
+                "description": "Unique identifier for the monthly summary"
+            },
+            "month": {
+                "bsonType": "string",
+                "description": "Month in YYYY-MM format",
+                "pattern": "^[0-9]{4}-[0-9]{2}$"
+            },
+            "top_properties": {
+                "bsonType": "array",
+                "description": "Top 5 properties by leads for the month",
+                "items": {
+                    "bsonType": "object",
+                    "required": ["farmhouse_id", "name", "type", "total_leads", "total_views"],
+                    "properties": {
+                        "farmhouse_id": {
+                            "bsonType": "objectId",
+                            "description": "Reference to farmhouse _id"
+                        },
+                        "name": {
+                            "bsonType": "string",
+                            "description": "Property name"
+                        },
+                        "type": {
+                            "bsonType": "string",
+                            "description": "Property type - farmhouse or bnb",
+                            "enum": ["farmhouse", "bnb"]
+                        },
+                        "total_leads": {
+                            "bsonType": "int",
+                            "description": "Total leads for the month"
+                        },
+                        "total_views": {
+                            "bsonType": "int",
+                            "description": "Total views for the month"
+                        }
+                    }
+                }
+            },
+            "created_at": {
+                "bsonType": "date",
+                "description": "Timestamp when summary was created"
+            }
+        }
+    }
+    return schema

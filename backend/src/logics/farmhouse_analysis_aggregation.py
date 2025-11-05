@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 from bson import ObjectId
 from ..database import db
+from ..database.db_admin_kpi_operations import save_monthly_top_properties
 from ..utils.exception_handler import handle_exceptions
 
 
@@ -82,6 +83,9 @@ def process_farmhouse_aggregation(farmhouse_doc, month):
 @handle_exceptions
 def run_monthly_aggregation():
     month = get_last_complete_month_string()
+    
+    save_monthly_top_properties(month)
+    
     farmhouses = get_all_farmhouses()
     
     success_count = 0
