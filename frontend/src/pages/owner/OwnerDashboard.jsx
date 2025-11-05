@@ -198,14 +198,14 @@ function OwnerDashboard() {
             </button>
             <img src={Logo} alt="Company Logo" className="h-6 sm:h-10" style={{ filter: 'brightness(0)' }}/>
           </div>
-          <div className="flex items-center gap-3 sm:gap-6 text-xs sm:text-sm">
-            <div className="text-right">
-              <span className="text-black font-bold hidden sm:inline">Owner: </span>
-              <span className="font-semibold text-gray-900">{ownerInfo.name || 'N/A'}</span>
-            </div>
+          <div className="flex flex-col sm:flex-row items-end sm:items-center gap-1 sm:gap-6 text-[10px] sm:text-sm">
             <div className="text-right">
               <span className="text-black font-bold text-[10px] sm:text-sm">Credits Left: </span>
-              <span className="font-semibold text-green-600 text-xs sm:text-sm">₹{paymentKpis.total_cost_left || 0}</span>
+              <span className="font-semibold text-green-600 text-[10px] sm:text-sm">₹{paymentKpis.total_cost_left || 0}</span>
+            </div>
+            <div className="text-right">
+              <span className="text-black font-bold hidden sm:inline">Owner: </span>
+              <span className="font-semibold text-gray-900 text-[10px] sm:text-sm">{ownerInfo.name || 'N/A'}</span>
             </div>
           </div>
         </header>
