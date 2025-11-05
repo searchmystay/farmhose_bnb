@@ -7,7 +7,7 @@ from src.utils.exception_handler import handle_route_exceptions, AppException
 admin_bp = Blueprint('admin', __name__)
 
 
-@admin_bp.route('/super_admin_login', methods=['POST'])
+@admin_bp.route('/admin_login', methods=['POST'])
 @handle_route_exceptions
 def admin_login():
     login_data = request.get_json()
