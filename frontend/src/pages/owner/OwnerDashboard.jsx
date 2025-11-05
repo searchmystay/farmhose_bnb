@@ -184,8 +184,8 @@ function OwnerDashboard() {
 
     return (
       <div className="min-h-screen bg-gray-50">
-        <header className="bg-white shadow-md border-b-2 border-gray-200 px-4 sm:px-6 py-4 flex justify-between items-center">
-          <div className="flex items-center gap-4">
+        <header className="bg-white shadow-md border-b-2 border-gray-200 px-3 sm:px-6 py-3 sm:py-4 flex justify-between items-center">
+          <div className="flex items-center gap-2 sm:gap-4">
             {/* Hamburger Menu Button - Mobile Only */}
             <button 
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -196,16 +196,16 @@ function OwnerDashboard() {
               <span className="w-6 h-0.5 bg-black block"></span>
               <span className="w-6 h-0.5 bg-black block"></span>
             </button>
-            <img src={Logo} alt="Company Logo" className="h-8 sm:h-10" style={{ filter: 'brightness(0)' }}/>
+            <img src={Logo} alt="Company Logo" className="h-6 sm:h-10" style={{ filter: 'brightness(0)' }}/>
           </div>
-          <div className="flex items-center gap-3 sm:gap-6 text-xs sm:text-sm">
+          <div className="flex flex-col sm:flex-row items-end sm:items-center gap-1 sm:gap-6 text-[10px] sm:text-sm">
             <div className="text-right">
-              <span className="text-black font-bold hidden sm:inline">Owner: </span>
-              <span className="font-semibold text-gray-900">{ownerInfo.name || 'N/A'}</span>
+              <span className="text-black font-bold text-[10px] sm:text-sm">Credits Left: </span>
+              <span className="font-semibold text-green-600 text-[10px] sm:text-sm">₹{paymentKpis.total_cost_left || 0}</span>
             </div>
             <div className="text-right">
-              <span className="text-black font-bold">Credits Left: </span>
-              <span className="font-semibold text-green-600">₹{paymentKpis.total_cost_left || 0}</span>
+              <span className="text-black font-bold hidden sm:inline">Owner: </span>
+              <span className="font-semibold text-gray-900 text-[10px] sm:text-sm">{ownerInfo.name || 'N/A'}</span>
             </div>
           </div>
         </header>
