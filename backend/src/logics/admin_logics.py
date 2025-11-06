@@ -66,8 +66,8 @@ def process_admin_property_details(property_data):
         "address": build_complete_address(property_data.get("location", {})),
         "opening_time": property_data.get("opening_time", ""),
         "closing_time": property_data.get("closing_time", ""),
-        "per_day_cost": property_data.get("per_day_cost", 0),
-        "max_people": property_data.get("max_people", 0),
+        "per_day_price": property_data.get("per_day_price", 0),
+        "max_people_allowed": property_data.get("max_people_allowed", 0),
         "amenities": property_data.get("amenities", {})
     }
     
@@ -128,8 +128,8 @@ def get_admin_property_details(property_id):
         "location": 1,
         "opening_time": 1,
         "closing_time": 1,
-        "per_day_cost": 1,
-        "max_people": 1,
+        "per_day_price": 1,
+        "max_people_allowed": 1,
         "amenities": 1,
         "owner_details": 1,
         "documents": 1,
@@ -161,7 +161,7 @@ def create_initial_analysis_data(property_id):
         "farmhouse_id": ObjectId(property_id),
         "total_views": 0,
         "total_leads": 0,
-        "daily": [],
+        "daily_analytics": [],
         "review_average": 0.0,
         "created_at": current_time,
         "updated_at": current_time
