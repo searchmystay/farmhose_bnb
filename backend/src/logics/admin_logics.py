@@ -6,6 +6,8 @@ from src.logics.cloudfare_bucket import delete_farmhouse_folder_from_r2
 from bson import ObjectId
 from datetime import datetime
 import pytz
+import hashlib
+import re
 
 
 @handle_exceptions
@@ -182,16 +184,61 @@ def initialize_farmhouse_analysis(property_id):
 
 
 @handle_exceptions
+def generate_dashboard_id(owner_name):
+    clean_name = re.sub(r'[^a-zA-Z0-9]', '', owner_name.lower())
+    if len(clean_name) < 3:
+        clean_name = clean_name + "owner"
+    
+    dashboard_id = clean_name[:20]
+    return dashboard_id
+
+
+@handle_exceptions
+def generate_dashboard_password(farmhouse_id):
+    if not farmhouse_id:
+        raise AppException("Farmhouse ID is required to generate password")
+    
+    password_base = f"fh_{farmhouse_id}_owner"
+    password_hash = hashlib.md5(password_base.encode()).hexdigest()
+    dashboard_password = password_hash[:8]
+    return dashboard_password
+
+
+@handle_exceptions
+def generate_owner_credentials(property_id, owner_name):
+    dashboard_id = generate_dashboard_id(owner_name)
+    dashboard_password = generate_dashboard_password(property_id)
+    return dashboard_id, dashboard_password
+        
+
+@handle_exceptions
 def approve_pending_property(property_id):
     query_filter = {"_id": ObjectId(property_id), "status": "pending_approval"}
-    property_exists = db_find_one("farmhouses", query_filter, {"_id": 1})
+    property_data = db_find_one("farmhouses", query_filter, {
+        "_id": 1, 
+        "owner_details": 1
+    })
     
-    if not property_exists:
+    if not property_data:
         raise AppException("Pending property not found")
     
-    update_data = {"status": "active"}
+    owner_details = property_data.get("owner_details", {})
+    owner_name = owner_details.get("owner_name", "")
+    
+    if not owner_name:
+        raise AppException("Owner name is required to generate dashboard credentials")
+    
+    dashboard_id, dashboard_password = generate_owner_credentials(property_id, owner_name)
+    
+    update_data = {
+        "status": "active",
+        "owner_details.owner_dashboard_id": dashboard_id,
+        "owner_details.owner_dashboard_password": dashboard_password
+    }
+    
     db_update_one("farmhouses", query_filter, {"$set": update_data})
     initialize_farmhouse_analysis(property_id)
+    
     return True
 
 
