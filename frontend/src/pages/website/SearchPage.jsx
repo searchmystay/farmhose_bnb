@@ -41,7 +41,6 @@ function SearchPage() {
     }
     
     sessionStorage.setItem('searchCriteria', JSON.stringify(searchData))
-    console.log('Search data saved to session storage:', searchData)
     
     if (formData.propertyType === 'farmhouse') {
       navigate('/farmhouse')

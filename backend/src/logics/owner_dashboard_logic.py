@@ -1,6 +1,6 @@
-from src.database.db_owner_analysis_operations import get_total_visits, get_total_contacts, get_contacts_last_7_days, get_contacts_last_month, get_contacts_last_year, get_daily_leads_last_7_days, get_daily_views_last_7_days, get_this_month_leads, get_last_month_leads, get_this_month_views, get_last_month_views
+from src.database.db_owner_analysis_operations import *
 from src.database.db_payment_operations import get_farmhouse_credit_balance
-from src.database.db_common_operations import db_find_many, db_aggregate, db_find_one, db_update_one
+from src.database.db_common_operations import db_aggregate, db_find_one, db_update_one
 from src.utils.exception_handler import handle_exceptions, AppException
 from src.config import JWT_SECRET_KEY
 from bson import ObjectId
@@ -170,18 +170,15 @@ def get_booked_dates(farmhouse_id):
 
 @handle_exceptions
 def add_booked_date(farmhouse_id, date_string):
-    # Parse the date string (YYYY-MM-DD format)
     try:
         date_obj = datetime.strptime(date_string, "%Y-%m-%d")
     except ValueError:
         raise AppException("Invalid date format. Use YYYY-MM-DD")
     
-    # Check if date is not in the past
     today = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
     if date_obj < today:
         raise AppException("Cannot book past dates")
     
-    # Add to booked_dates array as string (use $addToSet to avoid duplicates)
     query_filter = {"_id": ObjectId(farmhouse_id)}
     update_data = {
         "$addToSet": {"booked_dates": date_string}
@@ -201,13 +198,11 @@ def add_booked_date(farmhouse_id, date_string):
 
 @handle_exceptions
 def remove_booked_date(farmhouse_id, date_string):
-    # Validate the date string
     try:
         datetime.strptime(date_string, "%Y-%m-%d")
     except ValueError:
         raise AppException("Invalid date format. Use YYYY-MM-DD")
     
-    # Remove from booked_dates array as string
     query_filter = {"_id": ObjectId(farmhouse_id)}
     update_data = {
         "$pull": {"booked_dates": date_string}

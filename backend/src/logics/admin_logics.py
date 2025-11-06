@@ -184,12 +184,37 @@ def initialize_farmhouse_analysis(property_id):
 
 
 @handle_exceptions
-def generate_dashboard_id(owner_name):
-    clean_name = re.sub(r'[^a-zA-Z0-9]', '', owner_name.lower())
-    if len(clean_name) < 3:
-        clean_name = clean_name + "owner"
+def get_existing_property_ids():
+    query_filter = {"owner_details.owner_dashboard_id": {"$regex": "^property_"}}
+    projection = {"owner_details.owner_dashboard_id": 1}
+    existing_properties = db_find_many("farmhouses", query_filter, projection)
+    return existing_properties
+
+
+@handle_exceptions
+def extract_max_property_number(existing_properties):
+    max_number = 0
+    for property_data in existing_properties:
+        owner_details = property_data.get("owner_details", {})
+        dashboard_id = owner_details.get("owner_dashboard_id", "")
+        
+        if dashboard_id.startswith("property_"):
+            try:
+                number_part = dashboard_id.replace("property_", "")
+                current_number = int(number_part)
+                max_number = max(max_number, current_number)
+            except ValueError:
+                continue
     
-    dashboard_id = clean_name[:20]
+    return max_number
+
+
+@handle_exceptions
+def generate_dashboard_id():
+    existing_properties = get_existing_property_ids()
+    max_number = extract_max_property_number(existing_properties)
+    new_number = max_number + 1
+    dashboard_id = f"property_{new_number}"
     return dashboard_id
 
 
@@ -206,7 +231,7 @@ def generate_dashboard_password(farmhouse_id):
 
 @handle_exceptions
 def generate_owner_credentials(property_id, owner_name):
-    dashboard_id = generate_dashboard_id(owner_name)
+    dashboard_id = generate_dashboard_id()
     dashboard_password = generate_dashboard_password(property_id)
     return dashboard_id, dashboard_password
         
