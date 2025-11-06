@@ -442,7 +442,19 @@ def process_amenities_data(essential_amenities, experience_amenities, additional
 
 
 @handle_exceptions
-def register_property(farmhouse_data, property_images, property_documents, aadhaar_card, pan_card):
+def format_time_with_ampm(time_str):
+        if not time_str:
+            return ""
+        try:
+            from datetime import datetime
+            time_obj = datetime.strptime(time_str, '%H:%M')
+            return time_obj.strftime('%I:%M %p')
+        except:
+            return time_str
+
+
+@handle_exceptions
+def register_property(farmhouse_data, property_images, property_documents, aadhaar_card, pan_card, owner_photo):
     amenities = process_amenities_data(
         farmhouse_data.get("essential_amenities", {}),
         farmhouse_data.get("experience_amenities", {}),
@@ -456,14 +468,27 @@ def register_property(farmhouse_data, property_images, property_documents, aadha
     
     ist_timezone = pytz.timezone('Asia/Kolkata')
     current_time = datetime.now(ist_timezone).replace(tzinfo=None)
+    opening_time_formatted = format_time_with_ampm(farmhouse_data.get("opening_time", ""))
+    closing_time_formatted = format_time_with_ampm(farmhouse_data.get("closing_time", ""))
+    
+    owner_details = {
+        "owner_name": farmhouse_data.get("owner_name", ""),
+        "owner_description": farmhouse_data.get("owner_description", ""),
+        "owner_photo": ""
+    }
     
     farmhouse_record = {
         "name": farmhouse_data.get("name"),
         "description":  farmhouse_data.get("description", ""),
         "type": farmhouse_data.get("type"),
+        "per_day_price": int(farmhouse_data.get("per_day_price", 0)) if farmhouse_data.get("per_day_price") else 0,
+        "max_people_allowed": int(farmhouse_data.get("max_people_allowed", 0)) if farmhouse_data.get("max_people_allowed") else 0,
+        "opening_time": opening_time_formatted,
+        "closing_time": closing_time_formatted,
         "location": location,
         "phone_number": farmhouse_data.get("phone_number"), 
         "amenities": amenities,
+        "owner_details": owner_details,
         "status": "pending_approval",
         "images": [],
         "credit_balance": 0,
@@ -479,13 +504,24 @@ def register_property(farmhouse_data, property_images, property_documents, aadha
     aadhaar_url, pan_url= upload_identity_documents(aadhaar_card, pan_card, farmhouse_id)
     uploaded_property_documents = upload_farmhouse_documents(property_documents, farmhouse_id)
     
+    owner_photo_url = ""
+    if owner_photo and owner_photo.filename:
+        owner_photo_url = upload_farmhouse_image_to_r2(owner_photo, farmhouse_id, "owner_photo")
+    
     documents_data = {
         "property_docs": uploaded_property_documents,
         "aadhar_card": aadhaar_url,
         "pan_card": pan_url 
     }
     
-    update_farmhouse_db_with_file_urls(farmhouse_id, uploaded_images, documents_data)
+    update_data = {
+        "images": uploaded_images,
+        "documents": documents_data,
+        "owner_details.owner_photo": owner_photo_url
+    }
+    
+    query_filter = {"_id": ObjectId(farmhouse_id)}
+    db_update_one("farmhouses", query_filter, {"$set": update_data})
     return farmhouse_id 
 
 

@@ -31,11 +31,11 @@ def get_farmhouse_schema() -> Dict:
                 "description": "Phone number for property owner",
                 "pattern": "^[0-9]{10}$"
             },
-            "max_people": {
+            "max_people_allowed": {
                 "bsonType": "int",
                 "description": "Maximum number of people that can stay at the property",
                 "minimum": 1,
-                "maximum": 100
+                "maximum": 50
             },
             "location": {
                 "bsonType": "object",
@@ -491,7 +491,7 @@ def get_farmhouse_schema() -> Dict:
                 "description": "Closing time of the farmhouse (12-hour format with AM/PM)",
                 "pattern": "^(1[0-2]|0?[1-9]):[0-5][0-9] (AM|PM)$"
             },
-            "per_day_cost": {
+            "per_day_price": {
                 "bsonType": "number",
                 "description": "Cost per day for booking the farmhouse in rupees",
                 "minimum": 0
