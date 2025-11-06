@@ -135,6 +135,8 @@ def process_farmhouse_for_listing(farmhouse_data):
     full_description = farmhouse_data.get("description", "")
     images = farmhouse_data.get("images", [])
     favourite = farmhouse_data.get("favourite", False)
+    location = farmhouse_data.get("location", {})
+    review_average = farmhouse_data.get("review_average", 0.0)
     description_words = full_description.split()
     
     if len(description_words) > 20:
@@ -150,7 +152,9 @@ def process_farmhouse_for_listing(farmhouse_data):
         "description": truncated_description,
         "images": images,
         "amenities": available_amenities,
-        "favourite": favourite
+        "favourite": favourite,
+        "location": location,
+        "review_average": review_average
     }
     
     return processed_data
@@ -175,7 +179,8 @@ def get_approved_properties_by_type(query_filter, number_of_people=None, check_i
         "description": 1,
         "images": 1,
         "amenities": 1,
-        "type":1
+        "type": 1,
+        "location": 1
     }
 
     if number_of_people and not isinstance(number_of_people, str):
@@ -191,6 +196,14 @@ def get_approved_properties_by_type(query_filter, number_of_people=None, check_i
     
     processed_properties = []
     for property_data in properties_list:
+        # Get review_average from farmhouse_analysis collection
+        farmhouse_id = property_data.get("_id")
+        analysis_data = db_find_one("farmhouse_analysis", {"farmhouse_id": farmhouse_id}, {"review_average": 1})
+        if analysis_data:
+            property_data["review_average"] = analysis_data.get("review_average", 0.0)
+        else:
+            property_data["review_average"] = 0.0
+        
         processed_property = process_farmhouse_for_listing(property_data)
         processed_properties.append(processed_property)
     
