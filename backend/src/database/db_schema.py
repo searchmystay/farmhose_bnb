@@ -718,10 +718,10 @@ def get_pending_reviews_schema():
     }
 
 
-def get_trending_properties_schema():
+def get_admin_analysis_schema():
     schema = {
         "bsonType": "object",
-        "required": ["month", "top_properties", "created_at"],
+        "required": ["month", "top_properties", "total_platform_leads", "total_platform_views", "new_properties_added", "created_at"],
         "properties": {
             "_id": {
                 "bsonType": "objectId",
@@ -762,6 +762,18 @@ def get_trending_properties_schema():
                         }
                     }
                 }
+            },
+            "total_platform_leads": {
+                "bsonType": "int",
+                "description": "Total leads across all properties for the month"
+            },
+            "total_platform_views": {
+                "bsonType": "int",
+                "description": "Total views across all properties for the month"
+            },
+            "new_properties_added": {
+                "bsonType": "int",
+                "description": "Count of new properties added this month"
             },
             "created_at": {
                 "bsonType": "date",

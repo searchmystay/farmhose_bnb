@@ -133,7 +133,7 @@ def get_last_month_string():
 def get_top_properties_last_month(limit):
     month_str = get_last_month_string()
     filter_dict = {"month": month_str}
-    result = db_find_one("trending_properties", filter_dict)
+    result = db_find_one("admin_analysis", filter_dict)
     
     if result and "top_properties" in result:
         top_properties = result["top_properties"][:limit]
@@ -202,31 +202,127 @@ def enrich_with_property_names(results):
 
 
 @handle_exceptions
-def save_to_collection(month_str, top_properties):
+def save_to_collection(month_str, top_properties, total_leads, total_views, new_properties):
     monthly_summary = {
         "month": month_str,
         "top_properties": top_properties,
+        "total_platform_leads": total_leads,
+        "total_platform_views": total_views,
+        "new_properties_added": new_properties,
         "created_at": datetime.utcnow()
     }
     
-    existing = db_find_one("trending_properties", {"month": month_str})
+    existing = db_find_one("admin_analysis", {"month": month_str})
     
     if existing:
-        db.trending_properties.update_one(
+        db.admin_analysis.update_one(
             {"month": month_str},
             {"$set": monthly_summary}
         )
     else:
-        db_insert_one("trending_properties", monthly_summary)
+        db_insert_one("admin_analysis", monthly_summary)
     
     return True
 
 
 @handle_exceptions
-def save_monthly_top_properties(month_str):
+def save_monthly_admin_analysis(month_str):
     month_data = parse_month_string(month_str)
     date_range = calculate_month_range(month_data["year"], month_data["month"])
+    
     results = aggregate_top_properties_for_month(date_range["start"], date_range["end"])
     top_properties = enrich_with_property_names(results)
-    save_to_collection(month_str, top_properties)
-    return top_properties
+    
+    total_leads = aggregate_platform_leads_for_month(date_range["start"], date_range["end"])
+    total_views = aggregate_platform_views_for_month(date_range["start"], date_range["end"])
+    new_properties = count_new_properties_for_month(date_range["start"], date_range["end"])
+    
+    save_to_collection(month_str, top_properties, total_leads, total_views, new_properties)
+    return True
+
+
+@handle_exceptions
+def get_current_month_string():
+    now = datetime.utcnow()
+    month_str = f"{now.year}-{now.month:02d}"
+    return month_str
+
+
+@handle_exceptions
+def get_current_month_dates():
+    now = datetime.utcnow()
+    start_date = f"{now.year}-{now.month:02d}-01"
+    end_date = f"{now.year}-{now.month:02d}-{now.day:02d}"
+    date_range = {"start": start_date, "end": end_date}
+    return date_range
+
+
+@handle_exceptions
+def aggregate_platform_leads_for_month(start_date, end_date):
+    pipeline = [
+        {"$unwind": "$daily_analytics"},
+        {"$match": {"daily_analytics.date": {"$gte": start_date, "$lte": end_date}}},
+        {"$group": {"_id": None, "total_leads": {"$sum": "$daily_analytics.leads"}}}
+    ]
+    result = list(db.farmhouse_analysis.aggregate(pipeline))
+    total_leads = result[0]["total_leads"] if result else 0
+    return total_leads
+
+
+@handle_exceptions
+def aggregate_platform_views_for_month(start_date, end_date):
+    pipeline = [
+        {"$unwind": "$daily_analytics"},
+        {"$match": {"daily_analytics.date": {"$gte": start_date, "$lte": end_date}}},
+        {"$group": {"_id": None, "total_views": {"$sum": "$daily_analytics.views"}}}
+    ]
+    result = list(db.farmhouse_analysis.aggregate(pipeline))
+    total_views = result[0]["total_views"] if result else 0
+    return total_views
+
+
+@handle_exceptions
+def count_new_properties_for_month(start_date, end_date):
+    start_datetime = datetime.strptime(start_date, "%Y-%m-%d")
+    end_datetime = datetime.strptime(end_date, "%Y-%m-%d")
+    end_datetime = end_datetime.replace(hour=23, minute=59, second=59)
+    
+    filter_dict = {"created_at": {"$gte": start_datetime, "$lte": end_datetime}}
+    count = db.farmhouses.count_documents(filter_dict)
+    return count
+
+
+@handle_exceptions
+def get_current_month_stats_live():
+    month_str = get_current_month_string()
+    date_range = get_current_month_dates()
+    
+    total_leads = aggregate_platform_leads_for_month(date_range["start"], date_range["end"])
+    total_views = aggregate_platform_views_for_month(date_range["start"], date_range["end"])
+    new_properties = count_new_properties_for_month(date_range["start"], date_range["end"])
+    
+    stats = {
+        "month": month_str,
+        "total_platform_leads": total_leads,
+        "total_platform_views": total_views,
+        "new_properties_added": new_properties
+    }
+    return stats
+
+
+@handle_exceptions
+def get_last_6_months_data():
+    pipeline = [
+        {"$sort": {"month": -1}},
+        {"$limit": 6},
+        {"$project": {"month": 1, "total_platform_leads": 1, "_id": 0}}
+    ]
+    results = list(db.admin_analysis.aggregate(pipeline))
+    results.reverse()
+    return results
+
+
+@handle_exceptions
+def get_total_money_left():
+    total_credits = aggregate_total_credits()
+    return total_credits
