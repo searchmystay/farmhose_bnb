@@ -33,8 +33,8 @@ def admin_login():
         login_result.get("token"),
         max_age=24*60*60,
         httponly=True,
-        secure=False,
-        samesite='Lax'
+        secure=True,
+        samesite='None'
     )
     
     return response
@@ -54,8 +54,8 @@ def admin_logout():
         '',
         max_age=0,
         httponly=True,
-        secure=False,
-        samesite='Lax'
+        secure=True,
+        samesite='None'
     )
     
     return response
