@@ -9,6 +9,8 @@ const RegisterPropertyPage = () => {
     name: '',
     description: '',
     type: 'farmhouse',
+    per_day_price: '',
+    max_people_allowed: '',
     phone_number: '',
     address: '',
     pin_code: ''
@@ -177,6 +179,18 @@ const RegisterPropertyPage = () => {
       errors.address = 'Address is required';
     }
     
+    if (!basicInfo.per_day_price.trim()) {
+      errors.per_day_price = 'Per day price is required';
+    } else if (!/^\d+$/.test(basicInfo.per_day_price.trim()) || parseInt(basicInfo.per_day_price) <= 0) {
+      errors.per_day_price = 'Price must be a valid positive number';
+    }
+    
+    if (!basicInfo.max_people_allowed.trim()) {
+      errors.max_people_allowed = 'Maximum people allowed is required';
+    } else if (!/^\d+$/.test(basicInfo.max_people_allowed.trim()) || parseInt(basicInfo.max_people_allowed) <= 0 || parseInt(basicInfo.max_people_allowed) > 50) {
+      errors.max_people_allowed = 'Must be a number between 1 and 50';
+    }
+    
     if (!basicInfo.pin_code.trim()) {
       errors.pin_code = 'Pin code is required';
     } else if (!/^\d{6}$/.test(basicInfo.pin_code.trim())) {
@@ -317,6 +331,8 @@ const RegisterPropertyPage = () => {
       name: '',
       description: '',
       type: 'farmhouse',
+      per_day_price: '',
+      max_people_allowed: '',
       phone_number: '',
       address: '',
       pin_code: ''
@@ -562,6 +578,47 @@ const RegisterPropertyPage = () => {
           <option value="farmhouse">Farmhouse</option>
           <option value="bnb">Bed and breakfast (BnB)</option>
         </select>
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          Per Day Price (₹)
+        </label>
+        <input
+          type="number"
+          name="per_day_price"
+          value={basicInfo.per_day_price}
+          onChange={handleBasicInfoChange}
+          className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:border-transparent transition-all ${
+            validationErrors.per_day_price ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-green-500'
+          }`}
+          placeholder="Enter price per day in rupees"
+          min="1"
+        />
+        {validationErrors.per_day_price && (
+          <p className="mt-1 text-sm text-red-600">{validationErrors.per_day_price}</p>
+        )}
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          Maximum People Allowed
+        </label>
+        <input
+          type="number"
+          name="max_people_allowed"
+          value={basicInfo.max_people_allowed}
+          onChange={handleBasicInfoChange}
+          className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:border-transparent transition-all ${
+            validationErrors.max_people_allowed ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-green-500'
+          }`}
+          placeholder="Enter maximum number of guests (1-50)"
+          min="1"
+          max="50"
+        />
+        {validationErrors.max_people_allowed && (
+          <p className="mt-1 text-sm text-red-600">{validationErrors.max_people_allowed}</p>
+        )}
       </div>
 
       <div>
