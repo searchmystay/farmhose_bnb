@@ -9,6 +9,10 @@ const RegisterPropertyPage = () => {
     name: '',
     description: '',
     type: 'farmhouse',
+    per_day_price: '',
+    max_people_allowed: '',
+    opening_time: '',
+    closing_time: '',
     phone_number: '',
     address: '',
     pin_code: ''
@@ -94,6 +98,12 @@ const RegisterPropertyPage = () => {
     panCard: null
   });
 
+  const [ownerDetails, setOwnerDetails] = useState({
+    ownerName: '',
+    ownerDescription: '',
+    ownerPhoto: null
+  });
+
   const [validationErrors, setValidationErrors] = useState({});
   const [isRegistrationComplete, setIsRegistrationComplete] = useState(false);
 
@@ -171,6 +181,26 @@ const RegisterPropertyPage = () => {
       errors.address = 'Address is required';
     }
     
+    if (!basicInfo.per_day_price.trim()) {
+      errors.per_day_price = 'Per day price is required';
+    } else if (!/^\d+$/.test(basicInfo.per_day_price.trim()) || parseInt(basicInfo.per_day_price) <= 0) {
+      errors.per_day_price = 'Price must be a valid positive number';
+    }
+    
+    if (!basicInfo.max_people_allowed.trim()) {
+      errors.max_people_allowed = 'Maximum people allowed is required';
+    } else if (!/^\d+$/.test(basicInfo.max_people_allowed.trim()) || parseInt(basicInfo.max_people_allowed) <= 0 || parseInt(basicInfo.max_people_allowed) > 50) {
+      errors.max_people_allowed = 'Must be a number between 1 and 50';
+    }
+    
+    if (!basicInfo.opening_time.trim()) {
+      errors.opening_time = 'Opening time is required';
+    }
+    
+    if (!basicInfo.closing_time.trim()) {
+      errors.closing_time = 'Closing time is required';
+    }
+    
     if (!basicInfo.pin_code.trim()) {
       errors.pin_code = 'Pin code is required';
     } else if (!/^\d{6}$/.test(basicInfo.pin_code.trim())) {
@@ -207,6 +237,69 @@ const RegisterPropertyPage = () => {
   const handleStep4Next = (e) => {
     e.preventDefault();
     setCurrentStep(5);
+  };
+
+  const handleStep5Next = (e) => {
+    e.preventDefault();
+    const errors = validateOwnerDetails();
+    
+    if (Object.keys(errors).length > 0) {
+      setValidationErrors(errors);
+      return;
+    }
+    
+    setValidationErrors({});
+    setCurrentStep(6);
+  };
+
+  const handleOwnerDetailsChange = (e) => {
+    const { name, value } = e.target;
+    setOwnerDetails(prev => ({ ...prev, [name]: value }));
+    
+    if (validationErrors[name]) {
+      setValidationErrors(prev => ({ ...prev, [name]: '' }));
+    }
+  };
+
+  const handleOwnerPhotoUpload = (e) => {
+    const file = e.target.files[0];
+    setOwnerDetails(prev => ({ ...prev, ownerPhoto: file }));
+    
+    if (validationErrors.ownerPhoto) {
+      setValidationErrors(prev => ({ ...prev, ownerPhoto: '' }));
+    }
+  };
+
+  const validateOwnerDetails = () => {
+    const errors = {};
+    
+    if (!ownerDetails.ownerName.trim()) {
+      errors.ownerName = 'Owner name is required';
+    } else {
+      const nameWordCount = ownerDetails.ownerName.trim().split(/\s+/).length;
+      if (nameWordCount < 2) {
+        errors.ownerName = 'Owner name must have at least 2 words (first and last name)';
+      } else if (nameWordCount > 5) {
+        errors.ownerName = 'Owner name cannot exceed 5 words';
+      }
+    }
+    
+    if (!ownerDetails.ownerDescription.trim()) {
+      errors.ownerDescription = 'Owner description is required';
+    } else {
+      const wordCount = ownerDetails.ownerDescription.trim().split(/\s+/).length;
+      if (wordCount < 10) {
+        errors.ownerDescription = 'Description must have at least 10 words';
+      } else if (wordCount > 200) {
+        errors.ownerDescription = 'Description cannot exceed 200 words';
+      }
+    }
+    
+    if (!ownerDetails.ownerPhoto) {
+      errors.ownerPhoto = 'Owner photo is required';
+    }
+    
+    return errors;
   };
 
   const handleFileUpload = (e, fileType) => {
@@ -248,6 +341,10 @@ const RegisterPropertyPage = () => {
       name: '',
       description: '',
       type: 'farmhouse',
+      per_day_price: '',
+      max_people_allowed: '',
+      opening_time: '',
+      closing_time: '',
       phone_number: '',
       address: '',
       pin_code: ''
@@ -329,6 +426,11 @@ const RegisterPropertyPage = () => {
       aadhaarCard: null,
       panCard: null
     });
+    setOwnerDetails({
+      ownerName: '',
+      ownerDescription: '',
+      ownerPhoto: null
+    });
     setValidationErrors({});
   };
 
@@ -350,6 +452,7 @@ const RegisterPropertyPage = () => {
         essentialAmenities,
         experienceAmenities,
         additionalAmenities,
+        ownerDetails,
         uploadData
       };
       
@@ -380,12 +483,12 @@ const RegisterPropertyPage = () => {
   );
 
   const renderProgressIndicator = () => {
-    const progressPercent = (currentStep / 5) * 100;
+    const progressPercent = (currentStep / 6) * 100;
     return (
       <div className="mb-8">
         <div className="flex items-center justify-between text-sm text-gray-500 mb-2">
-          <span>Step {currentStep} of 5</span>
-          <span>{progressPercent}% Complete</span>
+          <span>Step {currentStep} of 6</span>
+          <span>{Math.round(progressPercent)}% Complete</span>
         </div>
         <div className="w-full bg-gray-200 rounded-full h-2">
           <div className="bg-green-500 h-2 rounded-full transition-all duration-300" 
@@ -487,6 +590,85 @@ const RegisterPropertyPage = () => {
           <option value="farmhouse">Farmhouse</option>
           <option value="bnb">Bed and breakfast (BnB)</option>
         </select>
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          Per Day Price (₹)
+        </label>
+        <input
+          type="number"
+          name="per_day_price"
+          value={basicInfo.per_day_price}
+          onChange={handleBasicInfoChange}
+          className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:border-transparent transition-all ${
+            validationErrors.per_day_price ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-green-500'
+          }`}
+          placeholder="Enter price per day in rupees"
+          min="1"
+        />
+        {validationErrors.per_day_price && (
+          <p className="mt-1 text-sm text-red-600">{validationErrors.per_day_price}</p>
+        )}
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          Maximum People Allowed
+        </label>
+        <input
+          type="number"
+          name="max_people_allowed"
+          value={basicInfo.max_people_allowed}
+          onChange={handleBasicInfoChange}
+          className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:border-transparent transition-all ${
+            validationErrors.max_people_allowed ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-green-500'
+          }`}
+          placeholder="Enter maximum number of guests (1-50)"
+          min="1"
+          max="50"
+        />
+        {validationErrors.max_people_allowed && (
+          <p className="mt-1 text-sm text-red-600">{validationErrors.max_people_allowed}</p>
+        )}
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Opening Time
+          </label>
+          <input
+            type="time"
+            name="opening_time"
+            value={basicInfo.opening_time}
+            onChange={handleBasicInfoChange}
+            className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:border-transparent transition-all ${
+              validationErrors.opening_time ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-green-500'
+            }`}
+          />
+          {validationErrors.opening_time && (
+            <p className="mt-1 text-sm text-red-600">{validationErrors.opening_time}</p>
+          )}
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Closing Time
+          </label>
+          <input
+            type="time"
+            name="closing_time"
+            value={basicInfo.closing_time}
+            onChange={handleBasicInfoChange}
+            className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:border-transparent transition-all ${
+              validationErrors.closing_time ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-green-500'
+            }`}
+          />
+          {validationErrors.closing_time && (
+            <p className="mt-1 text-sm text-red-600">{validationErrors.closing_time}</p>
+          )}
+        </div>
       </div>
 
       <div>
@@ -875,7 +1057,113 @@ const RegisterPropertyPage = () => {
     </div>
   );
 
-  const renderStep5DocumentUpload = () => (
+  const renderStep5OwnerDetails = () => (
+    <form onSubmit={handleStep5Next} className="space-y-6">
+      <div className="space-y-6">
+        <div className="border-b pb-4">
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">Owner Details</h2>
+          <p className="text-gray-600">Provide information about the property owner</p>
+        </div>
+        
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Owner Name <span className="text-red-500">*</span>
+          </label>
+          <input
+            type="text"
+            name="ownerName"
+            value={ownerDetails.ownerName}
+            onChange={handleOwnerDetailsChange}
+            className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:border-transparent transition-all ${
+              validationErrors.ownerName ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-green-500'
+            }`}
+            placeholder="Enter owner's full name"
+          />
+          {validationErrors.ownerName && (
+            <p className="mt-1 text-sm text-red-600">{validationErrors.ownerName}</p>
+          )}
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Owner Description <span className="text-red-500">*</span>
+          </label>
+          <textarea
+            name="ownerDescription"
+            value={ownerDetails.ownerDescription}
+            onChange={handleOwnerDetailsChange}
+            rows="4"
+            className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:border-transparent transition-all resize-none ${
+              validationErrors.ownerDescription ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-green-500'
+            }`}
+            placeholder="Tell guests about yourself - your background, interests, and what makes you a great host..."
+          />
+          {validationErrors.ownerDescription && (
+            <p className="mt-1 text-sm text-red-600">{validationErrors.ownerDescription}</p>
+          )}
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Owner Photo <span className="text-red-500">*</span>
+          </label>
+          <p className="text-sm text-gray-500 mb-3">Upload a clear passport-size photo where your face is clearly visible</p>
+          <div className={`mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-dashed rounded-lg transition-colors ${
+            validationErrors.ownerPhoto 
+              ? 'border-red-300 hover:border-red-400' 
+              : 'border-gray-300 hover:border-green-400'
+          }`}>
+            <div className="space-y-1 text-center">
+              <svg className="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+              <div className="flex text-sm text-gray-600">
+                <label className="relative cursor-pointer bg-white rounded-md font-medium text-green-600 hover:text-green-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-green-500">
+                  <span>Upload photo</span>
+                  <input
+                    type="file"
+                    className="sr-only"
+                    accept="image/*"
+                    onChange={handleOwnerPhotoUpload}
+                  />
+                </label>
+                <p className="pl-1">or drag and drop</p>
+              </div>
+              <p className="text-xs text-gray-500">
+                PNG, JPG, JPEG up to 2MB (passport size preferred)
+              </p>
+            </div>
+          </div>
+          {ownerDetails.ownerPhoto && (
+            <div className="mt-2">
+              <p className="text-sm text-green-600">{ownerDetails.ownerPhoto.name}</p>
+            </div>
+          )}
+          {validationErrors.ownerPhoto && (
+            <p className="mt-1 text-sm text-red-600">{validationErrors.ownerPhoto}</p>
+          )}
+        </div>
+      </div>
+
+      <div className="flex justify-between pt-6 border-t">
+        <button
+          type="button"
+          onClick={handlePrevious}
+          className="px-6 py-3 text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors font-medium"
+        >
+          Previous
+        </button>
+        <button
+          type="submit"
+          className="px-8 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-all font-medium"
+        >
+          Next Step
+        </button>
+      </div>
+    </form>
+  );
+
+  const renderStep6DocumentUpload = () => (
     <form onSubmit={handleFinalSubmit} className="space-y-8">
       {success && (
         <div className="bg-green-50 border border-green-200 rounded-lg p-4">
@@ -1007,7 +1295,8 @@ const RegisterPropertyPage = () => {
               {currentStep === 2 && renderStep2EssentialAmenities()}
               {currentStep === 3 && renderStep3ExperienceAmenities()}
               {currentStep === 4 && renderStep4AdditionalAmenities()}
-              {currentStep === 5 && renderStep5DocumentUpload()}
+              {currentStep === 5 && renderStep5OwnerDetails()}
+              {currentStep === 6 && renderStep6DocumentUpload()}
             </div>
           </div>
         </div>
