@@ -2,6 +2,7 @@ import random
 import string
 from datetime import datetime, timedelta
 from pymongo import MongoClient
+from bson import ObjectId
 MONGODB_URI = 'mongodb://localhost:27017/'
 DATABASE_NAME = 'farmhouse_listing'
 
@@ -326,6 +327,7 @@ def generate_farmhouse_data():
     current_time = datetime.now()
     
     farmhouse_data = {
+        "_id": ObjectId(),
         "name": property_name,
         "description": property_description,
         "type": property_type,
@@ -341,6 +343,7 @@ def generate_farmhouse_data():
         "closing_time": closing_time,
         "credit_balance": credit_balance,
         "per_day_cost": random.randint(3000, 15000),
+        "max_people_allowed": random.randint(6, 20),
         "status": "active",
         "favourite": random.choice([True, False]),
         "created_at": current_time,
@@ -350,21 +353,72 @@ def generate_farmhouse_data():
     return farmhouse_data
 
 
+def generate_farmhouse_analytics(farmhouse_id):
+    current_time = datetime.now()
+    total_views = random.randint(50, 500)
+    total_leads = random.randint(5, 50)
+    
+    daily_analytics = []
+    for i in range(30):
+        date = (current_time - timedelta(days=i)).strftime('%Y-%m-%d')
+        views = random.randint(1, 20)
+        leads = random.randint(0, 5)
+        daily_analytics.append({
+            "date": date,
+            "views": views,
+            "leads": leads
+        })
+    
+    last_month = (current_time - timedelta(days=30)).strftime('%Y-%m')
+    last_month_summary = {
+        "month": last_month,
+        "total_leads": random.randint(10, 80),
+        "total_views": random.randint(100, 800),
+        "created_at": current_time
+    }
+    
+    review_average = round(random.uniform(3.0, 5.0), 1)
+    
+    analytics_data = {
+        "farmhouse_id": farmhouse_id,
+        "total_views": total_views,
+        "total_leads": total_leads,
+        "daily_analytics": daily_analytics,
+        "last_month_summary": last_month_summary,
+        "review_average": review_average,
+        "created_at": current_time,
+        "updated_at": current_time
+    }
+    
+    return analytics_data
+
+
 def populate_farmhouses_collection():
     client = MongoClient(MONGODB_URI)
     db = client[DATABASE_NAME]
     farmhouses_collection = db.farmhouses
+    farmhouse_analysis_collection = db.farmhouse_analysis
     
     farmhouses_data = []
+    analytics_data = []
+    
     for i in range(20):
         farmhouse_data = generate_farmhouse_data()
         farmhouses_data.append(farmhouse_data)
         print(f"Generated farmhouse {i+1}: {farmhouse_data['name']}")
     
-    result = farmhouses_collection.insert_many(farmhouses_data)
-    inserted_count = len(result.inserted_ids)
+    farmhouse_result = farmhouses_collection.insert_many(farmhouses_data)
+    inserted_farmhouses = len(farmhouse_result.inserted_ids)
     
-    print(f"\nSuccessfully inserted {inserted_count} farmhouses into the database!")
+    for farmhouse_data in farmhouses_data:
+        analytics = generate_farmhouse_analytics(farmhouse_data["_id"])
+        analytics_data.append(analytics)
+    
+    analytics_result = farmhouse_analysis_collection.insert_many(analytics_data)
+    inserted_analytics = len(analytics_result.inserted_ids)
+    
+    print(f"\nSuccessfully inserted {inserted_farmhouses} farmhouses into the database!")
+    print(f"Successfully inserted {inserted_analytics} farmhouse analytics into the database!")
     return True
 
 

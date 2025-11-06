@@ -122,12 +122,6 @@ def process_property_for_detail(property_data):
     return processed_data
 
 
-@handle_exceptions
-def extract_available_amenities():
-    enimities = ["WiFi", "Parking", "Swimming Pool", "Kitchen", "Air Conditioning"]
-    return enimities
-
-
 @handle_exceptions  
 def process_farmhouse_for_listing(farmhouse_data):
     farmhouse_id = str(farmhouse_data.get("_id"))
@@ -144,14 +138,11 @@ def process_farmhouse_for_listing(farmhouse_data):
     else:
         truncated_description = full_description
     
-    available_amenities = extract_available_amenities()
-    
     processed_data = {
         "_id": farmhouse_id,
         "name": name,
         "description": truncated_description,
         "images": images,
-        "amenities": available_amenities,
         "favourite": favourite,
         "location": location,
         "review_average": review_average
