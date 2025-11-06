@@ -77,7 +77,7 @@ def get_dashboard_kpis(farmhouse_id):
     total_cost_left = get_farmhouse_credit_balance(farmhouse_id)
     
     farmhouse_doc = db_find_one("farmhouses", {"_id": ObjectId(farmhouse_id)})
-    owner_name = farmhouse_doc.get("owner_details", {}).get("name", "N/A") if farmhouse_doc else "N/A"
+    owner_name = farmhouse_doc.get("owner_details", {}).get("owner_name", "N/A") if farmhouse_doc else "N/A"
     custom_farmhouse_id = generate_custom_farmhouse_id(farmhouse_id)
     
     kpis_data = {
