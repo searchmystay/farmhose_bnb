@@ -188,7 +188,7 @@ def get_last_month_string():
 def get_top_properties_last_month(limit):
     month_str = get_last_month_string()
     filter_dict = {"month": month_str}
-    result = db_find_one("monthly_top_properties", filter_dict)
+    result = db_find_one("trending_properties", filter_dict)
     
     if result and "top_properties" in result:
         top_properties = result["top_properties"][:limit]
@@ -264,15 +264,15 @@ def save_to_collection(month_str, top_properties):
         "created_at": datetime.utcnow()
     }
     
-    existing = db_find_one("monthly_top_properties", {"month": month_str})
+    existing = db_find_one("trending_properties", {"month": month_str})
     
     if existing:
-        db.monthly_top_properties.update_one(
+        db.trending_properties.update_one(
             {"month": month_str},
             {"$set": monthly_summary}
         )
     else:
-        db_insert_one("monthly_top_properties", monthly_summary)
+        db_insert_one("trending_properties", monthly_summary)
     
     return True
 

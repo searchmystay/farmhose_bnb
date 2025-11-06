@@ -21,7 +21,7 @@ def record_visit(farmhouse_id):
             "$setOnInsert": {
                 "farmhouse_id": ObjectId(farmhouse_id),
                 "total_leads": 0,
-                "daily": [],
+                "daily_analytics": [],
                 "created_at": now
             }
         },
@@ -29,14 +29,14 @@ def record_visit(farmhouse_id):
     )
     
     result = collection.update_one(
-        {"farmhouse_id": ObjectId(farmhouse_id), "daily.date": today},
-        {"$inc": {"daily.$.views": 1}}
+        {"farmhouse_id": ObjectId(farmhouse_id), "daily_analytics.date": today},
+        {"$inc": {"daily_analytics.$.views": 1}}
     )
     
     if result.matched_count == 0:
         collection.update_one(
             filter_dict,
-            {"$push": {"daily": {"date": today, "views": 1, "leads": 0}}}
+            {"$push": {"daily_analytics": {"date": today, "views": 1, "leads": 0}}}
         )
     
     return True
@@ -58,7 +58,7 @@ def record_contact(farmhouse_id):
             "$setOnInsert": {
                 "farmhouse_id": ObjectId(farmhouse_id),
                 "total_views": 0,
-                "daily": [],
+                "daily_analytics": [],
                 "created_at": now
             }
         },
@@ -66,14 +66,14 @@ def record_contact(farmhouse_id):
     )
     
     result = collection.update_one(
-        {"farmhouse_id": ObjectId(farmhouse_id), "daily.date": today},
-        {"$inc": {"daily.$.leads": 1}}
+        {"farmhouse_id": ObjectId(farmhouse_id), "daily_analytics.date": today},
+        {"$inc": {"daily_analytics.$.leads": 1}}
     )
     
     if result.matched_count == 0:
         collection.update_one(
             filter_dict,
-            {"$push": {"daily": {"date": today, "views": 0, "leads": 1}}}
+            {"$push": {"daily_analytics": {"date": today, "views": 0, "leads": 1}}}
         )
     
     return True
@@ -103,10 +103,10 @@ def get_contacts_last_days(farmhouse_id, days):
     filter_dict = {"farmhouse_id": ObjectId(farmhouse_id)}
     doc = collection.find_one(filter_dict)
     
-    if not doc or "daily" not in doc:
+    if not doc or "daily_analytics" not in doc:
         return 0
     
-    total = sum(d.get("leads", 0) for d in doc.get("daily", []) if d.get("date", "") >= start_date)
+    total = sum(d.get("leads", 0) for d in doc.get("daily_analytics", []) if d.get("date", "") >= start_date)
     return total
 
 
@@ -138,8 +138,8 @@ def get_daily_leads_last_7_days(farmhouse_id):
     doc = collection.find_one(filter_dict)
     
     daily_dict = {}
-    if doc and "daily" in doc:
-        for d in doc.get("daily", []):
+    if doc and "daily_analytics" in doc:
+        for d in doc.get("daily_analytics", []):
             daily_dict[d.get("date", "")] = d.get("leads", 0)
     
     daily_data = []
@@ -160,8 +160,8 @@ def get_daily_views_last_7_days(farmhouse_id):
     doc = collection.find_one(filter_dict)
     
     daily_dict = {}
-    if doc and "daily" in doc:
-        for d in doc.get("daily", []):
+    if doc and "daily_analytics" in doc:
+        for d in doc.get("daily_analytics", []):
             daily_dict[d.get("date", "")] = d.get("views", 0)
     
     daily_data = []
@@ -182,10 +182,10 @@ def get_this_month_leads(farmhouse_id):
     filter_dict = {"farmhouse_id": ObjectId(farmhouse_id)}
     doc = collection.find_one(filter_dict)
     
-    if not doc or "daily" not in doc:
+    if not doc or "daily_analytics" not in doc:
         return 0
     
-    total = sum(d.get("leads", 0) for d in doc.get("daily", []) if d.get("date", "") >= month_start_str)
+    total = sum(d.get("leads", 0) for d in doc.get("daily_analytics", []) if d.get("date", "") >= month_start_str)
     return total
 
 
@@ -230,7 +230,7 @@ def get_last_month_leads(farmhouse_id):
     last_month_start_str = last_month_start.strftime("%Y-%m-%d")
     last_month_end_str = last_month_end.strftime("%Y-%m-%d")
     
-    daily = doc.get("daily", [])
+    daily = doc.get("daily_analytics", [])
     total = sum(d.get("leads", 0) for d in daily 
                 if last_month_start_str <= d.get("date", "") <= last_month_end_str)
     return total
@@ -246,10 +246,10 @@ def get_this_month_views(farmhouse_id):
     filter_dict = {"farmhouse_id": ObjectId(farmhouse_id)}
     doc = collection.find_one(filter_dict)
     
-    if not doc or "daily" not in doc:
+    if not doc or "daily_analytics" not in doc:
         return 0
     
-    total = sum(d.get("views", 0) for d in doc.get("daily", []) if d.get("date", "") >= month_start_str)
+    total = sum(d.get("views", 0) for d in doc.get("daily_analytics", []) if d.get("date", "") >= month_start_str)
     return total
 
 
@@ -277,7 +277,7 @@ def get_last_month_views(farmhouse_id):
     last_month_start_str = last_month_start.strftime("%Y-%m-%d")
     last_month_end_str = last_month_end.strftime("%Y-%m-%d")
     
-    daily = doc.get("daily", [])
+    daily = doc.get("daily_analytics", [])
     total = sum(d.get("views", 0) for d in daily 
                 if last_month_start_str <= d.get("date", "") <= last_month_end_str)
     return total
