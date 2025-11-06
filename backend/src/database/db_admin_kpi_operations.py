@@ -192,6 +192,9 @@ def get_top_properties_last_month(limit):
     
     if result and "top_properties" in result:
         top_properties = result["top_properties"][:limit]
+        for prop in top_properties:
+            if "farmhouse_id" in prop and isinstance(prop["farmhouse_id"], ObjectId):
+                prop["farmhouse_id"] = str(prop["farmhouse_id"])
         return top_properties
     
     empty_list = []
@@ -242,7 +245,7 @@ def enrich_with_property_names(results):
         
         if property_data:
             property_info = {
-                "farmhouse_id": farmhouse_id,
+                "farmhouse_id": str(farmhouse_id),
                 "name": property_data.get("name", "Unknown"),
                 "type": property_data.get("type", "farmhouse"),
                 "total_leads": result["monthly_leads"],
