@@ -1,9 +1,11 @@
 from src.logics.admin_auth import authenticate_admin
 from src.utils.exception_handler import handle_exceptions, AppException
-from src.database.db_common_operations import db_find_many, db_find_one, db_update_one, db_delete_one
+from src.database.db_common_operations import db_find_many, db_find_one, db_update_one, db_delete_one, db_insert_one
 from src.logics.website_logic import process_property_for_detail, extract_all_amenities, build_complete_address
 from src.logics.cloudfare_bucket import delete_farmhouse_folder_from_r2
 from bson import ObjectId
+from datetime import datetime
+import pytz
 
 
 @handle_exceptions
@@ -142,6 +144,44 @@ def get_admin_property_details(property_id):
 
 
 @handle_exceptions
+def check_analysis_document_exists(property_id):
+    query_filter = {"farmhouse_id": ObjectId(property_id)}
+    existing_analysis = db_find_one("farmhouse_analysis", query_filter, {"_id": 1})
+    return existing_analysis is not None
+
+
+@handle_exceptions
+def create_initial_analysis_data(property_id):
+    ist_timezone = pytz.timezone('Asia/Kolkata')
+    current_time = datetime.now(ist_timezone)
+    
+    initial_data = {
+        "farmhouse_id": ObjectId(property_id),
+        "total_views": 0,
+        "total_leads": 0,
+        "daily": [],
+        "review_average": 0.0,
+        "created_at": current_time,
+        "updated_at": current_time
+    }
+    
+    return initial_data
+
+
+@handle_exceptions
+def initialize_farmhouse_analysis(property_id):
+    analysis_exists = check_analysis_document_exists(property_id)
+    
+    if analysis_exists:
+        return True
+    
+    initial_data = create_initial_analysis_data(property_id)
+    db_insert_one("farmhouse_analysis", initial_data)
+    
+    return True
+
+
+@handle_exceptions
 def approve_pending_property(property_id):
     query_filter = {"_id": ObjectId(property_id), "status": "pending_approval"}
     property_exists = db_find_one("farmhouses", query_filter, {"_id": 1})
@@ -151,7 +191,7 @@ def approve_pending_property(property_id):
     
     update_data = {"status": "active"}
     db_update_one("farmhouses", query_filter, {"$set": update_data})
-    
+    initialize_farmhouse_analysis(property_id)
     return True
 
 
