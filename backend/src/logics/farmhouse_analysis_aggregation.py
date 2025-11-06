@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 from bson import ObjectId
 from ..database import db
-from ..database.db_admin_kpi_operations import save_monthly_top_properties
+from ..database.db_admin_kpi_operations import save_monthly_admin_analysis
 from ..utils.exception_handler import handle_exceptions
 
 
@@ -57,14 +57,14 @@ def save_to_last_month_summary(farmhouse_id, summary):
 def delete_monthly_daily_data(farmhouse_id, month):
     result = db["farmhouse_analysis"].update_one(
         {"_id": farmhouse_id},
-        {"$pull": {"daily": {"date": {"$regex": f"^{month}"}}}}
+        {"$pull": {"daily_analytics": {"date": {"$regex": f"^{month}"}}}}
     )
     return result.modified_count > 0
 
 
 @handle_exceptions
 def process_farmhouse_aggregation(farmhouse_doc, month):
-    daily_data = farmhouse_doc.get("daily", [])
+    daily_data = farmhouse_doc.get("daily_analytics", [])
     month_data = filter_monthly_data(daily_data, month)
     
     if not month_data:
@@ -84,7 +84,7 @@ def process_farmhouse_aggregation(farmhouse_doc, month):
 def run_monthly_aggregation():
     month = get_last_complete_month_string()
     
-    save_monthly_top_properties(month)
+    save_monthly_admin_analysis(month)
     
     farmhouses = get_all_farmhouses()
     

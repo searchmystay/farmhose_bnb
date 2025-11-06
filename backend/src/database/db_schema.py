@@ -571,7 +571,7 @@ def get_payment_schema() -> Dict:
 def get_farmhouse_analysis_schema() -> Dict:
     return {
         "bsonType": "object",
-        "required": ["farmhouse_id", "total_views", "total_leads", "daily", "created_at", "updated_at"],
+        "required": ["farmhouse_id", "total_views", "total_leads", "daily_analytics", "created_at", "updated_at"],
         "properties": {
             "_id": {
                 "bsonType": "objectId",
@@ -589,9 +589,9 @@ def get_farmhouse_analysis_schema() -> Dict:
                 "bsonType": "int",
                 "description": "Total leads count"
             },
-            "daily": {
+            "daily_analytics": {
                 "bsonType": "array",
-                "description": "Daily breakdown",
+                "description": "Daily analytics tracking views and leads",
                 "items": {
                     "bsonType": "object",
                     "required": ["date", "views", "leads"],
@@ -718,10 +718,10 @@ def get_pending_reviews_schema():
     }
 
 
-def get_monthly_top_properties_schema():
+def get_admin_analysis_schema():
     schema = {
         "bsonType": "object",
-        "required": ["month", "top_properties", "created_at"],
+        "required": ["month", "top_properties", "total_platform_leads", "total_platform_views", "new_properties_added", "created_at"],
         "properties": {
             "_id": {
                 "bsonType": "objectId",
@@ -762,6 +762,18 @@ def get_monthly_top_properties_schema():
                         }
                     }
                 }
+            },
+            "total_platform_leads": {
+                "bsonType": "int",
+                "description": "Total leads across all properties for the month"
+            },
+            "total_platform_views": {
+                "bsonType": "int",
+                "description": "Total views across all properties for the month"
+            },
+            "new_properties_added": {
+                "bsonType": "int",
+                "description": "Count of new properties added this month"
             },
             "created_at": {
                 "bsonType": "date",
