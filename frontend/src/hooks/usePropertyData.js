@@ -106,12 +106,22 @@ export const usePropertyRegistration = () => {
       formData.append('name', registrationData.basicInfo.name)
       formData.append('description', registrationData.basicInfo.description)
       formData.append('type', registrationData.basicInfo.type)
+      formData.append('per_day_price', registrationData.basicInfo.per_day_price)
+      formData.append('max_people_allowed', registrationData.basicInfo.max_people_allowed)
+      formData.append('opening_time', registrationData.basicInfo.opening_time)
+      formData.append('closing_time', registrationData.basicInfo.closing_time)
       formData.append('phone_number', registrationData.basicInfo.phone_number)
       formData.append('address', registrationData.basicInfo.address)
       formData.append('pin_code', registrationData.basicInfo.pin_code)
       formData.append('essentialAmenities', JSON.stringify(registrationData.essentialAmenities))
       formData.append('experienceAmenities', JSON.stringify(registrationData.experienceAmenities))
       formData.append('additionalAmenities', JSON.stringify(registrationData.additionalAmenities))
+      
+      formData.append('owner_name', registrationData.ownerDetails.ownerName)
+      formData.append('owner_description', registrationData.ownerDetails.ownerDescription)
+      if (registrationData.ownerDetails.ownerPhoto) {
+        formData.append('owner_photo', registrationData.ownerDetails.ownerPhoto)
+      }
       
       if (registrationData.uploadData.propertyImages?.length > 0) {
         registrationData.uploadData.propertyImages.forEach((file, index) => {
