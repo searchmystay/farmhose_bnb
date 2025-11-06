@@ -427,22 +427,14 @@ function PropertyDetailPage() {
   const renderContactButton = () => {
     if (!hasSearchCriteria) {
       return (
-        <div className="flex flex-col items-center gap-2">
-          <div className="bg-gray-100 text-gray-500 p-2 md:px-4 md:py-2 rounded-full flex items-center justify-center md:gap-2 cursor-not-allowed">
+        <>
+          <button className="bg-gray-100 text-gray-500 p-2 md:px-4 md:py-2 rounded-full flex items-center justify-center md:gap-2 cursor-not-allowed">
             <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
               <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.148.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
             </svg>
             <span className="hidden md:inline text-sm font-medium">Check Availability First</span>
-          </div>
-          <div className="text-center">
-            <button 
-              onClick={() => navigate('/search')}
-              className="text-xs text-green-600 hover:text-green-700 font-medium underline"
-            >
-              Fill form to check availability
-            </button>
-          </div>
-        </div>
+          </button>
+        </>
       )
     }
 
@@ -527,31 +519,42 @@ function PropertyDetailPage() {
         <div>
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl md:text-2xl font-bold text-gray-900">{property.name}</h2>
-            <div className="flex items-center gap-2">
-              <button 
-                onClick={handleAddToWishlist}
-                disabled={wishlistLoading}
-                className={`${
-                  isInWishlist 
-                    ? 'bg-red-50 border-red-300 text-red-700 hover:bg-red-100 hover:border-red-400' 
-                    : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400'
-                } ${
-                  wishlistLoading ? 'opacity-50 cursor-not-allowed' : ''
-                } p-2 md:px-4 md:py-2 rounded-full transition-all duration-200 flex items-center gap-2`}
-              >
-                {wishlistLoading ? (
-                  <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
-                ) : (
-                  <svg className="w-4 h-4 md:w-5 md:h-5" fill={isInWishlist ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                  </svg>
-                )}
-                <span className="hidden md:inline text-sm font-medium">
-                  {wishlistLoading ? 'Updating...' : isInWishlist ? 'Remove from Wishlist' : 'Add to Wishlist'}
-                </span>
-              </button>
+            <div className="flex flex-col items-end">
+              <div className="flex items-center gap-2">
+                <button 
+                  onClick={handleAddToWishlist}
+                  disabled={wishlistLoading}
+                  className={`${
+                    isInWishlist 
+                      ? 'bg-red-50 border-red-300 text-red-700 hover:bg-red-100 hover:border-red-400' 
+                      : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400'
+                  } ${
+                    wishlistLoading ? 'opacity-50 cursor-not-allowed' : ''
+                  } p-2 md:px-4 md:py-2 rounded-full transition-all duration-200 flex items-center gap-2`}
+                >
+                  {wishlistLoading ? (
+                    <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
+                  ) : (
+                    <svg className="w-4 h-4 md:w-5 md:h-5" fill={isInWishlist ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                    </svg>
+                  )}
+                  <span className="hidden md:inline text-sm font-medium">
+                    {wishlistLoading ? 'Updating...' : isInWishlist ? 'Remove from Wishlist' : 'Add to Wishlist'}
+                  </span>
+                </button>
 
-              {renderContactButton()}
+                {renderContactButton()}
+              </div>
+              
+              {!hasSearchCriteria && (
+                <button 
+                  onClick={() => navigate('/search')}
+                  className="text-xs text-green-600 hover:text-green-700 font-medium underline mt-1"
+                >
+                  Fill form to check availability
+                </button>
+              )}
             </div>
           </div>
           <div className="text-gray-600 leading-relaxed">
