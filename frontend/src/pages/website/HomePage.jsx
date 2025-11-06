@@ -149,7 +149,13 @@ function FarmhouseCard({ property }) {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
             </svg>
-            <span className="text-xs text-gray-600 line-clamp-2">{property.location?.address || 'Address not available'}</span>
+            <span className="text-xs text-gray-600 line-clamp-2">
+              {(() => {
+                const address = property.location?.address || 'Address not available'
+                const words = address.split(' ')
+                return words.length > 5 ? words.slice(0, 5).join(' ') + '...' : address
+              })()}
+            </span>
           </div>
           
           <div className="flex items-center gap-1 ml-3 flex-shrink-0">

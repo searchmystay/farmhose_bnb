@@ -1,6 +1,6 @@
 import random
 import string
-from datetime import datetime
+from datetime import datetime, timedelta
 from pymongo import MongoClient
 MONGODB_URI = 'mongodb://localhost:27017/'
 DATABASE_NAME = 'farmhouse_listing'
@@ -293,6 +293,22 @@ def generate_operating_hours():
     return opening_time, closing_time
 
 
+def generate_random_booked_dates():
+    """Generate some random booked dates for testing"""
+    booked_dates = []
+    
+    # Randomly decide if property has bookings (70% chance)
+    if random.random() < 0.7:
+        # Add 2-5 random booked dates in the next 60 days
+        num_bookings = random.randint(2, 5)
+        for _ in range(num_bookings):
+            days_ahead = random.randint(1, 60)
+            booked_date = datetime.now() + timedelta(days=days_ahead)
+            booked_dates.append(booked_date.strftime('%Y-%m-%d'))
+    
+    return booked_dates
+
+
 def generate_farmhouse_data():
     property_name = generate_property_name()
     property_description = generate_description()
@@ -306,6 +322,7 @@ def generate_farmhouse_data():
     owner_details = generate_owner_details()
     opening_time, closing_time = generate_operating_hours()
     credit_balance = random.randint(500, 5000)
+    booked_dates = generate_random_booked_dates()
     current_time = datetime.now()
     
     farmhouse_data = {
@@ -315,7 +332,7 @@ def generate_farmhouse_data():
         "phone_number": phone_number,
         "location": location,
         "documents": documents,
-        "booked_dates": [],
+        "booked_dates": booked_dates,
         "images": images,
         "amenities": amenities,
         "reviews": reviews,
