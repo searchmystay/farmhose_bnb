@@ -1,5 +1,5 @@
 import { useAnalytics } from '../../hooks/admin/useAnalytics'
-import { CurrencyCircleDollar, TrendUp, Users, House, ChartBar } from '@phosphor-icons/react'
+import { CurrencyCircleDollar, TrendUp, Users, House, ChartBar, Wallet, Eye, CalendarPlus, UserPlus } from '@phosphor-icons/react'
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
 
 function DashboardPage() {
@@ -48,11 +48,12 @@ function DashboardPage() {
     )
   }
 
-  const prepareLeadsChartData = () => {
-    const totalLeads = analytics?.engagement?.total_leads || 0
-    return [
-      { name: 'Total Platform Leads', leads: totalLeads }
-    ]
+  const preparePlatformLeadsGraphData = () => {
+    const graphData = analytics?.platform_leads_graph || []
+    return graphData.map(item => ({
+      month: item.month,
+      leads: item.total_platform_leads
+    }))
   }
 
   const prepareTop5ChartData = () => {
@@ -64,26 +65,38 @@ function DashboardPage() {
     }))
   }
 
-  const renderLeadsChart = () => {
+  const renderPlatformLeadsGraph = () => {
+    const chartData = preparePlatformLeadsGraphData()
     return (
       <div className="bg-white rounded-2xl shadow-md hover:shadow-xl transition-shadow duration-300 p-8">
         <h2 className="text-xl font-bold mb-6 flex items-center gap-3">
           <Users size={28} weight="duotone" className="text-purple-600" />
-          Total Platform Leads
+          Platform Leads - Last 6 Months
         </h2>
-        <ResponsiveContainer width="100%" height={300}>
-          <BarChart data={prepareLeadsChartData()} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-            <XAxis dataKey="name" stroke="#6b7280" style={{ fontSize: '12px' }} />
-            <YAxis stroke="#6b7280" style={{ fontSize: '12px' }} />
-            <Tooltip contentStyle={{ backgroundColor: '#fff', border: '1px solid #e5e7eb', borderRadius: '8px' }} />
-            <Bar dataKey="leads" fill="#8b5cf6" radius={[8, 8, 0, 0]} />
-          </BarChart>
-        </ResponsiveContainer>
-        <div className="mt-6 p-4 bg-purple-50 rounded-lg">
-          <p className="text-sm text-purple-900 font-semibold">Total Leads: {analytics?.engagement?.total_leads || 0}</p>
-          <p className="text-xs text-purple-700 mt-1">Across all properties on the platform</p>
-        </div>
+        {chartData.length > 0 ? (
+          <>
+            <ResponsiveContainer width="100%" height={300}>
+              <LineChart data={chartData} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                <XAxis dataKey="month" stroke="#6b7280" style={{ fontSize: '12px' }} />
+                <YAxis stroke="#6b7280" style={{ fontSize: '12px' }} />
+                <Tooltip contentStyle={{ backgroundColor: '#fff', border: '1px solid #e5e7eb', borderRadius: '8px' }} />
+                <Line type="monotone" dataKey="leads" stroke="#8b5cf6" strokeWidth={3} dot={{ fill: '#8b5cf6', r: 5 }} activeDot={{ r: 7 }} />
+              </LineChart>
+            </ResponsiveContainer>
+            <div className="mt-6 p-4 bg-purple-50 rounded-lg">
+              <p className="text-sm text-purple-900 font-semibold">Monthly trend of platform leads</p>
+              <p className="text-xs text-purple-700 mt-1">Last 6 months data including current month (live)</p>
+            </div>
+          </>
+        ) : (
+          <div className="flex items-center justify-center h-[300px] text-gray-500">
+            <div className="text-center">
+              <Users size={48} className="mx-auto mb-3 text-gray-400" />
+              <p>No data available</p>
+            </div>
+          </div>
+        )}
       </div>
     )
   }
@@ -128,24 +141,7 @@ function DashboardPage() {
 
   return (
     <div className="p-10 bg-gray-50 min-h-screen">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-        {renderKpiCard(
-          <CurrencyCircleDollar size={40} weight="duotone" />,
-          'Total Platform Revenue',
-          formatCurrency(analytics?.revenue?.total_platform_revenue || 0),
-          '#10b981',
-          `From leads consumed (${analytics?.engagement?.total_leads || 0} leads × ₹40)`
-        )}
-        {renderKpiCard(
-          <TrendUp size={40} weight="duotone" />,
-          'This Month Revenue',
-          formatCurrency(analytics?.revenue?.this_month_revenue || 0),
-          '#3b82f6',
-          'Recharges in current month'
-        )}
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         {renderKpiCard(
           <House size={40} weight="duotone" />,
           'Total Farmhouses',
@@ -158,10 +154,52 @@ function DashboardPage() {
           analytics?.property_counts?.total_bnbs || 0,
           '#8b5cf6'
         )}
+        {renderKpiCard(
+          <Wallet size={40} weight="duotone" />,
+          'Total Money Left',
+          formatCurrency(analytics?.total_money_left || 0),
+          '#06b6d4',
+          'Available credits balance'
+        )}
+        {renderKpiCard(
+          <CurrencyCircleDollar size={40} weight="duotone" />,
+          'Total Platform Revenue',
+          formatCurrency(analytics?.revenue?.total_platform_revenue || 0),
+          '#10b981',
+        )}
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        {renderKpiCard(
+          <UserPlus size={40} weight="duotone" />,
+          'This Month Leads',
+          analytics?.current_month?.this_month_leads || 0,
+          '#ec4899'
+        )}
+        {renderKpiCard(
+          <Eye size={40} weight="duotone" />,
+          'This Month Views',
+          analytics?.current_month?.this_month_views || 0,
+          '#14b8a6'
+        )}
+        {renderKpiCard(
+          <TrendUp size={40} weight="duotone" />,
+          'This Month Revenue',
+          formatCurrency(analytics?.revenue?.this_month_revenue || 0),
+          '#3b82f6',
+          'Recharges in current month'
+        )}
+        {renderKpiCard(
+          <CalendarPlus size={40} weight="duotone" />,
+          'New Properties Added',
+          analytics?.current_month?.new_properties_added || 0,
+          '#f97316',
+          'This month'
+        )}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {renderLeadsChart()}
+        {renderPlatformLeadsGraph()}
         {renderTop5Chart()}
       </div>
     </div>
