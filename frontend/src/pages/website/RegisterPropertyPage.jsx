@@ -11,6 +11,8 @@ const RegisterPropertyPage = () => {
     type: 'farmhouse',
     per_day_price: '',
     max_people_allowed: '',
+    opening_time: '',
+    closing_time: '',
     phone_number: '',
     address: '',
     pin_code: ''
@@ -191,6 +193,14 @@ const RegisterPropertyPage = () => {
       errors.max_people_allowed = 'Must be a number between 1 and 50';
     }
     
+    if (!basicInfo.opening_time.trim()) {
+      errors.opening_time = 'Opening time is required';
+    }
+    
+    if (!basicInfo.closing_time.trim()) {
+      errors.closing_time = 'Closing time is required';
+    }
+    
     if (!basicInfo.pin_code.trim()) {
       errors.pin_code = 'Pin code is required';
     } else if (!/^\d{6}$/.test(basicInfo.pin_code.trim())) {
@@ -333,6 +343,8 @@ const RegisterPropertyPage = () => {
       type: 'farmhouse',
       per_day_price: '',
       max_people_allowed: '',
+      opening_time: '',
+      closing_time: '',
       phone_number: '',
       address: '',
       pin_code: ''
@@ -619,6 +631,44 @@ const RegisterPropertyPage = () => {
         {validationErrors.max_people_allowed && (
           <p className="mt-1 text-sm text-red-600">{validationErrors.max_people_allowed}</p>
         )}
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Opening Time
+          </label>
+          <input
+            type="time"
+            name="opening_time"
+            value={basicInfo.opening_time}
+            onChange={handleBasicInfoChange}
+            className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:border-transparent transition-all ${
+              validationErrors.opening_time ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-green-500'
+            }`}
+          />
+          {validationErrors.opening_time && (
+            <p className="mt-1 text-sm text-red-600">{validationErrors.opening_time}</p>
+          )}
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Closing Time
+          </label>
+          <input
+            type="time"
+            name="closing_time"
+            value={basicInfo.closing_time}
+            onChange={handleBasicInfoChange}
+            className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:border-transparent transition-all ${
+              validationErrors.closing_time ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-green-500'
+            }`}
+          />
+          {validationErrors.closing_time && (
+            <p className="mt-1 text-sm text-red-600">{validationErrors.closing_time}</p>
+          )}
+        </div>
       </div>
 
       <div>
