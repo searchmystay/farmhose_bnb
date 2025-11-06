@@ -74,7 +74,7 @@ function OwnerProtectedRoute({ children }) {
     return <div>Loading...</div>
   }
 
-  return isAuthenticated ? React.cloneElement(children, { ownerData }) : <Navigate to="/owner/login" replace />
+  return isAuthenticated ? React.cloneElement(children, { ownerData }) : <Navigate to="/owner" replace />
 }
 
 function App() {
@@ -97,8 +97,8 @@ function App() {
               </ProtectedRoute>
             } />
             <Route path="/admin/login" element={<AdminLogin />} />
-            <Route path="/owner/login" element={<OwnerLogin />} />
-            <Route path="/owner/dashboard/:farmhouseId" element={
+            <Route path="/owner" element={<OwnerLogin />} />
+            <Route path="/owner/:farmhouseId" element={
               <OwnerProtectedRoute>
                 <OwnerDashboard />
               </OwnerProtectedRoute>

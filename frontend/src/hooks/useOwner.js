@@ -24,7 +24,7 @@ export const useOwnerAuth = () => {
       
       if (result.success && result.data) {
         toast.success(`Welcome back, ${result.data.owner_name || 'Owner'}!`)
-        navigate(`/owner/dashboard/${result.data.farmhouse_id}`)
+        navigate(`/owner/${result.data.farmhouse_id}`)
       }
       
       return result
