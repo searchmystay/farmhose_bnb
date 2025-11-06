@@ -3,7 +3,6 @@ from ..database.db_admin_kpi_operations import (
     get_total_platform_revenue,
     get_this_month_revenue,
     get_total_leads,
-    get_most_viewed_property_this_month,
     get_top_properties_last_month
 )
 from ..utils.exception_handler import handle_exceptions
@@ -13,8 +12,7 @@ from ..utils.exception_handler import handle_exceptions
 def build_property_counts_data(property_counts):
     counts_data = {
         "total_farmhouses": property_counts["farmhouse"],
-        "total_bnbs": property_counts["bnb"],
-        "total_properties": property_counts["farmhouse"] + property_counts["bnb"]
+        "total_bnbs": property_counts["bnb"]
     }
     return counts_data
 
@@ -31,19 +29,9 @@ def build_revenue_data(revenue_info, monthly_revenue):
 
 
 @handle_exceptions
-def build_engagement_data(total_leads, most_viewed):
-    if most_viewed:
-        most_viewed_data = most_viewed
-    else:
-        most_viewed_data = {
-            "property_name": "N/A",
-            "property_type": "N/A",
-            "views": 0
-        }
-    
+def build_engagement_data(total_leads):
     engagement_data = {
-        "total_leads": total_leads,
-        "most_viewed_this_month": most_viewed_data
+        "total_leads": total_leads
     }
     return engagement_data
 
@@ -65,12 +53,11 @@ def get_admin_dashboard_kpis():
     revenue_info = get_total_platform_revenue()
     monthly_revenue = get_this_month_revenue()
     total_leads = get_total_leads()
-    most_viewed = get_most_viewed_property_this_month()
     top_properties = get_top_properties_last_month(limit=5)
     
     counts_data = build_property_counts_data(property_counts)
     revenue_data = build_revenue_data(revenue_info, monthly_revenue)
-    engagement_data = build_engagement_data(total_leads, most_viewed)
+    engagement_data = build_engagement_data(total_leads)
     kpis = build_kpis_response(counts_data, revenue_data, engagement_data, top_properties)
     
     return kpis

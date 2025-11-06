@@ -1,5 +1,5 @@
 import { useAnalytics } from '../../hooks/admin/useAnalytics'
-import { CurrencyCircleDollar, TrendUp, Eye, Users, House, ChartBar } from '@phosphor-icons/react'
+import { CurrencyCircleDollar, TrendUp, Users, House, ChartBar } from '@phosphor-icons/react'
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
 
 function DashboardPage() {
@@ -145,7 +145,7 @@ function DashboardPage() {
         )}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
         {renderKpiCard(
           <House size={40} weight="duotone" />,
           'Total Farmhouses',
@@ -157,23 +157,6 @@ function DashboardPage() {
           'Total BnBs',
           analytics?.property_counts?.total_bnbs || 0,
           '#8b5cf6'
-        )}
-        {renderKpiCard(
-          <ChartBar size={40} weight="duotone" />,
-          'Total Properties',
-          analytics?.property_counts?.total_properties || 0,
-          '#06b6d4'
-        )}
-        {renderKpiCard(
-          <Eye size={40} weight="duotone" />,
-          'Most Viewed This Month',
-          analytics?.engagement?.most_viewed_this_month?.property_name !== 'N/A' 
-            ? `${analytics?.engagement?.most_viewed_this_month?.views || 0} views`
-            : 'N/A',
-          '#ef4444',
-          analytics?.engagement?.most_viewed_this_month?.property_name !== 'N/A'
-            ? analytics?.engagement?.most_viewed_this_month?.property_name
-            : 'No data'
         )}
       </div>
 

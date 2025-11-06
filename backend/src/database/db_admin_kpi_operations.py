@@ -117,61 +117,6 @@ def get_total_leads():
 
 
 @handle_exceptions
-def get_current_month_dates():
-    now = datetime.utcnow()
-    month_start_str = f"{now.year}-{now.month:02d}-01"
-    today_str = f"{now.year}-{now.month:02d}-{now.day:02d}"
-    dates = {"start": month_start_str, "today": today_str}
-    return dates
-
-
-@handle_exceptions
-def aggregate_monthly_views(month_start_str, today_str):
-    pipeline = [
-        {"$unwind": "$daily"},
-        {"$match": {"daily.date": {"$gte": month_start_str, "$lte": today_str}}},
-        {"$group": {"_id": "$farmhouse_id", "monthly_views": {"$sum": "$daily.views"}}},
-        {"$sort": {"monthly_views": -1}},
-        {"$limit": 1}
-    ]
-    result = list(db.farmhouse_analysis.aggregate(pipeline))
-    return result
-
-
-@handle_exceptions
-def lookup_property_details(result):
-    if not result:
-        return None
-    
-    farmhouse_id = result[0]["_id"]
-    monthly_views = result[0]["monthly_views"]
-    
-    pipeline = [
-        {"$match": {"_id": farmhouse_id}},
-        {"$project": {"name": 1, "type": 1}}
-    ]
-    property_data = list(db.farmhouses.aggregate(pipeline))
-    
-    if not property_data:
-        return None
-    
-    property_info = {
-        "property_name": property_data[0]["name"],
-        "property_type": property_data[0]["type"],
-        "views": monthly_views
-    }
-    return property_info
-
-
-@handle_exceptions
-def get_most_viewed_property_this_month():
-    dates = get_current_month_dates()
-    result = aggregate_monthly_views(dates["start"], dates["today"])
-    property_info = lookup_property_details(result)
-    return property_info
-
-
-@handle_exceptions
 def get_last_month_string():
     now = datetime.utcnow()
     if now.month == 1:
