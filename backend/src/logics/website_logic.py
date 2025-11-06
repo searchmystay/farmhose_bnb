@@ -252,9 +252,13 @@ def get_property_details(property_id, lead_email=None, check_in_date=None, check
     
     processed_property = process_property_for_detail(property_data)
     
-    availability, reason = check_property_availability(property_data, check_in_date, check_out_date, number_of_people)
-    processed_property["availability"] = availability
-    processed_property["reason"] = reason
+    if check_in_date and check_out_date and number_of_people:
+        availability, reason = check_property_availability(property_data, check_in_date, check_out_date, number_of_people)
+        processed_property["availability"] = availability
+        processed_property["reason"] = reason
+    else:
+        processed_property["availability"] = None
+        processed_property["reason"] = None
     
     if not lead_email:
         processed_property["in_wishlist"] = False
