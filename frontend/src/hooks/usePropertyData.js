@@ -373,6 +373,37 @@ export const useFarmhouseName = (farmhouseId) => {
   return { farmhouseName, loading, error, refetch: loadFarmhouseName }
 }
 
+export const useSearchCriteria = () => {
+  const [hasSearchCriteria, setHasSearchCriteria] = useState(false)
+
+  const checkSearchCriteria = () => {
+    try {
+      const searchCriteria = sessionStorage.getItem('searchCriteria')
+      const hasValidCriteria = searchCriteria && searchCriteria !== 'null' && searchCriteria !== 'undefined'
+      setHasSearchCriteria(hasValidCriteria)
+      return hasValidCriteria
+    } catch (err) {
+      setHasSearchCriteria(false)
+      return false
+    }
+  }
+
+  const getSearchCriteria = () => {
+    try {
+      const searchCriteria = sessionStorage.getItem('searchCriteria')
+      return searchCriteria ? JSON.parse(searchCriteria) : null
+    } catch (err) {
+      return null
+    }
+  }
+
+  useEffect(() => {
+    checkSearchCriteria()
+  }, [])
+
+  return { hasSearchCriteria, checkSearchCriteria, getSearchCriteria }
+}
+
 export const useReviewSubmission = () => {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
