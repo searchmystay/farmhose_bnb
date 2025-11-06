@@ -131,15 +131,11 @@ def get_last_month_string():
 
 @handle_exceptions
 def get_top_properties_last_month(limit):
-    month_str = get_last_month_string()
-    filter_dict = {"month": month_str}
+    filter_dict = {"_id": "admin_analysis_singleton"}
     result = db_find_one("admin_analysis", filter_dict)
     
-    if result and "top_properties" in result:
-        top_properties = result["top_properties"][:limit]
-        for prop in top_properties:
-            if "farmhouse_id" in prop and isinstance(prop["farmhouse_id"], ObjectId):
-                prop["farmhouse_id"] = str(prop["farmhouse_id"])
+    if result and "last_month_top_properties" in result:
+        top_properties = result["last_month_top_properties"][:limit]
         return top_properties
     
     empty_list = []
@@ -165,12 +161,12 @@ def calculate_month_range(year, month):
 @handle_exceptions
 def aggregate_top_properties_for_month(month_start_str, month_end_str):
     pipeline = [
-        {"$unwind": "$daily"},
-        {"$match": {"daily.date": {"$gte": month_start_str, "$lte": month_end_str}}},
+        {"$unwind": "$daily_analytics"},
+        {"$match": {"daily_analytics.date": {"$gte": month_start_str, "$lte": month_end_str}}},
         {"$group": {
             "_id": "$farmhouse_id",
-            "monthly_leads": {"$sum": "$daily.leads"},
-            "monthly_views": {"$sum": "$daily.views"}
+            "monthly_leads": {"$sum": "$daily_analytics.leads"},
+            "monthly_views": {"$sum": "$daily_analytics.views"}
         }},
         {"$sort": {"monthly_leads": -1}},
         {"$limit": 5}
@@ -202,25 +198,60 @@ def enrich_with_property_names(results):
 
 
 @handle_exceptions
-def save_to_collection(month_str, top_properties, total_leads, total_views, new_properties):
-    monthly_summary = {
+def upsert_admin_analysis(month_str, top_properties, total_leads, total_views, new_properties):
+    month_entry = {
         "month": month_str,
-        "top_properties": top_properties,
         "total_platform_leads": total_leads,
         "total_platform_views": total_views,
-        "new_properties_added": new_properties,
-        "created_at": datetime.utcnow()
+        "new_properties_added": new_properties
     }
     
-    existing = db_find_one("admin_analysis", {"month": month_str})
+    top_props_formatted = []
+    for prop in top_properties:
+        formatted_prop = {
+            "farmhouse_id": str(prop["farmhouse_id"]) if isinstance(prop["farmhouse_id"], ObjectId) else prop["farmhouse_id"],
+            "name": prop["name"],
+            "total_leads": prop["total_leads"],
+            "total_views": prop["total_views"]
+        }
+        top_props_formatted.append(formatted_prop)
+    
+    existing = db.admin_analysis.find_one({"_id": "admin_analysis_singleton"})
     
     if existing:
-        db.admin_analysis.update_one(
-            {"month": month_str},
-            {"$set": monthly_summary}
-        )
+        monthly_data = existing.get("monthly_data", [])
+        month_exists = any(m["month"] == month_str for m in monthly_data)
+        
+        if not month_exists:
+            db.admin_analysis.update_one(
+                {"_id": "admin_analysis_singleton"},
+                {
+                    "$push": {"monthly_data": month_entry},
+                    "$set": {
+                        "last_month_top_properties": top_props_formatted,
+                        "updated_at": datetime.utcnow()
+                    }
+                }
+            )
+        else:
+            db.admin_analysis.update_one(
+                {"_id": "admin_analysis_singleton"},
+                {
+                    "$set": {
+                        "last_month_top_properties": top_props_formatted,
+                        "updated_at": datetime.utcnow()
+                    }
+                }
+            )
     else:
-        db_insert_one("admin_analysis", monthly_summary)
+        new_doc = {
+            "_id": "admin_analysis_singleton",
+            "monthly_data": [month_entry],
+            "last_month_top_properties": top_props_formatted,
+            "created_at": datetime.utcnow(),
+            "updated_at": datetime.utcnow()
+        }
+        db_insert_one("admin_analysis", new_doc)
     
     return True
 
@@ -237,7 +268,7 @@ def save_monthly_admin_analysis(month_str):
     total_views = aggregate_platform_views_for_month(date_range["start"], date_range["end"])
     new_properties = count_new_properties_for_month(date_range["start"], date_range["end"])
     
-    save_to_collection(month_str, top_properties, total_leads, total_views, new_properties)
+    upsert_admin_analysis(month_str, top_properties, total_leads, total_views, new_properties)
     return True
 
 
@@ -311,15 +342,17 @@ def get_current_month_stats_live():
 
 
 @handle_exceptions
-def get_last_6_months_data():
-    pipeline = [
-        {"$sort": {"month": -1}},
-        {"$limit": 6},
-        {"$project": {"month": 1, "total_platform_leads": 1, "_id": 0}}
-    ]
-    results = list(db.admin_analysis.aggregate(pipeline))
-    results.reverse()
-    return results
+def get_last_5_saved_months():
+    filter_dict = {"_id": "admin_analysis_singleton"}
+    projection = {"monthly_data": {"$slice": -5}, "_id": 0}
+    result = db.admin_analysis.find_one(filter_dict, projection)
+    
+    if result and "monthly_data" in result:
+        monthly_data = result["monthly_data"]
+        return monthly_data
+    
+    empty_list = []
+    return empty_list
 
 
 @handle_exceptions

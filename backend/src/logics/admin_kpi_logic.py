@@ -6,7 +6,7 @@ from ..database.db_admin_kpi_operations import (
     get_top_properties_last_month,
     get_total_money_left,
     get_current_month_stats_live,
-    get_last_6_months_data
+    get_last_5_saved_months
 )
 from ..utils.exception_handler import handle_exceptions
 
@@ -50,6 +50,17 @@ def build_current_month_data(current_month_stats):
 
 
 @handle_exceptions
+def build_platform_leads_graph(saved_months, current_month_stats):
+    graph_data = saved_months.copy()
+    current_month_entry = {
+        "month": current_month_stats["month"],
+        "total_platform_leads": current_month_stats["total_platform_leads"]
+    }
+    graph_data.append(current_month_entry)
+    return graph_data
+
+
+@handle_exceptions
 def build_kpis_response(counts_data, revenue_data, engagement_data, top_properties, current_month, graph_data, total_money):
     kpis = {
         "property_counts": counts_data,
@@ -72,12 +83,13 @@ def get_admin_dashboard_kpis():
     top_properties = get_top_properties_last_month(limit=5)
     total_money = get_total_money_left()
     current_month_stats = get_current_month_stats_live()
-    graph_data = get_last_6_months_data()
+    saved_months = get_last_5_saved_months()
     
     counts_data = build_property_counts_data(property_counts)
     revenue_data = build_revenue_data(revenue_info, monthly_revenue)
     engagement_data = build_engagement_data(total_leads)
     current_month = build_current_month_data(current_month_stats)
+    graph_data = build_platform_leads_graph(saved_months, current_month_stats)
     kpis = build_kpis_response(counts_data, revenue_data, engagement_data, top_properties, current_month, graph_data, total_money)
     
     return kpis
