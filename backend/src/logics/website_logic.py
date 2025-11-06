@@ -101,6 +101,7 @@ def process_property_for_detail(property_data):
     owner_details = property_data.get("owner_details", {})
     opening_time = property_data.get("opening_time", "")
     closing_time = property_data.get("closing_time", "")
+    per_day_cost = property_data.get("per_day_cost", 0)
     
     formatted_amenities = format_amenities_for_display(raw_amenities_data)
     
@@ -114,7 +115,8 @@ def process_property_for_detail(property_data):
         "reviews": reviews,
         "owner_details": owner_details,
         "opening_time": opening_time,
-        "closing_time": closing_time
+        "closing_time": closing_time,
+        "per_day_cost": per_day_cost
     }
     
     return processed_data
@@ -196,7 +198,33 @@ def get_approved_properties_by_type(query_filter, number_of_people=None, check_i
 
 
 @handle_exceptions
-def get_property_details(property_id, lead_email=None):
+def check_property_availability(property_data, check_in_date, check_out_date, number_of_people):
+    availability = True
+    reason = ""
+    
+    if check_in_date and check_out_date:
+        parsed_check_in = datetime.strptime(check_in_date, '%Y-%m-%d')
+        parsed_check_out = datetime.strptime(check_out_date, '%Y-%m-%d')
+        requested_date_range = get_date_range(parsed_check_in, parsed_check_out)
+        
+        booked_dates = property_data.get("booked_dates", [])
+        for requested_date in requested_date_range:
+            if requested_date in booked_dates:
+                availability = False
+                reason = "Property is not available for selected dates"
+                break
+    
+    if availability and number_of_people:
+        max_people = property_data.get("max_people", 0)
+        if max_people > 0 and number_of_people > max_people:
+            availability = False
+            reason = f"Property accommodates maximum {max_people} people, but {number_of_people} requested"
+    
+    return availability, reason
+
+
+@handle_exceptions
+def get_property_details(property_id, lead_email=None, check_in_date=None, check_out_date=None, number_of_people=None):
     query_filter = {"_id": property_id, "status": "active"}
     projection = {
         "_id": 1,
@@ -208,7 +236,10 @@ def get_property_details(property_id, lead_email=None):
         "reviews": 1,
         "owner_details": 1,
         "opening_time": 1,
-        "closing_time": 1
+        "closing_time": 1,
+        "per_day_cost": 1,
+        "booked_dates": 1,
+        "max_people": 1
     }
     
     property_data = db_find_one("farmhouses", query_filter, projection)
@@ -220,6 +251,10 @@ def get_property_details(property_id, lead_email=None):
     record_visit(farmhouse_id)
     
     processed_property = process_property_for_detail(property_data)
+    
+    availability, reason = check_property_availability(property_data, check_in_date, check_out_date, number_of_people)
+    processed_property["availability"] = availability
+    processed_property["reason"] = reason
     
     if not lead_email:
         processed_property["in_wishlist"] = False

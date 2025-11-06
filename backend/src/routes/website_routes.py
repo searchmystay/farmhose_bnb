@@ -65,9 +65,12 @@ def list_properties():
 def get_property_detail(property_id):
     data = request.get_json() or {}
     lead_email = data.get('leadEmail')
+    check_in_date = data.get('checkInDate')
+    check_out_date = data.get('checkOutDate')
+    number_of_people = data.get('numberOfPeople')
     
     object_id = ObjectId(property_id)
-    property_data = get_property_details(object_id, lead_email)
+    property_data = get_property_details(object_id, lead_email, check_in_date, check_out_date, number_of_people)
     
     response_data = {
         "success": True,
