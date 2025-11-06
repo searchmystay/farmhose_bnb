@@ -662,13 +662,17 @@ def get_user_wishlist(email):
         "_id": 1,
         "name": 1,
         "description": 1,
-        "images": 1
+        "images": 1,
+        "location": 1
     }
     
     properties_list = db_find_many("farmhouses", query_filter, projection)
     
     processed_properties = []
     for property_data in properties_list:
+        farmhouse_id = property_data.get("_id")
+        analysis_data = db_find_one("farmhouse_analysis", {"farmhouse_id": farmhouse_id}, {"review_average": 1})
+        property_data["review_average"] = analysis_data.get("review_average", 0.0)
         processed_property = process_farmhouse_for_listing(property_data)
         processed_properties.append(processed_property)
     
