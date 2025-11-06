@@ -231,6 +231,11 @@ def submit_review_route():
     if not review_comment:
         raise AppException("Review comment is required")
     
+    # Validate minimum word count (10 words)
+    word_count = len(review_comment.strip().split())
+    if word_count < 10:
+        raise AppException(f"Review must be at least 10 words. Current: {word_count} words")
+    
     object_id = ObjectId(farmhouse_id)
     submit_review(object_id, reviewer_name, rating, review_comment)
     

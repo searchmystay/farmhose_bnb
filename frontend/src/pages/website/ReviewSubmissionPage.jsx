@@ -56,6 +56,7 @@ function ReviewSubmissionPage() {
   })
   const [wordCount, setWordCount] = useState(0)
 
+  const MIN_WORDS = 10
   const MAX_WORDS = 100
 
   const countWords = (text) => {
@@ -87,6 +88,11 @@ function ReviewSubmissionPage() {
     
     if (!formData.description.trim()) {
       alert('Please write a review description')
+      return
+    }
+    
+    if (wordCount < MIN_WORDS) {
+      alert(`Please write at least ${MIN_WORDS} words. Current: ${wordCount} words`)
       return
     }
     
@@ -178,7 +184,7 @@ function ReviewSubmissionPage() {
             {/* Description */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Write Your Review *
+                Write Your Review * <span className="text-xs text-gray-500">(minimum 10 words)</span>
               </label>
               <textarea
                 value={formData.description}
@@ -189,9 +195,9 @@ function ReviewSubmissionPage() {
               />
               <div className="flex justify-between items-center mt-2">
                 <span className={`text-sm ${
-                  wordCount > MAX_WORDS * 0.9 ? 'text-red-600' : 'text-gray-500'
+                  wordCount < MIN_WORDS ? 'text-red-600' : wordCount > MAX_WORDS * 0.9 ? 'text-orange-600' : 'text-gray-500'
                 }`}>
-                  {wordCount}/{MAX_WORDS} words
+                  {wordCount}/{MAX_WORDS} words {wordCount < MIN_WORDS && `(minimum ${MIN_WORDS} required)`}
                 </span>
                 <span className="text-xs text-gray-400">
                   Be specific about what you liked or could be improved
