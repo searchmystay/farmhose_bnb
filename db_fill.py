@@ -323,6 +323,7 @@ def generate_farmhouse_data():
         "opening_time": opening_time,
         "closing_time": closing_time,
         "credit_balance": credit_balance,
+        "per_day_cost": random.randint(3000, 15000),
         "status": "active",
         "favourite": random.choice([True, False]),
         "created_at": current_time,
