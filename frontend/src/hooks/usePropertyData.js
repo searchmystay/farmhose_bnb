@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { fetchFarmhouseList, fetchBnbList, fetchTopProperties, fetchPropertyDetail, registerProperty, contactViaWhatsapp, toggleWishlist, createLead, getUserWishlist, submitReview, getFarmhouseName } from '../services/propertyApi'
+import { fetchFarmhouseList, fetchBnbList, fetchPropertyList, fetchTopProperties, fetchPropertyDetail, registerProperty, contactViaWhatsapp, toggleWishlist, createLead, getUserWishlist, submitReview, getFarmhouseName } from '../services/propertyApi'
 
 export const useFarmhouseList = (shouldFetch = false) => {
   const [farmhouses, setFarmhouses] = useState([])
@@ -79,6 +79,46 @@ export const useBnbList = (shouldFetch = false) => {
   }, [shouldFetch])
 
   return { bnbs, loading, error, refetch: loadBnbs }
+}
+
+export const usePropertyList = (shouldFetch = false) => {
+  const [properties, setProperties] = useState([])
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState(null)
+
+  const getSearchCriteria = () => {
+    try {
+      const searchCriteria = sessionStorage.getItem('searchCriteria')
+      return searchCriteria ? JSON.parse(searchCriteria) : null
+    } catch (err) {
+      return null
+    }
+  }
+
+  const loadProperties = async () => {
+    try {
+      setLoading(true)
+      setError(null)
+      const searchCriteria = getSearchCriteria()
+      const response = await fetchPropertyList(searchCriteria)
+      const propertyData = response.backend_data || []
+      setProperties(propertyData)
+    } catch (err) {
+      const errorMessage = err.message || 'Failed to fetch properties'
+      setError(errorMessage)
+      setProperties([])
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    if (shouldFetch) {
+      loadProperties()
+    }
+  }, [shouldFetch])
+
+  return { properties, loading, error, refetch: loadProperties }
 }
 
 export const useTopProperties = () => {

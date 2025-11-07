@@ -54,6 +54,29 @@ export const fetchBnbList = async (searchCriteria = null) => {
   }
 }
 
+export const fetchPropertyList = async (searchCriteria = null) => {
+  try {
+    const requestData = {}
+    
+    if (searchCriteria) {
+      requestData.checkInDate = searchCriteria.checkInDate
+      requestData.checkOutDate = searchCriteria.checkOutDate
+      requestData.numberOfPeople = searchCriteria.numberOfPeople
+      requestData.propertyType = searchCriteria.propertyType
+    }
+    
+    const response = await apiClient.post('/property-list', requestData)
+    const result = response.data
+    return result
+  } catch (error) {
+    if (error.response && error.response.data) {
+      const backendError = error.response.data
+      throw new Error(backendError.message || 'Failed to fetch properties')
+    }
+    throw new Error('Failed to fetch properties, Network error')
+  }
+}
+
 export const fetchTopProperties = async () => {
   const response = await apiClient.get('/top-properties')
   const result = response.data

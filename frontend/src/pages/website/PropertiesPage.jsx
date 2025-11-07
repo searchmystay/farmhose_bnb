@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Helmet } from 'react-helmet-async'
-import { useFarmhouseList, useBnbList, useLeadRegistration } from '../../hooks/usePropertyData'
+import { useFarmhouseList, useBnbList, usePropertyList, useLeadRegistration } from '../../hooks/usePropertyData'
 import Footer from '../../components/Footer'
 import VisitorLoginPopup from '../../components/VisitorLoginPopup'
 
@@ -115,32 +115,21 @@ function PropertiesPage({ propertyType = 'both' } = {}) {
   const navigate = useNavigate()
   const { handleLeadInfo, getLeadInfo } = useLeadRegistration()
   const [showVisitorPopup, setShowVisitorPopup] = useState(false)
-  
-  const shouldFetchFarmhouses = propertyType === 'farmhouse' || propertyType === 'both'
-  const shouldFetchBnbs = propertyType === 'bnb' || propertyType === 'both'
-  const { farmhouses, loading: farmhouseLoading, error: farmhouseError } = useFarmhouseList(shouldFetchFarmhouses)
-  const { bnbs, loading: bnbLoading, error: bnbError } = useBnbList(shouldFetchBnbs)
-  
-  const [properties, setProperties] = useState([])
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState(null)
+  const { farmhouses, loading: farmhouseLoading, error: farmhouseError } = useFarmhouseList(propertyType === 'farmhouse')
+  const { bnbs, loading: bnbLoading, error: bnbError } = useBnbList(propertyType === 'bnb')
+  const { properties: bothProperties, loading: bothLoading, error: bothError } = usePropertyList(propertyType === 'both')
 
-  useEffect(() => {
-    if (propertyType === 'farmhouse') {
-      setProperties(farmhouses)
-      setLoading(farmhouseLoading)
-      setError(farmhouseError)
-    } else if (propertyType === 'bnb') {
-      setProperties(bnbs)
-      setLoading(bnbLoading)
-      setError(bnbError)
-    } else {
-      const allProperties = [...farmhouses, ...bnbs]
-      setProperties(allProperties)
-      setLoading(farmhouseLoading || bnbLoading)
-      setError(farmhouseError || bnbError)
-    }
-  }, [propertyType, farmhouses, bnbs, farmhouseLoading, bnbLoading, farmhouseError, bnbError])
+  const properties = propertyType === 'farmhouse' ? farmhouses 
+                   : propertyType === 'bnb' ? bnbs 
+                   : bothProperties
+
+  const loading = propertyType === 'farmhouse' ? farmhouseLoading
+                : propertyType === 'bnb' ? bnbLoading
+                : bothLoading
+
+  const error = propertyType === 'farmhouse' ? farmhouseError
+              : propertyType === 'bnb' ? bnbError
+              : bothError
 
   const getTitle = () => {
     switch (propertyType) {
