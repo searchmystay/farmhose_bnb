@@ -26,7 +26,7 @@ function DashboardPage() {
 
   const renderKpiCard = (icon, title, value, color, subtitle = null) => {
     return (
-      <div className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1 p-4 sm:p-6 cursor-pointer border border-gray-100">
+      <div className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1 px-1 py-2 sm:p-6 cursor-pointer border border-gray-100">
         <div className="flex justify-between items-start mb-3 sm:mb-4">
           <div 
             className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg flex items-center justify-center text-xl sm:text-2xl"
@@ -140,8 +140,8 @@ function DashboardPage() {
   }
 
   return (
-    <div className="p-3 sm:p-6 md:p-8 lg:p-10 bg-gray-50 min-h-screen">
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6 mb-6 sm:mb-8">
+    <div className="px-0 py-6 sm:p-6 md:p-8 lg:p-10 bg-gray-50 min-h-screen">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 mb-6 sm:mb-8">
         {renderKpiCard(
           <House size={40} weight="duotone" />,
           'Total Farmhouses',
@@ -169,7 +169,7 @@ function DashboardPage() {
         )}
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6 mb-6 sm:mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 mb-6 sm:mb-8">
         {renderKpiCard(
           <UserPlus size={40} weight="duotone" />,
           'This Month Leads',
@@ -198,7 +198,7 @@ function DashboardPage() {
         )}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 md:gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
         {renderPlatformLeadsGraph()}
         {renderTop5Chart()}
       </div>
