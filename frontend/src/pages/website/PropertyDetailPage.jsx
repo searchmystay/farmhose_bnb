@@ -283,6 +283,25 @@ function PropertyDetailPage() {
             alt={`${property.name} - Image ${currentImageIndex + 1}`}
             className="w-full h-64 md:h-96 object-cover rounded-lg shadow-lg"
           />
+          <button
+            onClick={handleAddToWishlist}
+            disabled={wishlistLoading}
+            className={`absolute top-3 right-3 ${
+              isInWishlist 
+                ? 'bg-red-50 border-red-300 text-red-700 hover:bg-red-100' 
+                : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
+            } ${
+              wishlistLoading ? 'opacity-50 cursor-not-allowed' : ''
+            } p-2 rounded-full border-2 transition-all duration-200 shadow-lg`}
+          >
+            {wishlistLoading ? (
+              <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
+            ) : (
+              <svg className="w-5 h-5" fill={isInWishlist ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+              </svg>
+            )}
+          </button>
           <div className="absolute bottom-3 left-1/2 transform -translate-x-1/2 flex space-x-2">
             {property.images.map((_, index) => (
               <div
@@ -550,31 +569,8 @@ function PropertyDetailPage() {
         {renderAvailabilityStatus()}
         <div>
           <div className="flex items-start justify-between mb-4 gap-2">
-            <h2 className="text-base md:text-2xl font-bold text-gray-900 leading-tight max-w-[65%]">{property.name}</h2>
+            <h2 className="text-base md:text-2xl font-bold text-gray-900 leading-tight flex-1">{property.name}</h2>
             <div className="flex flex-col items-end gap-2 flex-shrink-0 mr-3 md:mr-0">
-              <button 
-                onClick={handleAddToWishlist}
-                disabled={wishlistLoading}
-                className={`${
-                  isInWishlist 
-                    ? 'bg-red-50 border-red-300 text-red-700 hover:bg-red-100 hover:border-red-400' 
-                    : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400'
-                } ${
-                  wishlistLoading ? 'opacity-50 cursor-not-allowed' : ''
-                } p-2 md:px-4 md:py-2 rounded-full border transition-all duration-200 flex items-center gap-2`}
-              >
-                {wishlistLoading ? (
-                  <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
-                ) : (
-                  <svg className="w-4 h-4 md:w-5 md:h-5" fill={isInWishlist ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                  </svg>
-                )}
-                <span className="hidden md:inline text-sm font-medium">
-                  {wishlistLoading ? 'Updating...' : isInWishlist ? 'Remove from Wishlist' : 'Add to Wishlist'}
-                </span>
-              </button>
-
               {renderContactButton()}
               
               {!hasSearchCriteria && (
