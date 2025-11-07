@@ -636,17 +636,58 @@ const RegisterPropertyPage = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Opening Time
+            Check-IN
           </label>
-          <input
-            type="time"
-            name="opening_time"
-            value={basicInfo.opening_time}
-            onChange={handleBasicInfoChange}
-            className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:border-transparent transition-all ${
-              validationErrors.opening_time ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-green-500'
-            }`}
-          />
+          <div className="flex gap-2">
+            <select
+              value={basicInfo.opening_time ? (parseInt(basicInfo.opening_time.split(':')[0]) % 12 || 12) : ''}
+              onChange={(e) => {
+                const hour = parseInt(e.target.value);
+                const minute = basicInfo.opening_time ? basicInfo.opening_time.split(':')[1] : '00';
+                const isPM = basicInfo.opening_time ? parseInt(basicInfo.opening_time.split(':')[0]) >= 12 : false;
+                const hour24 = isPM ? (hour === 12 ? 12 : hour + 12) : (hour === 12 ? 0 : hour);
+                handleBasicInfoChange({ target: { name: 'opening_time', value: `${String(hour24).padStart(2, '0')}:${minute}` } });
+              }}
+              className={`flex-1 px-4 py-3 border rounded-lg focus:ring-2 focus:border-transparent transition-all ${
+                validationErrors.opening_time ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-green-500'
+              }`}
+            >
+              <option value="">HH</option>
+              {[...Array(12)].map((_, i) => (
+                <option key={i + 1} value={i + 1}>{String(i + 1).padStart(2, '0')}</option>
+              ))}
+            </select>
+            <select
+              value={basicInfo.opening_time ? basicInfo.opening_time.split(':')[1] : ''}
+              onChange={(e) => {
+                const hour = basicInfo.opening_time ? basicInfo.opening_time.split(':')[0] : '00';
+                handleBasicInfoChange({ target: { name: 'opening_time', value: `${hour}:${e.target.value}` } });
+              }}
+              className={`flex-1 px-4 py-3 border rounded-lg focus:ring-2 focus:border-transparent transition-all ${
+                validationErrors.opening_time ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-green-500'
+              }`}
+            >
+              <option value="">MM</option>
+              {[...Array(60)].map((_, i) => (
+                <option key={i} value={String(i).padStart(2, '0')}>{String(i).padStart(2, '0')}</option>
+              ))}
+            </select>
+            <select
+              value={basicInfo.opening_time && parseInt(basicInfo.opening_time.split(':')[0]) >= 12 ? 'PM' : 'AM'}
+              onChange={(e) => {
+                const [hour24, minute] = basicInfo.opening_time ? basicInfo.opening_time.split(':') : ['00', '00'];
+                const hour12 = parseInt(hour24) % 12 || 12;
+                const newHour24 = e.target.value === 'PM' ? (hour12 === 12 ? 12 : hour12 + 12) : (hour12 === 12 ? 0 : hour12);
+                handleBasicInfoChange({ target: { name: 'opening_time', value: `${String(newHour24).padStart(2, '0')}:${minute}` } });
+              }}
+              className={`w-24 px-4 py-3 border rounded-lg focus:ring-2 focus:border-transparent transition-all ${
+                validationErrors.opening_time ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-green-500'
+              }`}
+            >
+              <option value="AM">AM</option>
+              <option value="PM">PM</option>
+            </select>
+          </div>
           {validationErrors.opening_time && (
             <p className="mt-1 text-sm text-red-600">{validationErrors.opening_time}</p>
           )}
@@ -654,17 +695,58 @@ const RegisterPropertyPage = () => {
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Closing Time
+            Check-OUT
           </label>
-          <input
-            type="time"
-            name="closing_time"
-            value={basicInfo.closing_time}
-            onChange={handleBasicInfoChange}
-            className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:border-transparent transition-all ${
-              validationErrors.closing_time ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-green-500'
-            }`}
-          />
+          <div className="flex gap-2">
+            <select
+              value={basicInfo.closing_time ? (parseInt(basicInfo.closing_time.split(':')[0]) % 12 || 12) : ''}
+              onChange={(e) => {
+                const hour = parseInt(e.target.value);
+                const minute = basicInfo.closing_time ? basicInfo.closing_time.split(':')[1] : '00';
+                const isPM = basicInfo.closing_time ? parseInt(basicInfo.closing_time.split(':')[0]) >= 12 : false;
+                const hour24 = isPM ? (hour === 12 ? 12 : hour + 12) : (hour === 12 ? 0 : hour);
+                handleBasicInfoChange({ target: { name: 'closing_time', value: `${String(hour24).padStart(2, '0')}:${minute}` } });
+              }}
+              className={`flex-1 px-4 py-3 border rounded-lg focus:ring-2 focus:border-transparent transition-all ${
+                validationErrors.closing_time ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-green-500'
+              }`}
+            >
+              <option value="">HH</option>
+              {[...Array(12)].map((_, i) => (
+                <option key={i + 1} value={i + 1}>{String(i + 1).padStart(2, '0')}</option>
+              ))}
+            </select>
+            <select
+              value={basicInfo.closing_time ? basicInfo.closing_time.split(':')[1] : ''}
+              onChange={(e) => {
+                const hour = basicInfo.closing_time ? basicInfo.closing_time.split(':')[0] : '00';
+                handleBasicInfoChange({ target: { name: 'closing_time', value: `${hour}:${e.target.value}` } });
+              }}
+              className={`flex-1 px-4 py-3 border rounded-lg focus:ring-2 focus:border-transparent transition-all ${
+                validationErrors.closing_time ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-green-500'
+              }`}
+            >
+              <option value="">MM</option>
+              {[...Array(60)].map((_, i) => (
+                <option key={i} value={String(i).padStart(2, '0')}>{String(i).padStart(2, '0')}</option>
+              ))}
+            </select>
+            <select
+              value={basicInfo.closing_time && parseInt(basicInfo.closing_time.split(':')[0]) >= 12 ? 'PM' : 'AM'}
+              onChange={(e) => {
+                const [hour24, minute] = basicInfo.closing_time ? basicInfo.closing_time.split(':') : ['00', '00'];
+                const hour12 = parseInt(hour24) % 12 || 12;
+                const newHour24 = e.target.value === 'PM' ? (hour12 === 12 ? 12 : hour12 + 12) : (hour12 === 12 ? 0 : hour12);
+                handleBasicInfoChange({ target: { name: 'closing_time', value: `${String(newHour24).padStart(2, '0')}:${minute}` } });
+              }}
+              className={`w-24 px-4 py-3 border rounded-lg focus:ring-2 focus:border-transparent transition-all ${
+                validationErrors.closing_time ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-green-500'
+              }`}
+            >
+              <option value="AM">AM</option>
+              <option value="PM">PM</option>
+            </select>
+          </div>
           {validationErrors.closing_time && (
             <p className="mt-1 text-sm text-red-600">{validationErrors.closing_time}</p>
           )}
