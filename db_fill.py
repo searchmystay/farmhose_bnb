@@ -20,13 +20,13 @@ IMAGE_LINKS = [
 ]
 
 DOCUMENT_LINKS = [
-    "https://www.orimi.com/pdf-test.pdf",                           # Sample PDF (test page)
-    "https://example-files.online-convert.com/document/pdf/example.pdf",  # Example PDF content
-    "https://www.aeee.in/wp-content/uploads/2020/08/Sample-pdf.pdf",     # Basic sample document
-    "https://www.rd.usda.gov/sites/default/files/pdf-sample_0.pdf",      # Dummy PDF file from USDA
-    "https://pdfobject.com/pdf/sample.pdf",                              # Simple sample PDF
-    "https://ontheline.trincoll.edu/images/bookdown/sample-local-pdf.pdf",  # 3-page sample document
-    "https://www.adobe.com/support/products/enterprise/knowledgecenter/media/c4611_sample_explain.pdf"  # Adobe sample
+    "https://www.orimi.com/pdf-test.pdf",                           
+    "https://example-files.online-convert.com/document/pdf/example.pdf",  
+    "https://www.aeee.in/wp-content/uploads/2020/08/Sample-pdf.pdf",      
+    "https://www.rd.usda.gov/sites/default/files/pdf-sample_0.pdf",       
+    "https://pdfobject.com/pdf/sample.pdf",                               
+    "https://ontheline.trincoll.edu/images/bookdown/sample-local-pdf.pdf",   
+    "https://www.adobe.com/support/products/enterprise/knowledgecenter/media/c4611_sample_explain.pdf"  
 ]
 
 
@@ -298,9 +298,7 @@ def generate_random_booked_dates():
     """Generate some random booked dates for testing"""
     booked_dates = []
     
-    # Randomly decide if property has bookings (70% chance)
     if random.random() < 0.7:
-        # Add 2-5 random booked dates in the next 60 days
         num_bookings = random.randint(2, 5)
         for _ in range(num_bookings):
             days_ahead = random.randint(1, 60)

@@ -140,7 +140,12 @@ function DashboardPage() {
   }
 
   return (
-    <div className="px-0 py-6 sm:p-6 md:p-8 lg:p-10 bg-gray-50 min-h-screen">
+    <div className="px-2 py-3 sm:p-6 md:p-8 lg:p-10 bg-gray-50 min-h-screen">
+      <div className="mb-6">
+        <h2 className="text-2xl font-semibold text-gray-900">
+          Dashboard
+        </h2>
+      </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 mb-6 sm:mb-8">
         {renderKpiCard(
           <House size={40} weight="duotone" />,

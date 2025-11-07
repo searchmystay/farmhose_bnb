@@ -294,7 +294,12 @@ function OwnerDashboard() {
 
           <main className="flex-1 bg-gray-50">
             {activeTab === 'dashboard' && (
-              <div className="px-0 py-3 sm:p-10">
+              <div className="px-2 py-3 sm:p-10">
+                <div className="mb-6">
+                  <h2 className="text-2xl font-semibold text-gray-900">
+                    Dashboard
+                  </h2>
+                </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2 mb-6 sm:mb-8">
                   {renderKpiCard(
                     <CurrencyCircleDollar size={40} weight="duotone" />, 
@@ -367,11 +372,17 @@ function OwnerDashboard() {
             )}
 
            {activeTab === 'recharge' && (
-             <div className="flex items-center justify-center min-h-[80vh] p-3 sm:p-10">
+             <div className="px-2 py-3 sm:p-10">
+               <div className="mb-6">
+                 <h2 className="text-2xl font-semibold text-gray-900">
+                   Recharge Credits
+                 </h2>
+               </div>
+               <div className="flex items-center justify-center min-h-[70vh]">
                 <div className="bg-white rounded-2xl shadow-md p-6 sm:p-10 w-full max-w-3xl">
                   <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-3">
                     <CreditCard size={32} weight="duotone" className="text-blue-600" />
-                    Recharge Credits
+                    Enter Amount
                   </h2>
                   
                   <form onSubmit={handleRechargeSubmit}>
@@ -418,11 +429,17 @@ function OwnerDashboard() {
                     </button>
                   </form>
                 </div>
+               </div>
               </div>
             )}
 
             {activeTab === 'settings' && (
-              <div className="p-4 sm:p-6 md:p-8 lg:p-10">
+              <div className="px-2 py-3 sm:p-6 md:p-8 lg:p-10">
+                <div className="mb-6">
+                  <h2 className="text-2xl font-semibold text-gray-900">
+                    Settings
+                  </h2>
+                </div>
                 <div className="bg-white rounded-2xl shadow-md p-4 sm:p-6 md:p-6 lg:p-8">
                   <div className="mb-4 sm:mb-6">
                     <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 flex items-center gap-2 sm:gap-3 mb-2">
@@ -514,8 +531,6 @@ function OwnerDashboard() {
                           
                           // Check if all dates are booked (for unbooking)
                           const allBooked = datesToBook.every(date => bookedDates.includes(date))
-                          // Check if any date is booked (reject partial booking)
-                          const anyBooked = datesToBook.some(date => bookedDates.includes(date))
                           
                           if (allBooked) {
                             // Unbook all dates in range
@@ -523,16 +538,20 @@ function OwnerDashboard() {
                               await removeBookedDate(dateStr)
                             }
                             toast.success(`${datesToBook.length} date(s) unbooked`)
-                          } else if (anyBooked) {
-                            // Reject if any date in range is already booked
-                            toast.error('Cannot book: Some dates in range are already booked. Please select only consecutive available dates.')
-                            return
                           } else {
-                            // Book all dates (all are available)
+                            // Book only the available dates (skip already booked ones)
+                            let bookedCount = 0
                             for (const dateStr of datesToBook) {
-                              await addBookedDate(dateStr)
+                              if (!bookedDates.includes(dateStr)) {
+                                await addBookedDate(dateStr)
+                                bookedCount++
+                              }
                             }
-                            toast.success(`${datesToBook.length} date(s) booked`)
+                            if (bookedCount > 0) {
+                              toast.success(`${bookedCount} date(s) booked`)
+                            } else {
+                              toast.info('All selected dates are already booked')
+                            }
                           }
                         }}
                         dateClick={async (info) => {
