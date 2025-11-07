@@ -482,7 +482,7 @@ function PropertyDetailPage() {
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
         <span className="text-sm md:text-base">
-          Open: {property.opening_time} - {property.closing_time}
+          Check In / Check Out: {property.opening_time} - {property.closing_time}
         </span>
       </div>
     )
