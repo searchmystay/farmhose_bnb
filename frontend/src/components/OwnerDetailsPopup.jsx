@@ -21,17 +21,20 @@ const OwnerDetailsPopup = ({ isOpen, onClose, ownerDetails }) => {
               {ownerDetails.owner_photo ? (
                 <img
                   src={ownerDetails.owner_photo}
-                  alt="Property Owner"
+                  alt={ownerDetails.owner_name || "Property Owner"}
                   className="w-28 h-28 sm:w-32 sm:h-32 md:w-36 md:h-36 lg:w-40 lg:h-40 rounded-full object-cover mb-4 border-4 border-green-100"
                 />
               ) : (
                 <div className="w-28 h-28 sm:w-32 sm:h-32 md:w-36 md:h-36 lg:w-40 lg:h-40 rounded-full bg-green-100 flex items-center justify-center mb-4 border-4 border-green-200">
                   <span className="text-green-600 font-bold text-3xl sm:text-4xl md:text-5xl lg:text-6xl">
-                    O
+                    {ownerDetails.owner_name ? ownerDetails.owner_name.charAt(0).toUpperCase() : 'O'}
                   </span>
                 </div>
               )}
               
+              <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">
+                {ownerDetails.owner_name || 'Property Owner'}
+              </h3>
               <span className="inline-flex items-center px-3 py-1 sm:px-4 sm:py-2 rounded-full text-sm sm:text-base font-medium bg-green-100 text-green-800">
                 Property Owner
               </span>
