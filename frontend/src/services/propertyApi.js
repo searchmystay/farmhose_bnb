@@ -10,9 +10,17 @@ const apiClient = axios.create({
   },
 })
 
-export const fetchFarmhouseList = async () => {
+export const fetchFarmhouseList = async (searchCriteria = null) => {
   try {
-    const response = await apiClient.post('/farmhouse-list', {})
+    const requestData = {}
+    
+    if (searchCriteria) {
+      requestData.checkInDate = searchCriteria.checkInDate
+      requestData.checkOutDate = searchCriteria.checkOutDate
+      requestData.numberOfPeople = searchCriteria.numberOfPeople
+    }
+    
+    const response = await apiClient.post('/farmhouse-list', requestData)
     const result = response.data
     return result
   } catch (error) {
@@ -24,9 +32,17 @@ export const fetchFarmhouseList = async () => {
   }
 }
 
-export const fetchBnbList = async () => {
+export const fetchBnbList = async (searchCriteria = null) => {
   try {
-    const response = await apiClient.post('/bnb-list', {})
+    const requestData = {}
+    
+    if (searchCriteria) {
+      requestData.checkInDate = searchCriteria.checkInDate
+      requestData.checkOutDate = searchCriteria.checkOutDate
+      requestData.numberOfPeople = searchCriteria.numberOfPeople
+    }
+    
+    const response = await apiClient.post('/bnb-list', requestData)
     const result = response.data
     return result
   } catch (error) {

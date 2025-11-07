@@ -187,7 +187,6 @@ def get_approved_properties_by_type(query_filter, number_of_people=None, check_i
     
     processed_properties = []
     for property_data in properties_list:
-        # Get review_average from farmhouse_analysis collection
         farmhouse_id = property_data.get("_id")
         analysis_data = db_find_one("farmhouse_analysis", {"farmhouse_id": farmhouse_id}, {"review_average": 1})
         if analysis_data:

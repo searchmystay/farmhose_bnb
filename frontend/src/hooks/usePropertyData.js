@@ -6,11 +6,21 @@ export const useFarmhouseList = (shouldFetch = false) => {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
 
+  const getSearchCriteria = () => {
+    try {
+      const searchCriteria = sessionStorage.getItem('searchCriteria')
+      return searchCriteria ? JSON.parse(searchCriteria) : null
+    } catch (err) {
+      return null
+    }
+  }
+
   const loadFarmhouses = async () => {
     try {
       setLoading(true)
       setError(null)
-      const response = await fetchFarmhouseList()
+      const searchCriteria = getSearchCriteria()
+      const response = await fetchFarmhouseList(searchCriteria)
       const farmhouseData = response.backend_data || []
       setFarmhouses(farmhouseData)
     } catch (err) {
@@ -36,11 +46,21 @@ export const useBnbList = (shouldFetch = false) => {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
 
+  const getSearchCriteria = () => {
+    try {
+      const searchCriteria = sessionStorage.getItem('searchCriteria')
+      return searchCriteria ? JSON.parse(searchCriteria) : null
+    } catch (err) {
+      return null
+    }
+  }
+
   const loadBnbs = async () => {
     try {
       setLoading(true)
       setError(null)
-      const response = await fetchBnbList()
+      const searchCriteria = getSearchCriteria()
+      const response = await fetchBnbList(searchCriteria)
       const bnbData = response.backend_data || []
       setBnbs(bnbData)
     } catch (err) {
