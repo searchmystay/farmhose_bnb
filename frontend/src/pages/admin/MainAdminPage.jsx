@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Helmet } from 'react-helmet-async'
 import { useNavigate } from 'react-router-dom'
+import { useAdminAuth } from '../../hooks/useAdmin'
 import DashboardPage from './DashboardPage'
 import AllPropertiesPage from './AllPropertiesPage'
 import PendingPropertiesPage from './PendingPropertiesPage'
@@ -14,6 +15,7 @@ function MainAdminPage() {
   const [viewingPropertyDetails, setViewingPropertyDetails] = useState(false)
   const [selectedPropertyId, setSelectedPropertyId] = useState(null)
   const navigate = useNavigate()
+  const { logout, isLoading } = useAdminAuth()
 
   const menuItems = [
     { id: 'dashboard', name: 'Dashboard', icon: '▦' },
@@ -44,7 +46,12 @@ function MainAdminPage() {
   }
 
   const handleLogout = async () => {
-    console.log("will logout")
+    try {
+      setDropdownOpen(false)
+      await logout()
+    } catch (error) {
+      console.error('Logout error:', error)
+    }
   }
 
   const renderSidebar = () => (
@@ -110,9 +117,10 @@ function MainAdminPage() {
               <div className="py-1">
                 <button 
                   onClick={handleLogout}
-                  className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+                  disabled={isLoading}
+                  className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Logout
+                  {isLoading ? 'Logging out...' : 'Logout'}
                 </button>
               </div>
             </div>

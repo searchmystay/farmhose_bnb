@@ -201,3 +201,17 @@ export const fetchAnalytics = async () => {
     throw new Error('Failed to fetch analytics, Network error')
   }
 }
+
+export const adminLogout = async () => {
+  try {
+    const response = await adminApiClient.post('/admin_logout')
+    const result = response.data
+    return result
+  } catch (error) {
+    if (error.response && error.response.data) {
+      const backendError = error.response.data
+      throw new Error(backendError.message || 'Failed to logout')
+    }
+    throw new Error('Failed to logout, Network error')
+  }
+}

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
-import { adminLogin, fetchPendingReviews, acceptReview, rejectReview, fetchPendingProperties, approveProperty, rejectProperty, fetchAdminPropertyDetails, fetchAllProperties, markPropertyAsFavourite } from '../services/adminApi'
+import { adminLogin, fetchPendingReviews, acceptReview, rejectReview, fetchPendingProperties, approveProperty, rejectProperty, fetchAdminPropertyDetails, fetchAllProperties, markPropertyAsFavourite, adminLogout } from '../services/adminApi'
 
 export const useAdminAuth = () => {
   const [isLoading, setIsLoading] = useState(false)
@@ -29,7 +29,22 @@ export const useAdminAuth = () => {
     }
   }
 
-  return {login, isLoading}
+  const logout = async () => {
+    try {
+      setIsLoading(true)
+      const result = await adminLogout()
+      toast.success(result.message || 'Logged out successfully')
+      navigate('/')
+      return result
+    } catch (error) {
+      toast.error(error.message || 'Logout failed')
+      throw error
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  return {login, logout, isLoading}
 }
 
 export const usePendingReviews = () => {
