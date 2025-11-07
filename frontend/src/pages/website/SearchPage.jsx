@@ -46,8 +46,8 @@ function SearchPage() {
       navigate('/farmhouse')
     } else if (formData.propertyType === 'bnb') {
       navigate('/bnb')
-    } else {
-      navigate('/farmhouse')
+    } else if (formData.propertyType === 'both') {
+      navigate('/properties')
     }
   }
 

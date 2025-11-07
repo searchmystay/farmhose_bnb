@@ -87,6 +87,7 @@ function App() {
             <Route path="/search" element={<SearchPage />} />
             <Route path="/farmhouse" element={<PropertiesPage propertyType="farmhouse" />} />
             <Route path="/bnb" element={<PropertiesPage propertyType="bnb" />} />
+            <Route path="/properties" element={<PropertiesPage propertyType="both" />} />
             <Route path="/property/:propertyId" element={<PropertyDetailPage />} />
             <Route path="/register-property" element={<RegisterPropertyPage />} />
             <Route path="/wishlist" element={<WishlistPage />} />
