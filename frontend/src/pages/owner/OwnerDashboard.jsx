@@ -196,7 +196,13 @@ function OwnerDashboard() {
               <span className="w-6 h-0.5 bg-black block"></span>
               <span className="w-6 h-0.5 bg-black block"></span>
             </button>
-            <img src={Logo} alt="Company Logo" className="h-6 sm:h-10" style={{ filter: 'brightness(0)' }}/>
+            <img 
+              src={Logo} 
+              alt="Company Logo" 
+              className="h-6 sm:h-10 cursor-pointer" 
+              style={{ filter: 'brightness(0)' }}
+              onClick={() => window.location.href = '/'}
+            />
           </div>
           <div className="flex flex-col sm:flex-row items-end sm:items-center gap-1 sm:gap-6 text-[10px] sm:text-sm">
             <div className="text-right">
