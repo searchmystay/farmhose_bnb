@@ -531,8 +531,6 @@ function OwnerDashboard() {
                           
                           // Check if all dates are booked (for unbooking)
                           const allBooked = datesToBook.every(date => bookedDates.includes(date))
-                          // Check if any date is booked (reject partial booking)
-                          const anyBooked = datesToBook.some(date => bookedDates.includes(date))
                           
                           if (allBooked) {
                             // Unbook all dates in range
@@ -540,16 +538,20 @@ function OwnerDashboard() {
                               await removeBookedDate(dateStr)
                             }
                             toast.success(`${datesToBook.length} date(s) unbooked`)
-                          } else if (anyBooked) {
-                            // Reject if any date in range is already booked
-                            toast.error('Cannot book: Some dates in range are already booked. Please select only consecutive available dates.')
-                            return
                           } else {
-                            // Book all dates (all are available)
+                            // Book only the available dates (skip already booked ones)
+                            let bookedCount = 0
                             for (const dateStr of datesToBook) {
-                              await addBookedDate(dateStr)
+                              if (!bookedDates.includes(dateStr)) {
+                                await addBookedDate(dateStr)
+                                bookedCount++
+                              }
                             }
-                            toast.success(`${datesToBook.length} date(s) booked`)
+                            if (bookedCount > 0) {
+                              toast.success(`${bookedCount} date(s) booked`)
+                            } else {
+                              toast.info('All selected dates are already booked')
+                            }
                           }
                         }}
                         dateClick={async (info) => {
