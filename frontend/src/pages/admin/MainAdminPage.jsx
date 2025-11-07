@@ -182,13 +182,6 @@ function MainAdminPage() {
           </main>
         </div>
         
-        {sidebarOpen && (
-          <div 
-            className="fixed inset-0 z-30 bg-black bg-opacity-50 lg:hidden"
-            onClick={toggleSidebar}
-          />
-        )}
-        
         {dropdownOpen && (
           <div 
             className="fixed inset-0 z-20"
