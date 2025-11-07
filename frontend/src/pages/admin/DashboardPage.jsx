@@ -26,23 +26,23 @@ function DashboardPage() {
 
   const renderKpiCard = (icon, title, value, color, subtitle = null) => {
     return (
-      <div className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1 p-6 cursor-pointer border border-gray-100">
-        <div className="flex justify-between items-start mb-4">
+      <div className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1 p-4 sm:p-6 cursor-pointer border border-gray-100">
+        <div className="flex justify-between items-start mb-3 sm:mb-4">
           <div 
-            className="w-12 h-12 rounded-lg flex items-center justify-center text-2xl"
+            className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg flex items-center justify-center text-xl sm:text-2xl"
             style={{ backgroundColor: `${color}15` }}
           >
             <span style={{ color }}>{icon}</span>
           </div>
           {subtitle && (
             <div className="text-right">
-              <p className="text-xs text-gray-500">{subtitle}</p>
+              <p className="text-[10px] sm:text-xs text-gray-500">{subtitle}</p>
             </div>
           )}
         </div>
         <div>
-          <p className="text-sm font-medium text-gray-600 mb-3">{title}</p>
-          <p className="text-3xl font-bold text-gray-900">{value}</p>
+          <p className="text-xs sm:text-sm font-medium text-gray-600 mb-2 sm:mb-3">{title}</p>
+          <p className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900">{value}</p>
         </div>
       </div>
     )
@@ -68,25 +68,25 @@ function DashboardPage() {
   const renderPlatformLeadsGraph = () => {
     const chartData = preparePlatformLeadsGraphData()
     return (
-      <div className="bg-white rounded-2xl shadow-md hover:shadow-xl transition-shadow duration-300 p-8">
-        <h2 className="text-xl font-bold mb-6 flex items-center gap-3">
-          <Users size={28} weight="duotone" className="text-purple-600" />
-          Platform Leads - Last 6 Months
+      <div className="bg-white rounded-2xl shadow-md hover:shadow-xl transition-shadow duration-300 p-4 sm:p-6 md:p-8">
+        <h2 className="text-base sm:text-lg md:text-xl font-bold mb-4 sm:mb-6 flex items-center gap-2 sm:gap-3">
+          <Users size={24} weight="duotone" className="text-purple-600 sm:w-7 sm:h-7" />
+          <span className="text-sm sm:text-base md:text-xl">Platform Leads - Last 6 Months</span>
         </h2>
         {chartData.length > 0 ? (
           <>
-            <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={chartData} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
+            <ResponsiveContainer width="100%" height={250}>
+              <LineChart data={chartData} margin={{ top: 5, right: 10, left: -20, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                <XAxis dataKey="month" stroke="#6b7280" style={{ fontSize: '12px' }} />
-                <YAxis stroke="#6b7280" style={{ fontSize: '12px' }} />
-                <Tooltip contentStyle={{ backgroundColor: '#fff', border: '1px solid #e5e7eb', borderRadius: '8px' }} />
-                <Line type="monotone" dataKey="leads" stroke="#8b5cf6" strokeWidth={3} dot={{ fill: '#8b5cf6', r: 5 }} activeDot={{ r: 7 }} />
+                <XAxis dataKey="month" stroke="#6b7280" style={{ fontSize: '10px' }} />
+                <YAxis stroke="#6b7280" style={{ fontSize: '10px' }} />
+                <Tooltip contentStyle={{ backgroundColor: '#fff', border: '1px solid #e5e7eb', borderRadius: '8px', fontSize: '11px' }} />
+                <Line type="monotone" dataKey="leads" stroke="#8b5cf6" strokeWidth={2} dot={{ fill: '#8b5cf6', r: 3 }} activeDot={{ r: 5 }} />
               </LineChart>
             </ResponsiveContainer>
-            <div className="mt-6 p-4 bg-purple-50 rounded-lg">
-              <p className="text-sm text-purple-900 font-semibold">Monthly trend of platform leads</p>
-              <p className="text-xs text-purple-700 mt-1">Last 6 months data including current month (live)</p>
+            <div className="mt-4 sm:mt-6 p-3 sm:p-4 bg-purple-50 rounded-lg">
+              <p className="text-xs sm:text-sm text-purple-900 font-semibold">Monthly trend of platform leads</p>
+              <p className="text-[10px] sm:text-xs text-purple-700 mt-1">Last 6 months data including current month (live)</p>
             </div>
           </>
         ) : (
@@ -104,27 +104,27 @@ function DashboardPage() {
   const renderTop5Chart = () => {
     const chartData = prepareTop5ChartData()
     return (
-      <div className="bg-white rounded-2xl shadow-md hover:shadow-xl transition-shadow duration-300 p-8">
-        <h2 className="text-xl font-bold mb-6 flex items-center gap-3">
-          <ChartBar size={28} weight="duotone" className="text-orange-600" />
-          Top 5 Properties Last Month
+      <div className="bg-white rounded-2xl shadow-md hover:shadow-xl transition-shadow duration-300 p-4 sm:p-6 md:p-8">
+        <h2 className="text-base sm:text-lg md:text-xl font-bold mb-4 sm:mb-6 flex items-center gap-2 sm:gap-3">
+          <ChartBar size={24} weight="duotone" className="text-orange-600 sm:w-7 sm:h-7" />
+          <span className="text-sm sm:text-base md:text-xl">Top 5 Properties Last Month</span>
         </h2>
         {chartData.length > 0 ? (
           <>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={chartData} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
+            <ResponsiveContainer width="100%" height={250}>
+              <BarChart data={chartData} margin={{ top: 5, right: 10, left: -20, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                <XAxis dataKey="name" stroke="#6b7280" style={{ fontSize: '11px' }} angle={-15} textAnchor="end" height={80} />
-                <YAxis stroke="#6b7280" style={{ fontSize: '12px' }} />
-                <Tooltip contentStyle={{ backgroundColor: '#fff', border: '1px solid #e5e7eb', borderRadius: '8px' }} />
-                <Legend wrapperStyle={{ paddingTop: '20px' }} />
-                <Bar dataKey="leads" fill="#f97316" radius={[8, 8, 0, 0]} name="Leads" />
-                <Bar dataKey="views" fill="#3b82f6" radius={[8, 8, 0, 0]} name="Views" />
+                <XAxis dataKey="name" stroke="#6b7280" style={{ fontSize: '9px' }} angle={-15} textAnchor="end" height={70} />
+                <YAxis stroke="#6b7280" style={{ fontSize: '10px' }} />
+                <Tooltip contentStyle={{ backgroundColor: '#fff', border: '1px solid #e5e7eb', borderRadius: '8px', fontSize: '11px' }} />
+                <Legend wrapperStyle={{ paddingTop: '10px', fontSize: '11px' }} iconSize={12} />
+                <Bar dataKey="leads" fill="#f97316" radius={[6, 6, 0, 0]} name="Leads" />
+                <Bar dataKey="views" fill="#3b82f6" radius={[6, 6, 0, 0]} name="Views" />
               </BarChart>
             </ResponsiveContainer>
-            <div className="mt-6 p-4 bg-orange-50 rounded-lg">
-              <p className="text-sm text-orange-900 font-semibold">Based on leads generated in previous month</p>
-              <p className="text-xs text-orange-700 mt-1">Click tracking data</p>
+            <div className="mt-4 sm:mt-6 p-3 sm:p-4 bg-orange-50 rounded-lg">
+              <p className="text-xs sm:text-sm text-orange-900 font-semibold">Based on leads generated in previous month</p>
+              <p className="text-[10px] sm:text-xs text-orange-700 mt-1">Click tracking data</p>
             </div>
           </>
         ) : (
@@ -140,8 +140,8 @@ function DashboardPage() {
   }
 
   return (
-    <div className="p-10 bg-gray-50 min-h-screen">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+    <div className="p-3 sm:p-6 md:p-8 lg:p-10 bg-gray-50 min-h-screen">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6 mb-6 sm:mb-8">
         {renderKpiCard(
           <House size={40} weight="duotone" />,
           'Total Farmhouses',
@@ -169,7 +169,7 @@ function DashboardPage() {
         )}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6 mb-6 sm:mb-8">
         {renderKpiCard(
           <UserPlus size={40} weight="duotone" />,
           'This Month Leads',
@@ -198,7 +198,7 @@ function DashboardPage() {
         )}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 md:gap-8">
         {renderPlatformLeadsGraph()}
         {renderTop5Chart()}
       </div>
