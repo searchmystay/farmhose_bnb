@@ -171,11 +171,13 @@ function MainAdminPage() {
           
           <main className="lg:ml-64 px-0 py-6 sm:p-6 bg-gray-50 min-h-screen">
             <div className="max-w-full">
-              <div className="mb-6 px-2 sm:px-0">
-                <h2 className="text-2xl font-semibold text-gray-900">
-                  {getPageTitle()}
-                </h2>
-              </div>
+              {activeTab !== 'dashboard' && (
+                <div className="mb-6 px-2 sm:px-0">
+                  <h2 className="text-2xl font-semibold text-gray-900">
+                    {getPageTitle()}
+                  </h2>
+                </div>
+              )}
               
               {renderContent()}
             </div>
