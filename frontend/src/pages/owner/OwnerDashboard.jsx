@@ -451,6 +451,29 @@ function OwnerDashboard() {
                         weekends={true}
                         events={[]}
                         fixedWeekCount={false}
+                        dayCellDidMount={(arg) => {
+                          // Format date
+                          const year = arg.date.getFullYear()
+                          const month = String(arg.date.getMonth() + 1).padStart(2, '0')
+                          const day = String(arg.date.getDate()).padStart(2, '0')
+                          const dateStr = `${year}-${month}-${day}`
+                          
+                          // Check if booked
+                          const isBooked = bookedDates.includes(dateStr)
+                          
+                          if (isBooked) {
+                            // Create and inject the BOOKED strip
+                            const bookedLabel = document.createElement('div')
+                            bookedLabel.className = 'fc-booked-label'
+                            bookedLabel.innerHTML = '<span>BOOKED</span>'
+                            
+                            // Find the day cell and append
+                            const dayCell = arg.el.querySelector('.fc-daygrid-day-frame')
+                            if (dayCell) {
+                              dayCell.appendChild(bookedLabel)
+                            }
+                          }
+                        }}
                         select={async (info) => {
                           // Handle date range selection (drag-to-select)
                           const startDate = new Date(info.startStr)
@@ -509,6 +532,21 @@ function OwnerDashboard() {
                         dateClick={async (info) => {
                           // Use the exact date string from info.dateStr (already in YYYY-MM-DD format)
                           const clickedDateStr = info.dateStr
+                          const clickedDate = new Date(info.date)
+                          
+                          // Get current viewing month from calendar
+                          const viewDate = info.view.currentStart
+                          const viewMonth = viewDate.getMonth()
+                          const viewYear = viewDate.getFullYear()
+                          
+                          // Check if clicked date is in the current viewing month
+                          const clickedMonth = clickedDate.getMonth()
+                          const clickedYear = clickedDate.getFullYear()
+                          
+                          if (clickedMonth !== viewMonth || clickedYear !== viewYear) {
+                            toast.error('Please navigate to that month to book dates')
+                            return
+                          }
                           
                           // Compare with today using string format
                           const today = new Date()
@@ -558,28 +596,6 @@ function OwnerDashboard() {
                           }
                           
                           return classes
-                        }}
-                        dayCellContent={(arg) => {
-                          // Format date without timezone conversion - SAME as above
-                          const year = arg.date.getFullYear()
-                          const month = String(arg.date.getMonth() + 1).padStart(2, '0')
-                          const day = String(arg.date.getDate()).padStart(2, '0')
-                          const dateStr = `${year}-${month}-${day}`
-                          
-                          const isBooked = bookedDates.includes(dateStr)
-                          
-                          return (
-                            <div className="fc-daygrid-day-frame">
-                              <div className="fc-daygrid-day-top">
-                                <a className="fc-daygrid-day-number">{arg.dayNumberText}</a>
-                              </div>
-                              {isBooked && (
-                                <div className="fc-booked-label">
-                                  <span>🔒 Booked</span>
-                                </div>
-                              )}
-                            </div>
-                          )
                         }}
                       />
                     </div>
