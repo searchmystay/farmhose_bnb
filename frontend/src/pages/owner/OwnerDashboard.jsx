@@ -50,19 +50,19 @@ function OwnerDashboard() {
   const renderKpiCard = (icon, title, value, color, lastMonthValue = null, reviewLink = null) => {
     return (
       <div 
-        className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1 p-6 cursor-pointer border border-gray-100"
+        className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1 px-1 py-2 sm:p-6 cursor-pointer border border-gray-100"
       >
-        <div className="flex justify-between items-start mb-4">
+        <div className="flex justify-between items-start mb-3 sm:mb-4">
           <div 
-            className="w-12 h-12 rounded-lg flex items-center justify-center text-2xl"
+            className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg flex items-center justify-center text-xl sm:text-2xl"
             style={{ backgroundColor: `${color}15` }}
           >
             <span style={{ color }}>{icon}</span>
           </div>
           {lastMonthValue !== null && (
             <div className="text-right">
-              <p className="text-gray-700 font-semibold text-base">{lastMonthValue}</p>
-              <p className="text-xs text-gray-400">vs last month</p>
+              <p className="text-gray-700 font-semibold text-sm sm:text-base">{lastMonthValue}</p>
+              <p className="text-[10px] sm:text-xs text-gray-400">vs last month</p>
             </div>
           )}
           {reviewLink && (
@@ -88,8 +88,8 @@ function OwnerDashboard() {
           )}
         </div>
         <div>
-          <p className="text-sm font-medium text-gray-600 mb-3">{title}</p>
-          <p className="text-3xl font-bold text-gray-900">{value}</p>
+          <p className="text-xs sm:text-sm font-medium text-gray-600 mb-2 sm:mb-3">{title}</p>
+          <p className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900">{value}</p>
         </div>
       </div>
     )
@@ -97,10 +97,10 @@ function OwnerDashboard() {
 
   const renderLineChart = () => {
     return (
-      <div className="bg-white rounded-2xl shadow-md hover:shadow-xl transition-shadow duration-300 p-8">
-        <h2 className="text-xl font-bold mb-6 flex items-center gap-3">
-          <TrendUp size={28} weight="duotone" className="text-blue-600" />
-          Total Leads Last 7 Days
+      <div className="bg-white rounded-2xl shadow-md hover:shadow-xl transition-shadow duration-300 p-4 sm:p-6 md:p-8">
+        <h2 className="text-base sm:text-lg md:text-xl font-bold mb-4 sm:mb-6 flex items-center gap-2 sm:gap-3">
+          <TrendUp size={24} weight="duotone" className="text-blue-600 sm:w-7 sm:h-7" />
+          <span className="text-sm sm:text-base md:text-xl">Total Leads Last 7 Days</span>
         </h2>
         <ResponsiveContainer width="100%" height={300}>
           <LineChart data={lineChartData} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
@@ -117,10 +117,10 @@ function OwnerDashboard() {
 
   const renderBarChart = () => {
     return (
-      <div className="bg-white rounded-2xl shadow-md hover:shadow-xl transition-shadow duration-300 p-8">
-        <h2 className="text-xl font-bold mb-6 flex items-center gap-3">
-          <ChartBar size={28} weight="duotone" className="text-blue-600" />
-          Leads vs Views Comparison (Last 7 Days)
+      <div className="bg-white rounded-2xl shadow-md hover:shadow-xl transition-shadow duration-300 p-4 sm:p-6 md:p-8">
+        <h2 className="text-base sm:text-lg md:text-xl font-bold mb-4 sm:mb-6 flex items-center gap-2 sm:gap-3">
+          <ChartBar size={24} weight="duotone" className="text-blue-600 sm:w-7 sm:h-7" />
+          <span className="text-sm sm:text-base md:text-xl">Leads vs Views Comparison (Last 7 Days)</span>
         </h2>
         <ResponsiveContainer width="100%" height={300}>
           <BarChart data={barChartData} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
@@ -196,7 +196,13 @@ function OwnerDashboard() {
               <span className="w-6 h-0.5 bg-black block"></span>
               <span className="w-6 h-0.5 bg-black block"></span>
             </button>
-            <img src={Logo} alt="Company Logo" className="h-6 sm:h-10" style={{ filter: 'brightness(0)' }}/>
+            <img 
+              src={Logo} 
+              alt="Company Logo" 
+              className="h-6 sm:h-10 cursor-pointer" 
+              style={{ filter: 'brightness(0)' }}
+              onClick={() => window.location.href = '/'}
+            />
           </div>
           <div className="flex flex-col sm:flex-row items-end sm:items-center gap-1 sm:gap-6 text-[10px] sm:text-sm">
             <div className="text-right">
@@ -288,8 +294,8 @@ function OwnerDashboard() {
 
           <main className="flex-1 bg-gray-50">
             {activeTab === 'dashboard' && (
-              <div className="p-10">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
+              <div className="px-0 py-3 sm:p-10">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2 mb-6 sm:mb-8">
                   {renderKpiCard(
                     <CurrencyCircleDollar size={40} weight="duotone" />, 
                     'This Month Money Spend', 
@@ -320,7 +326,7 @@ function OwnerDashboard() {
                   )}
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2 mb-6 sm:mb-8">
                   {renderKpiCard(
                     <CurrencyCircleDollar size={40} weight="duotone" />, 
                     'Total Money Spent', 
@@ -353,7 +359,7 @@ function OwnerDashboard() {
                 </div>
 
 
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
                   {renderLineChart()}
                   {renderBarChart()}
                 </div>
@@ -361,8 +367,8 @@ function OwnerDashboard() {
             )}
 
            {activeTab === 'recharge' && (
-             <div className="flex items-center justify-center min-h-[80vh] p-10">
-                <div className="bg-white rounded-2xl shadow-md p-10 w-full max-w-3xl">
+             <div className="flex items-center justify-center min-h-[80vh] p-3 sm:p-10">
+                <div className="bg-white rounded-2xl shadow-md p-6 sm:p-10 w-full max-w-3xl">
                   <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-3">
                     <CreditCard size={32} weight="duotone" className="text-blue-600" />
                     Recharge Credits
@@ -451,6 +457,29 @@ function OwnerDashboard() {
                         weekends={true}
                         events={[]}
                         fixedWeekCount={false}
+                        dayCellDidMount={(arg) => {
+                          // Format date
+                          const year = arg.date.getFullYear()
+                          const month = String(arg.date.getMonth() + 1).padStart(2, '0')
+                          const day = String(arg.date.getDate()).padStart(2, '0')
+                          const dateStr = `${year}-${month}-${day}`
+                          
+                          // Check if booked
+                          const isBooked = bookedDates.includes(dateStr)
+                          
+                          if (isBooked) {
+                            // Create and inject the BOOKED strip
+                            const bookedLabel = document.createElement('div')
+                            bookedLabel.className = 'fc-booked-label'
+                            bookedLabel.innerHTML = '<span>BOOKED</span>'
+                            
+                            // Find the day cell and append
+                            const dayCell = arg.el.querySelector('.fc-daygrid-day-frame')
+                            if (dayCell) {
+                              dayCell.appendChild(bookedLabel)
+                            }
+                          }
+                        }}
                         select={async (info) => {
                           // Handle date range selection (drag-to-select)
                           const startDate = new Date(info.startStr)
@@ -485,6 +514,8 @@ function OwnerDashboard() {
                           
                           // Check if all dates are booked (for unbooking)
                           const allBooked = datesToBook.every(date => bookedDates.includes(date))
+                          // Check if any date is booked (reject partial booking)
+                          const anyBooked = datesToBook.some(date => bookedDates.includes(date))
                           
                           if (allBooked) {
                             // Unbook all dates in range
@@ -492,23 +523,36 @@ function OwnerDashboard() {
                               await removeBookedDate(dateStr)
                             }
                             toast.success(`${datesToBook.length} date(s) unbooked`)
+                          } else if (anyBooked) {
+                            // Reject if any date in range is already booked
+                            toast.error('Cannot book: Some dates in range are already booked. Please select only consecutive available dates.')
+                            return
                           } else {
-                            // Book all dates that aren't already booked
-                            let bookedCount = 0
+                            // Book all dates (all are available)
                             for (const dateStr of datesToBook) {
-                              if (!bookedDates.includes(dateStr)) {
-                                await addBookedDate(dateStr)
-                                bookedCount++
-                              }
+                              await addBookedDate(dateStr)
                             }
-                            if (bookedCount > 0) {
-                              toast.success(`${bookedCount} date(s) booked`)
-                            }
+                            toast.success(`${datesToBook.length} date(s) booked`)
                           }
                         }}
                         dateClick={async (info) => {
                           // Use the exact date string from info.dateStr (already in YYYY-MM-DD format)
                           const clickedDateStr = info.dateStr
+                          const clickedDate = new Date(info.date)
+                          
+                          // Get current viewing month from calendar
+                          const viewDate = info.view.currentStart
+                          const viewMonth = viewDate.getMonth()
+                          const viewYear = viewDate.getFullYear()
+                          
+                          // Check if clicked date is in the current viewing month
+                          const clickedMonth = clickedDate.getMonth()
+                          const clickedYear = clickedDate.getFullYear()
+                          
+                          if (clickedMonth !== viewMonth || clickedYear !== viewYear) {
+                            toast.error('Please navigate to that month to book dates')
+                            return
+                          }
                           
                           // Compare with today using string format
                           const today = new Date()
@@ -558,28 +602,6 @@ function OwnerDashboard() {
                           }
                           
                           return classes
-                        }}
-                        dayCellContent={(arg) => {
-                          // Format date without timezone conversion - SAME as above
-                          const year = arg.date.getFullYear()
-                          const month = String(arg.date.getMonth() + 1).padStart(2, '0')
-                          const day = String(arg.date.getDate()).padStart(2, '0')
-                          const dateStr = `${year}-${month}-${day}`
-                          
-                          const isBooked = bookedDates.includes(dateStr)
-                          
-                          return (
-                            <div className="fc-daygrid-day-frame">
-                              <div className="fc-daygrid-day-top">
-                                <a className="fc-daygrid-day-number">{arg.dayNumberText}</a>
-                              </div>
-                              {isBooked && (
-                                <div className="fc-booked-label">
-                                  <span>🔒 Booked</span>
-                                </div>
-                              )}
-                            </div>
-                          )
                         }}
                       />
                     </div>
