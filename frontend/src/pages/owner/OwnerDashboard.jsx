@@ -508,6 +508,8 @@ function OwnerDashboard() {
                           
                           // Check if all dates are booked (for unbooking)
                           const allBooked = datesToBook.every(date => bookedDates.includes(date))
+                          // Check if any date is booked (reject partial booking)
+                          const anyBooked = datesToBook.some(date => bookedDates.includes(date))
                           
                           if (allBooked) {
                             // Unbook all dates in range
@@ -515,18 +517,16 @@ function OwnerDashboard() {
                               await removeBookedDate(dateStr)
                             }
                             toast.success(`${datesToBook.length} date(s) unbooked`)
+                          } else if (anyBooked) {
+                            // Reject if any date in range is already booked
+                            toast.error('Cannot book: Some dates in range are already booked. Please select only consecutive available dates.')
+                            return
                           } else {
-                            // Book all dates that aren't already booked
-                            let bookedCount = 0
+                            // Book all dates (all are available)
                             for (const dateStr of datesToBook) {
-                              if (!bookedDates.includes(dateStr)) {
-                                await addBookedDate(dateStr)
-                                bookedCount++
-                              }
+                              await addBookedDate(dateStr)
                             }
-                            if (bookedCount > 0) {
-                              toast.success(`${bookedCount} date(s) booked`)
-                            }
+                            toast.success(`${datesToBook.length} date(s) booked`)
                           }
                         }}
                         dateClick={async (info) => {
