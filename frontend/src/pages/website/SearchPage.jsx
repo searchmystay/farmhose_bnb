@@ -17,8 +17,8 @@ function SearchPage() {
     if (savedSearchData) {
       const parsedData = JSON.parse(savedSearchData)
       setFormData({
-        checkIn: parsedData.checkIn || '',
-        checkOut: parsedData.checkOut || '',
+        checkIn: parsedData.checkInDate || '',
+        checkOut: parsedData.checkOutDate || '',
         propertyType: parsedData.propertyType || 'both',
         numberOfPeople: parsedData.numberOfPeople || 'flexible'
       })
@@ -34,8 +34,8 @@ function SearchPage() {
     e.preventDefault()
     
     const searchData = {
-      checkIn: formData.checkIn,
-      checkOut: formData.checkOut,
+      checkInDate: formData.checkIn,
+      checkOutDate: formData.checkOut,
       propertyType: formData.propertyType,
       numberOfPeople: formData.numberOfPeople === 'flexible' ? 'flexible' : parseInt(formData.numberOfPeople)
     }

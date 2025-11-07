@@ -183,6 +183,15 @@ export const usePropertyDetail = (propertyId) => {
     }
   }
 
+  const getSearchCriteria = () => {
+    try {
+      const searchCriteria = sessionStorage.getItem('searchCriteria')
+      return searchCriteria ? JSON.parse(searchCriteria) : null
+    } catch (err) {
+      return null
+    }
+  }
+
   const loadPropertyDetail = async () => {
     if (!propertyId) return
     
@@ -191,7 +200,8 @@ export const usePropertyDetail = (propertyId) => {
       setError(null)
       
       const leadEmail = getLeadEmail()
-      const response = await fetchPropertyDetail(propertyId, leadEmail)
+      const searchCriteria = getSearchCriteria()
+      const response = await fetchPropertyDetail(propertyId, leadEmail, searchCriteria)
       setProperty(response.backend_data)
     } catch (err) {
       const errorMessage = err.message || 'Failed to fetch property details'

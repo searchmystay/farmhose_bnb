@@ -49,8 +49,19 @@ export const fetchTopProperties = async () => {
   return result
 }
 
-export const fetchPropertyDetail = async (propertyId, leadEmail = null) => {
-  const requestData = leadEmail ? { leadEmail } : {}
+export const fetchPropertyDetail = async (propertyId, leadEmail = null, searchCriteria = null) => {
+  const requestData = {}
+  
+  if (leadEmail) {
+    requestData.leadEmail = leadEmail
+  }
+  
+  if (searchCriteria) {
+    requestData.checkInDate = searchCriteria.checkInDate
+    requestData.checkOutDate = searchCriteria.checkOutDate
+    requestData.numberOfPeople = searchCriteria.numberOfPeople
+  }
+  
   const response = await apiClient.post(`/property-detail/${propertyId}`, requestData)
   const result = response.data
   

@@ -438,6 +438,17 @@ function PropertyDetailPage() {
       )
     }
 
+    if (property.availability === false) {
+      return (
+        <button className="bg-gray-100 text-gray-500 p-2 md:px-4 md:py-2 rounded-full flex items-center justify-center md:gap-2 cursor-not-allowed">
+          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+          <span className="hidden md:inline text-sm font-medium">Not Available</span>
+        </button>
+      )
+    }
+
     return (
       <button 
         onClick={handleWhatsappContact}
@@ -506,6 +517,26 @@ function PropertyDetailPage() {
     )
   }
 
+  const renderAvailabilityStatus = () => {
+    if (property.availability === false) {
+      return (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+          <div className="flex items-center">
+            <svg className="w-5 h-5 text-red-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+            <div>
+              <h3 className="text-red-800 font-semibold">Not Available</h3>
+              <p className="text-red-700 text-sm">{property.reason || 'This property is not available for your selected criteria.'}</p>
+            </div>
+          </div>
+        </div>
+      )
+    }
+    
+    return null
+  }
+
   const renderPropertyInfo = () => {
     const maxLength = 1000
     const description = property.description || ''
@@ -516,6 +547,7 @@ function PropertyDetailPage() {
 
     return (
       <div className="space-y-6">
+        {renderAvailabilityStatus()}
         <div>
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl md:text-2xl font-bold text-gray-900">{property.name}</h2>
