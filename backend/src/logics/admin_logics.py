@@ -303,10 +303,14 @@ def add_credit_balance(property_id, credit_amount):
 @handle_exceptions
 def mark_property_as_favourite(property_id, favourite_status):
     query_filter = {"_id": ObjectId(property_id)}
-    property_exists = db_find_one("farmhouses", query_filter, {"_id": 1})
+    property_data = db_find_one("farmhouses", query_filter, {"_id": 1, "status": 1})
     
-    if not property_exists:
+    if not property_data:
         raise AppException("Property not found")
+    
+    property_status = property_data.get("status")
+    if property_status not in ["active", "inactive"]:
+        raise AppException("Only active or inactive properties can be marked as favourite")
     
     update_data = {"favourite": favourite_status}
     db_update_one("farmhouses", query_filter, {"$set": update_data})
@@ -316,12 +320,16 @@ def mark_property_as_favourite(property_id, favourite_status):
 @handle_exceptions
 def toggle_property_status(property_id, new_status):
     query_filter = {"_id": ObjectId(property_id)}
-    property_exists = db_find_one("farmhouses", query_filter, {"_id": 1})
+    property_data = db_find_one("farmhouses", query_filter, {"_id": 1, "favourite": 1})
     
-    if not property_exists:
+    if not property_data:
         raise AppException("Property not found")
     
     update_data = {"status": new_status}
+    
+    if new_status == "inactive" and property_data.get("favourite"):
+        update_data["favourite"] = False
+    
     db_update_one("farmhouses", query_filter, {"$set": update_data})
     return True
 
