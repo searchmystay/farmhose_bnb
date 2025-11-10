@@ -488,8 +488,8 @@ def get_farmhouse_schema() -> Dict:
                     },
                     "owner_dashboard_password": {
                         "bsonType": "string",
-                        "description": "Owner dashboard password for authentication",
-                        "minLength": 6
+                        "description": "Owner dashboard password for authentication - must include uppercase, lowercase, number, and special character",
+                        "minLength": 8
                     }
                 }
             },

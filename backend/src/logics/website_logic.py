@@ -542,6 +542,28 @@ def prepare_amenities_update(step_data, property_id):
 
 
 @handle_exceptions
+def validate_strong_password(password):
+    import re
+    
+    if len(password) < 8:
+        raise AppException("Password must be at least 8 characters long")
+    
+    if not re.search(r'[A-Z]', password):
+        raise AppException("Password must contain at least one uppercase letter")
+    
+    if not re.search(r'[a-z]', password):
+        raise AppException("Password must contain at least one lowercase letter")
+    
+    if not re.search(r'[0-9]', password):
+        raise AppException("Password must contain at least one number")
+    
+    if not re.search(r'[!@#$%^&*(),.?":{}|<>]', password):
+        raise AppException("Password must contain at least one special character (!@#$%^&*(),.?\":{}|<>)")
+    
+    return True
+
+
+@handle_exceptions
 def check_dashboard_id_unique(dashboard_id, current_property_id=None):
     query = {"owner_details.owner_dashboard_id": dashboard_id}
     if current_property_id:
@@ -568,9 +590,7 @@ def prepare_owner_details_update(step_data, property_id=None):
     if not dashboard_password:
         raise AppException("Owner dashboard password is required")
     
-    if len(dashboard_password) < 6:
-        raise AppException("Owner dashboard password must be at least 6 characters")
-    
+    validate_strong_password(dashboard_password)
     check_dashboard_id_unique(dashboard_id, property_id)
     
     update_data = {
