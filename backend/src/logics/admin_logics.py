@@ -6,7 +6,6 @@ from src.logics.cloudfare_bucket import delete_farmhouse_folder_from_r2
 from bson import ObjectId
 from datetime import datetime
 import pytz
-import hashlib
 import re
 
 
@@ -186,59 +185,6 @@ def initialize_farmhouse_analysis(property_id):
 
 
 @handle_exceptions
-def get_existing_property_ids():
-    query_filter = {"owner_details.owner_dashboard_id": {"$regex": "^property_"}}
-    projection = {"owner_details.owner_dashboard_id": 1}
-    existing_properties = db_find_many("farmhouses", query_filter, projection)
-    return existing_properties
-
-
-@handle_exceptions
-def extract_max_property_number(existing_properties):
-    max_number = 0
-    for property_data in existing_properties:
-        owner_details = property_data.get("owner_details", {})
-        dashboard_id = owner_details.get("owner_dashboard_id", "")
-        
-        if dashboard_id.startswith("property_"):
-            try:
-                number_part = dashboard_id.replace("property_", "")
-                current_number = int(number_part)
-                max_number = max(max_number, current_number)
-            except ValueError:
-                continue
-    
-    return max_number
-
-
-@handle_exceptions
-def generate_dashboard_id():
-    existing_properties = get_existing_property_ids()
-    max_number = extract_max_property_number(existing_properties)
-    new_number = max_number + 1
-    dashboard_id = f"property_{new_number}"
-    return dashboard_id
-
-
-@handle_exceptions
-def generate_dashboard_password(farmhouse_id):
-    if not farmhouse_id:
-        raise AppException("Farmhouse ID is required to generate password")
-    
-    password_base = f"fh_{farmhouse_id}_owner"
-    password_hash = hashlib.md5(password_base.encode()).hexdigest()
-    dashboard_password = password_hash[:8]
-    return dashboard_password
-
-
-@handle_exceptions
-def generate_owner_credentials(property_id, owner_name):
-    dashboard_id = generate_dashboard_id()
-    dashboard_password = generate_dashboard_password(property_id)
-    return dashboard_id, dashboard_password
-        
-
-@handle_exceptions
 def approve_pending_property(property_id):
     query_filter = {"_id": ObjectId(property_id), "status": "pending_approval"}
     property_data = db_find_one("farmhouses", query_filter, {
@@ -250,17 +196,14 @@ def approve_pending_property(property_id):
         raise AppException("Pending property not found")
     
     owner_details = property_data.get("owner_details", {})
-    owner_name = owner_details.get("owner_name", "")
+    dashboard_id = owner_details.get("owner_dashboard_id", "")
+    dashboard_password = owner_details.get("owner_dashboard_password", "")
     
-    if not owner_name:
-        raise AppException("Owner name is required to generate dashboard credentials")
-    
-    dashboard_id, dashboard_password = generate_owner_credentials(property_id, owner_name)
+    if not dashboard_id or not dashboard_password:
+        raise AppException("Property cannot be approved: Owner dashboard credentials are missing. Please ensure the property owner completed all registration steps.")
     
     update_data = {
-        "status": "active",
-        "owner_details.owner_dashboard_id": dashboard_id,
-        "owner_details.owner_dashboard_password": dashboard_password
+        "status": "active"
     }
     
     db_update_one("farmhouses", query_filter, {"$set": update_data})
