@@ -68,7 +68,8 @@ def process_admin_property_details(property_data):
         "closing_time": property_data.get("closing_time", ""),
         "per_day_price": property_data.get("per_day_price", 0),
         "max_people_allowed": property_data.get("max_people_allowed", 0),
-        "amenities": property_data.get("amenities", {})
+        "amenities": property_data.get("amenities", {}),
+        "credit_balance": property_data.get("credit_balance", 0)
     }
     
     owner_details_data = property_data.get("owner_details", {})
@@ -133,7 +134,8 @@ def get_admin_property_details(property_id):
         "amenities": 1,
         "owner_details": 1,
         "documents": 1,
-        "images": 1
+        "images": 1,
+        "credit_balance": 1
     }
     
     property_data = db_find_one("farmhouses", query_filter, projection)
@@ -486,7 +488,8 @@ def get_all_properties():
         "type": 1,
         "phone_number": 1,
         "status": 1,
-        "favourite": 1
+        "favourite": 1,
+        "credit_balance": 1
     }
     
     all_properties = db_find_many("farmhouses", query_filter, projection)
@@ -499,7 +502,8 @@ def get_all_properties():
             "type": property_data.get("type", ""),
             "phone_number": property_data.get("phone_number", ""),
             "status": property_data.get("status", ""),
-            "favourite": property_data.get("favourite", False)
+            "favourite": property_data.get("favourite", False),
+            "credit_balance": property_data.get("credit_balance", 0)
         }
         processed_properties.append(processed_property)
     
