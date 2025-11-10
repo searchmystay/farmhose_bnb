@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom'
 import { useAdminAuth } from '../../hooks/useAdmin'
 import DashboardPage from './DashboardPage'
 import AllPropertiesPage from './AllPropertiesPage'
+import IncompletePropertiesPage from './IncompletePropertiesPage'
 import PendingPropertiesPage from './PendingPropertiesPage'
 import PendingReviewsPage from './PendingReviewsPage'
 import PropertyDetailsPage from './PropertyDetailsPage'
@@ -20,6 +21,7 @@ function MainAdminPage() {
   const menuItems = [
     { id: 'dashboard', name: 'Dashboard', icon: '▦' },
     { id: 'all', name: 'All Properties', icon: '⚏' },
+    { id: 'incomplete', name: 'Incomplete Properties', icon: '📝' },
     { id: 'pending', name: 'Pending Properties', icon: '⋯' },
     { id: 'reviews', name: 'Pending Reviews', icon: '💬' }
   ]
@@ -144,6 +146,9 @@ function MainAdminPage() {
       
       case 'all':
         return <AllPropertiesPage onViewDetails={handleViewPropertyDetails} />
+      
+      case 'incomplete':
+        return <IncompletePropertiesPage />
       
       case 'pending':
         return <PendingPropertiesPage onViewDetails={handleViewPropertyDetails} />
