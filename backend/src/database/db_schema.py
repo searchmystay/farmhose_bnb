@@ -37,6 +37,18 @@ def get_farmhouse_schema() -> Dict:
                 "minimum": 1,
                 "maximum": 50
             },
+            "max_children_allowed": {
+                "bsonType": "int",
+                "description": "Maximum number of children allowed at the property",
+                "minimum": 0,
+                "maximum": 20
+            },
+            "max_pets_allowed": {
+                "bsonType": "int",
+                "description": "Maximum number of pets allowed at the property",
+                "minimum": 0,
+                "maximum": 10
+            },
             "location": {
                 "bsonType": "object",
                 "description": "Property location details",

@@ -175,7 +175,7 @@ def get_approved_properties_by_type(query_filter, number_of_people=None, check_i
     }
 
     if number_of_people and not isinstance(number_of_people, str):
-        query_filter["max_people"] = {"$gte": number_of_people}
+        query_filter["max_people_allowed"] = {"$gte": number_of_people}
     
     if check_in_date and check_out_date:
         check_in_date = datetime.strptime(check_in_date, '%Y-%m-%d')
@@ -490,20 +490,21 @@ def prepare_basic_info_update(step_data):
     property_name = step_data.get("name", "")
     validate_name_max_words(property_name, 3, "Property name")
     
+    if len(property_name.strip()) < 3:
+        raise AppException("Property name must be at least 3 characters")
+    
     opening_time = step_data.get("opening_time", "")
     closing_time = step_data.get("closing_time", "")
     opening_time_formatted = format_time_with_ampm(opening_time) if opening_time else ""
     closing_time_formatted = format_time_with_ampm(closing_time) if closing_time else ""
     
     per_day_price = safe_int_conversion(step_data.get("per_day_price"), 0)
-    max_people = safe_int_conversion(step_data.get("max_people_allowed"), 0)
     
     update_data = {
         "name": property_name,
         "description": step_data.get("description", ""),
         "type": step_data.get("type", ""),
         "per_day_price": per_day_price,
-        "max_people_allowed": max_people,
         "phone_number": step_data.get("phone_number", ""),
         "opening_time": opening_time_formatted,
         "closing_time": closing_time_formatted,
@@ -517,7 +518,7 @@ def prepare_basic_info_update(step_data):
 
 @handle_exceptions
 def prepare_amenities_update(step_data, property_id):
-    existing_property = db_find_one("farmhouses", {"_id": ObjectId(property_id)}, {"amenities": 1})
+    existing_property = db_find_one("farmhouses", {"_id": ObjectId(property_id)}, {"amenities": 1, "max_people_allowed": 1, "max_children_allowed": 1, "max_pets_allowed": 1})
     existing_amenities = existing_property.get("amenities", {}) if existing_property else {}
     
     core_amenities = step_data.get("essential_amenities") if "essential_amenities" in step_data else existing_amenities.get("core_amenities", {})
@@ -527,11 +528,34 @@ def prepare_amenities_update(step_data, property_id):
     amenities = process_amenities_data(core_amenities, experience_amenities, additional_amenities)
     
     update_data = {"amenities": amenities}
+    
+    if "essential_amenities" in step_data:
+        max_people = safe_int_conversion(step_data.get("essential_amenities", {}).get("max_people_allowed"), 0)
+        max_children = safe_int_conversion(step_data.get("essential_amenities", {}).get("max_children_allowed"), 0)
+        max_pets = safe_int_conversion(step_data.get("essential_amenities", {}).get("max_pets_allowed"), 0)
+        
+        update_data["max_people_allowed"] = max_people
+        update_data["max_children_allowed"] = max_children
+        update_data["max_pets_allowed"] = max_pets
+    
     return update_data
 
 
 @handle_exceptions
-def prepare_owner_details_update(step_data):
+def check_dashboard_id_unique(dashboard_id, current_property_id=None):
+    query = {"owner_details.owner_dashboard_id": dashboard_id}
+    if current_property_id:
+        query["_id"] = {"$ne": ObjectId(current_property_id)}
+    
+    existing_property = db_find_one("farmhouses", query, {"_id": 1})
+    if existing_property:
+        raise AppException("Dashboard ID already taken. Please choose a different ID.")
+    
+    return True
+
+
+@handle_exceptions
+def prepare_owner_details_update(step_data, property_id=None):
     owner_name = step_data.get("owner_name", "")
     validate_name_max_words(owner_name, 3, "Owner name")
     
@@ -546,6 +570,8 @@ def prepare_owner_details_update(step_data):
     
     if len(dashboard_password) < 6:
         raise AppException("Owner dashboard password must be at least 6 characters")
+    
+    check_dashboard_id_unique(dashboard_id, property_id)
     
     update_data = {
         "owner_details": {
@@ -577,7 +603,7 @@ def save_partial_property_registration(step_data, property_id=None):
         update_data.update(amenities_data)
     
     if "owner_name" in step_data:
-        owner_data = prepare_owner_details_update(step_data)
+        owner_data = prepare_owner_details_update(step_data, property_id)
         update_data.update(owner_data)
     
     query_filter = {"_id": ObjectId(property_id)}
