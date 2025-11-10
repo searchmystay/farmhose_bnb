@@ -3,7 +3,7 @@ from typing import Dict
 def get_farmhouse_schema() -> Dict:
     return {
         "bsonType": "object",
-        "required": ["name", "description", "type", "phone_number", "location", "credit_balance", "status", "created_at", "updated_at"],
+        "required": ["status", "created_at", "updated_at"],
         "properties": {
             "_id": {
                 "bsonType": "objectId",
@@ -503,7 +503,7 @@ def get_farmhouse_schema() -> Dict:
             "status": {
                 "bsonType": "string",
                 "description": "Status of the farmhouse listing",
-                "enum": ["pending_approval", "active", "inactive"]
+                "enum": ["incomplete", "pending_approval", "active", "inactive"]
             },
             "favourite": {
                 "bsonType": "bool",

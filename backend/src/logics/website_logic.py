@@ -417,6 +417,7 @@ def process_amenities_data(essential_amenities, experience_amenities, additional
     }
     
     processed_amenities = {}
+    numeric_fields = ["bedrooms", "bathrooms", "beds"]
     
     for category_name, config in category_mappings.items():
         source_data = config["source"]
@@ -424,7 +425,8 @@ def process_amenities_data(essential_amenities, experience_amenities, additional
         
         category_data = {}
         for field in fields:
-            category_data[field] = source_data[field]
+            default_value = 0 if field in numeric_fields else False
+            category_data[field] = source_data.get(field, default_value)
         
         processed_amenities[category_name] = category_data
     
@@ -441,6 +443,182 @@ def format_time_with_ampm(time_str):
             return time_obj.strftime('%I:%M %p')
         except:
             return time_str
+
+
+@handle_exceptions
+def create_incomplete_property():
+    ist_timezone = pytz.timezone('Asia/Kolkata')
+    current_time = datetime.now(ist_timezone).replace(tzinfo=None)
+    
+    property_record = {
+        "status": "incomplete",
+        "created_at": current_time,
+        "updated_at": current_time,
+        "credit_balance": 0,
+        "favourite": False
+    }
+    insert_result = db_insert_one("farmhouses", property_record)
+    new_property_id = str(insert_result.inserted_id)
+    return new_property_id
+
+
+@handle_exceptions
+def safe_int_conversion(value, default=0):
+    if value is None or value == "":
+        return default
+    if isinstance(value, int):
+        return value
+    if isinstance(value, str) and value.isdigit():
+        return int(value)
+    return default
+
+
+@handle_exceptions
+def prepare_basic_info_update(step_data):
+    opening_time = step_data.get("opening_time", "")
+    closing_time = step_data.get("closing_time", "")
+    opening_time_formatted = format_time_with_ampm(opening_time) if opening_time else ""
+    closing_time_formatted = format_time_with_ampm(closing_time) if closing_time else ""
+    
+    per_day_price = safe_int_conversion(step_data.get("per_day_price"), 0)
+    max_people = safe_int_conversion(step_data.get("max_people_allowed"), 0)
+    
+    update_data = {
+        "name": step_data.get("name", ""),
+        "description": step_data.get("description", ""),
+        "type": step_data.get("type", ""),
+        "per_day_price": per_day_price,
+        "max_people_allowed": max_people,
+        "phone_number": step_data.get("phone_number", ""),
+        "opening_time": opening_time_formatted,
+        "closing_time": closing_time_formatted,
+        "location": {
+            "address": step_data.get("address", ""),
+            "pin_code": step_data.get("pin_code", "")
+        }
+    }
+    return update_data
+
+
+@handle_exceptions
+def prepare_amenities_update(step_data, property_id):
+    existing_property = db_find_one("farmhouses", {"_id": ObjectId(property_id)}, {"amenities": 1})
+    existing_amenities = existing_property.get("amenities", {}) if existing_property else {}
+    
+    core_amenities = step_data.get("essential_amenities") if "essential_amenities" in step_data else existing_amenities.get("core_amenities", {})
+    experience_amenities = step_data.get("experience_amenities") if "experience_amenities" in step_data else existing_amenities.get("experience_amenities", {})
+    additional_amenities = step_data.get("additional_amenities") if "additional_amenities" in step_data else existing_amenities.get("additional_amenities", {})
+    
+    amenities = process_amenities_data(core_amenities, experience_amenities, additional_amenities)
+    
+    update_data = {"amenities": amenities}
+    return update_data
+
+
+@handle_exceptions
+def prepare_owner_details_update(step_data):
+    update_data = {
+        "owner_details": {
+            "owner_name": step_data.get("owner_name", ""),
+            "owner_description": step_data.get("owner_description", ""),
+            "owner_photo": ""
+        }
+    }
+    return update_data
+
+
+@handle_exceptions
+def save_partial_property_registration(step_data, property_id=None):
+    if not property_id:
+        property_id = create_incomplete_property()
+    
+    ist_timezone = pytz.timezone('Asia/Kolkata')
+    current_time = datetime.now(ist_timezone).replace(tzinfo=None)
+    update_data = {"updated_at": current_time}
+    
+    if "name" in step_data:
+        basic_info_data = prepare_basic_info_update(step_data)
+        update_data.update(basic_info_data)
+    
+    if "essential_amenities" in step_data or "experience_amenities" in step_data or "additional_amenities" in step_data:
+        amenities_data = prepare_amenities_update(step_data, property_id)
+        update_data.update(amenities_data)
+    
+    if "owner_name" in step_data:
+        owner_data = prepare_owner_details_update(step_data)
+        update_data.update(owner_data)
+    
+    query_filter = {"_id": ObjectId(property_id)}
+    db_update_one("farmhouses", query_filter, {"$set": update_data})
+    
+    return property_id
+
+
+@handle_exceptions
+def upload_partial_property_files(property_id, owner_photo=None):
+    if not property_id:
+        raise AppException("Property ID is required")
+    
+    owner_photo_url = ""
+    if owner_photo and owner_photo.filename:
+        owner_photo_url = upload_farmhouse_image_to_r2(owner_photo, property_id, "owner_photo")
+    
+    if owner_photo_url:
+        query_filter = {"_id": ObjectId(property_id)}
+        db_update_one("farmhouses", query_filter, {"$set": {"owner_details.owner_photo": owner_photo_url}})
+    
+    return owner_photo_url
+
+
+@handle_exceptions
+def validate_incomplete_property(property_id):
+    if not property_id:
+        raise AppException("Property ID is required")
+    
+    existing_property = db_find_one("farmhouses", {"_id": ObjectId(property_id)}, {"status": 1})
+    if not existing_property:
+        raise AppException("Property not found")
+    
+    if existing_property.get("status") != "incomplete":
+        raise AppException("Property is already submitted")
+    
+    return True
+
+
+@handle_exceptions
+def upload_final_property_documents(property_id, property_images, property_documents, aadhaar_card, pan_card):
+    uploaded_images = upload_farmhouse_images(property_images, property_id)
+    aadhaar_url, pan_url = upload_identity_documents(aadhaar_card, pan_card, property_id)
+    uploaded_property_documents = upload_farmhouse_documents(property_documents, property_id)
+    
+    documents_data = {
+        "property_docs": uploaded_property_documents,
+        "aadhar_card": aadhaar_url,
+        "pan_card": pan_url 
+    }
+    
+    return uploaded_images, documents_data
+
+
+@handle_exceptions
+def complete_property_registration(property_id, property_images, property_documents, aadhaar_card, pan_card):
+    validate_incomplete_property(property_id)
+    uploaded_images, documents_data = upload_final_property_documents(property_id, property_images, property_documents, aadhaar_card, pan_card)
+    
+    ist_timezone = pytz.timezone('Asia/Kolkata')
+    current_time = datetime.now(ist_timezone).replace(tzinfo=None)
+    
+    update_data = {
+        "images": uploaded_images,
+        "documents": documents_data,
+        "status": "pending_approval",
+        "updated_at": current_time
+    }
+    
+    query_filter = {"_id": ObjectId(property_id)}
+    db_update_one("farmhouses", query_filter, {"$set": update_data})
+    
+    return property_id
 
 
 @handle_exceptions

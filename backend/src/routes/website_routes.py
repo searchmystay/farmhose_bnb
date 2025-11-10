@@ -203,6 +203,185 @@ def register_property_route():
     return jsonify(response_data), 200
 
 
+@website_bp.route('/save-basic-info', methods=['POST'])
+@handle_route_exceptions
+def save_basic_info_route():
+    data = request.get_json() or {}
+    property_id = data.get('propertyId')
+    
+    step_data = {
+        "name": data.get('name'),
+        "description": data.get('description'),
+        "type": data.get('type'),
+        "per_day_price": data.get('per_day_price'),
+        "max_people_allowed": data.get('max_people_allowed'),
+        "opening_time": data.get('opening_time'),
+        "closing_time": data.get('closing_time'),
+        "phone_number": data.get('phone_number'),
+        "address": data.get('address'),
+        "pin_code": data.get('pin_code')
+    }
+    
+    saved_property_id = save_partial_property_registration(step_data, property_id)
+    
+    response_data = {
+        "success": True,
+        "message": "Basic information saved successfully",
+        "propertyId": saved_property_id
+    }
+    
+    return jsonify(response_data), 200
+
+
+@website_bp.route('/save-essential-amenities', methods=['POST'])
+@handle_route_exceptions
+def save_essential_amenities_route():
+    data = request.get_json() or {}
+    property_id = data.get('propertyId')
+    essential_amenities = data.get('essential_amenities', {})
+    
+    if not property_id:
+        raise AppException("Property ID is required")
+    
+    step_data = {"essential_amenities": essential_amenities}
+    saved_property_id = save_partial_property_registration(step_data, property_id)
+    
+    response_data = {
+        "success": True,
+        "message": "Essential amenities saved successfully",
+        "propertyId": saved_property_id
+    }
+    
+    return jsonify(response_data), 200
+
+
+@website_bp.route('/save-experience-amenities', methods=['POST'])
+@handle_route_exceptions
+def save_experience_amenities_route():
+    data = request.get_json() or {}
+    property_id = data.get('propertyId')
+    experience_amenities = data.get('experience_amenities', {})
+    
+    if not property_id:
+        raise AppException("Property ID is required")
+    
+    step_data = {"experience_amenities": experience_amenities}
+    saved_property_id = save_partial_property_registration(step_data, property_id)
+    
+    response_data = {
+        "success": True,
+        "message": "Experience amenities saved successfully",
+        "propertyId": saved_property_id
+    }
+    
+    return jsonify(response_data), 200
+
+
+@website_bp.route('/save-additional-amenities', methods=['POST'])
+@handle_route_exceptions
+def save_additional_amenities_route():
+    data = request.get_json() or {}
+    property_id = data.get('propertyId')
+    additional_amenities = data.get('additional_amenities', {})
+    
+    if not property_id:
+        raise AppException("Property ID is required")
+    
+    step_data = {"additional_amenities": additional_amenities}
+    saved_property_id = save_partial_property_registration(step_data, property_id)
+    
+    response_data = {
+        "success": True,
+        "message": "Additional amenities saved successfully",
+        "propertyId": saved_property_id
+    }
+    
+    return jsonify(response_data), 200
+
+
+@website_bp.route('/save-owner-details', methods=['POST'])
+@handle_route_exceptions
+def save_owner_details_route():
+    data = request.get_json() or {}
+    property_id = data.get('propertyId')
+    
+    if not property_id:
+        raise AppException("Property ID is required")
+    
+    step_data = {
+        "owner_name": data.get('owner_name'),
+        "owner_description": data.get('owner_description')
+    }
+    
+    saved_property_id = save_partial_property_registration(step_data, property_id)
+    
+    response_data = {
+        "success": True,
+        "message": "Owner details saved successfully",
+        "propertyId": saved_property_id
+    }
+    
+    return jsonify(response_data), 200
+
+
+@website_bp.route('/upload-owner-photo', methods=['POST'])
+@handle_route_exceptions
+def upload_owner_photo_route():
+    property_id = request.form.get('propertyId')
+    owner_photo = request.files.get('ownerPhoto')
+    
+    if not property_id:
+        raise AppException("Property ID is required")
+    
+    if not owner_photo:
+        raise AppException("Owner photo is required")
+    
+    photo_url = upload_partial_property_files(property_id, owner_photo)
+    
+    response_data = {
+        "success": True,
+        "message": "Owner photo uploaded successfully",
+        "photoUrl": photo_url
+    }
+    
+    return jsonify(response_data), 200
+
+
+@website_bp.route('/complete-property-registration', methods=['POST'])
+@handle_route_exceptions
+def complete_property_registration_route():
+    property_id = request.form.get('propertyId')
+    property_images = request.files.getlist('propertyImages')
+    property_documents = request.files.getlist('propertyDocuments')
+    aadhaar_card = request.files.get('aadhaarCard')
+    pan_card = request.files.get('panCard')
+    
+    if not property_id:
+        raise AppException("Property ID is required")
+    
+    if not property_images or len(property_images) == 0:
+        raise AppException("Property images are required")
+    
+    if not property_documents or len(property_documents) == 0:
+        raise AppException("Property documents are required")
+    
+    if not aadhaar_card:
+        raise AppException("Aadhaar card is required")
+    
+    if not pan_card:
+        raise AppException("PAN card is required")
+    
+    completed_property_id = complete_property_registration(property_id, property_images, property_documents, aadhaar_card, pan_card)
+    
+    response_data = {
+        "success": True,
+        "message": "Property registration completed successfully",
+        "propertyId": completed_property_id
+    }
+    
+    return jsonify(response_data), 200
+
+
 @website_bp.route('/contact-whatsapp/<farmhouse_id>', methods=['POST'])
 @handle_route_exceptions
 def contact_via_whatsapp(farmhouse_id):
