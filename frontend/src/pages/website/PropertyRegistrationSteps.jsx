@@ -129,17 +129,6 @@ export const Step1BasicInfo = ({
       min={1}
     />
 
-    <NumberInput
-      name="max_people_allowed"
-      value={basicInfo.max_people_allowed}
-      onChange={onBasicInfoChange}
-      label="Maximum People Allowed"
-      placeholder="Enter maximum number of guests (1-50)"
-      error={validationErrors.max_people_allowed}
-      min={1}
-      max={50}
-    />
-
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       <TimePickerInput
         name="opening_time"
@@ -263,6 +252,16 @@ export const Step2EssentialAmenities = ({
         <ToggleSwitch name="hair_dryer" label="Hair Dryer" description="For drying hair after bath" checked={essentialAmenities.hair_dryer} onChange={onToggleChange} />
         <ToggleSwitch name="attached_bathrooms" label="Attached Bathrooms" description="Private bathrooms with bedrooms" checked={essentialAmenities.attached_bathrooms} onChange={onToggleChange} />
         <ToggleSwitch name="bathtub" label="Bathtub" description="For relaxing baths" checked={essentialAmenities.bathtub} onChange={onToggleChange} />
+      </div>
+    </div>
+
+    <div className="space-y-6">
+      <SectionHeader title="Guest Capacity" subtitle="Maximum allowed guests, children, and pets" />
+
+      <div className="grid grid-cols-3 gap-4 p-4 bg-green-50 rounded-lg">
+        <NumberInput name="max_people_allowed" value={essentialAmenities.max_people_allowed} onChange={onNumberChange} label="Max People" min={1} max={50} centered />
+        <NumberInput name="max_children_allowed" value={essentialAmenities.max_children_allowed} onChange={onNumberChange} label="Max Children" min={0} max={20} centered />
+        <NumberInput name="max_pets_allowed" value={essentialAmenities.max_pets_allowed} onChange={onNumberChange} label="Max Pets" min={0} max={10} centered />
       </div>
     </div>
 

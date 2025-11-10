@@ -34,7 +34,6 @@ const PropertyRegistrationForm = () => {
     description: '',
     type: 'farmhouse',
     per_day_price: '',
-    max_people_allowed: '',
     opening_time: '',
     closing_time: '',
     phone_number: '',
@@ -68,7 +67,10 @@ const PropertyRegistrationForm = () => {
     mirror: false,
     hair_dryer: false,
     attached_bathrooms: false,
-    bathtub: false
+    bathtub: false,
+    max_people_allowed: 1,
+    max_children_allowed: 0,
+    max_pets_allowed: 0
   });
 
   const [experienceAmenities, setExperienceAmenities] = useState({
@@ -224,6 +226,8 @@ const PropertyRegistrationForm = () => {
     
     if (!basicInfo.name.trim()) {
       errors.name = 'Property name is required';
+    } else if (basicInfo.name.trim().length < 3) {
+      errors.name = 'Property name must be at least 3 characters';
     } else if (basicInfo.name.trim().split(/\s+/).length > 3) {
       errors.name = 'Property name should not exceed 3 words';
     }
@@ -252,12 +256,6 @@ const PropertyRegistrationForm = () => {
       errors.per_day_price = 'Per day price is required';
     } else if (!/^\d+$/.test(basicInfo.per_day_price.trim()) || parseInt(basicInfo.per_day_price) <= 0) {
       errors.per_day_price = 'Price must be a valid positive number';
-    }
-    
-    if (!basicInfo.max_people_allowed.trim()) {
-      errors.max_people_allowed = 'Maximum people allowed is required';
-    } else if (!/^\d+$/.test(basicInfo.max_people_allowed.trim()) || parseInt(basicInfo.max_people_allowed) <= 0 || parseInt(basicInfo.max_people_allowed) > 50) {
-      errors.max_people_allowed = 'Must be a number between 1 and 50';
     }
     
     if (!basicInfo.opening_time.trim()) {
@@ -448,7 +446,6 @@ const PropertyRegistrationForm = () => {
       description: '',
       type: 'farmhouse',
       per_day_price: '',
-      max_people_allowed: '',
       opening_time: '',
       closing_time: '',
       phone_number: '',
@@ -481,7 +478,10 @@ const PropertyRegistrationForm = () => {
       mirror: false,
       hair_dryer: false,
       attached_bathrooms: false,
-      bathtub: false
+      bathtub: false,
+      max_people_allowed: 1,
+      max_children_allowed: 0,
+      max_pets_allowed: 0
     });
     setExperienceAmenities({
       private_lawn_garden: false,
