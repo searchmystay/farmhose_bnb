@@ -594,7 +594,7 @@ const RegisterPropertyPage = () => {
 
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">
-          Per Day Price (₹)
+          Estimated Price (₹)
         </label>
         <input
           type="number"
