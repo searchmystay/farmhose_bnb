@@ -95,43 +95,38 @@ function AllPropertiesPage({ onViewDetails }) {
         <div className="flex flex-col sm:flex-row sm:items-center sm:gap-4 lg:gap-6 lg:flex-[1.5]">
           <div className="flex-1 min-w-0 mb-3 sm:mb-0">
             <div className="text-xs font-medium text-gray-500 mb-1">Status</div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-3">
               {getStatusBadge(property.status)}
-              <button
-                onClick={() => handleToggleStatus(property.id, property.status)}
-                disabled={actionLoading === property.id || property.status === 'pending_approval'}
-                className={`${property.status === 'active' ? 'bg-red-500 hover:bg-red-600' : 'bg-green-500 hover:bg-green-600'} text-white p-2 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center`}
-                title={property.status === 'pending_approval' ? 'Cannot toggle pending properties' : (property.status === 'active' ? 'Click to deactivate' : 'Click to activate')}
-              >
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M5.636 5.636a9 9 0 1012.728 0M12 3v9" />
-                </svg>
-              </button>
             </div>
           </div>
-          {(property.status === 'active' || property.status === 'inactive') && (
-            <div className="flex-shrink-0">
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => handleToggleStatus(property.id, property.status)}
+              disabled={actionLoading === property.id || property.status === 'pending_approval'}
+              className={`${property.status === 'active' ? 'bg-red-500 hover:bg-red-600' : 'bg-green-500 hover:bg-green-600'} text-white p-2 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center`}
+              title={property.status === 'pending_approval' ? 'Cannot toggle pending properties' : (property.status === 'active' ? 'Click to deactivate' : 'Click to activate')}
+            >
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M5.636 5.636a9 9 0 1012.728 0M12 3v9" />
+              </svg>
+            </button>
+            {(property.status === 'active' || property.status === 'inactive') && (
               <button 
                 onClick={() => handleFavouriteClick(property.id, property.favourite)} 
                 disabled={actionLoading === property.id}
-                className={`${property.favourite ? 'bg-amber-500 hover:bg-amber-600 shadow-lg' : 'bg-blue-600 hover:bg-blue-700 shadow-md'} text-white px-4 py-2.5 sm:px-5 lg:px-6 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 text-sm font-medium flex items-center justify-center gap-2 w-full sm:w-auto whitespace-nowrap min-w-[120px] sm:min-w-[140px]`}
+                className={`${property.favourite ? 'bg-amber-500 hover:bg-amber-600 shadow-lg' : 'bg-blue-600 hover:bg-blue-700 shadow-md'} text-white p-2 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center justify-center`}
+                title={property.favourite ? 'Remove from favourites' : 'Add to favourites'}
               >
                 {actionLoading === property.id ? (
-                  <div className="animate-spin rounded-full h-3 w-3 sm:h-4 sm:w-4 border-b-2 border-white"></div>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
                 ) : (
-                  <svg className="w-3 h-3 sm:w-4 sm:h-4" fill={property.favourite ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-5 h-5" fill={property.favourite ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
                   </svg>
                 )}
-                <span className="hidden sm:inline">
-                  {actionLoading === property.id 
-                    ? 'Updating...' 
-                    : (property.favourite ? 'Remove Favourite' : 'Add Favourite')
-                  }
-              </span>
-            </button>
+              </button>
+            )}
           </div>
-          )}
         </div>
       </div>
     </div>
