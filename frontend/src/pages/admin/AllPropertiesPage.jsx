@@ -1,7 +1,7 @@
 import { useAllProperties } from '../../hooks/useAdmin'
 
 function AllPropertiesPage({ onViewDetails }) {
-  const { allProperties, isLoading, error, actionLoading, refetch, handleToggleFavourite } = useAllProperties()
+  const { allProperties, isLoading, error, actionLoading, refetch, handleToggleFavourite, handleToggleStatus } = useAllProperties()
 
   const renderLoadingState = () => (
     <div className="flex items-center justify-center min-h-[50vh] px-4">
@@ -92,10 +92,20 @@ function AllPropertiesPage({ onViewDetails }) {
           </div>
         </div>
         
-        <div className="flex flex-col sm:flex-row sm:items-center sm:gap-4 lg:gap-6 lg:flex-[1]">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:gap-4 lg:gap-6 lg:flex-[1.5]">
           <div className="flex-1 min-w-0 mb-3 sm:mb-0">
             <div className="text-xs font-medium text-gray-500 mb-1">Status</div>
-            {getStatusBadge(property.status)}
+            <div className="flex items-center gap-2">
+              {getStatusBadge(property.status)}
+              <button
+                onClick={() => handleToggleStatus(property.id, property.status)}
+                disabled={actionLoading === property.id || property.status === 'pending_approval'}
+                className={`${property.status === 'active' ? 'bg-red-500 hover:bg-red-600' : 'bg-green-500 hover:bg-green-600'} text-white px-2 py-1 rounded text-xs font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-all`}
+                title={property.status === 'pending_approval' ? 'Cannot toggle pending properties' : (property.status === 'active' ? 'Click to deactivate' : 'Click to activate')}
+              >
+                {property.status === 'active' ? 'Deactivate' : 'Activate'}
+              </button>
+            </div>
           </div>
           <div className="flex-shrink-0">
             <button 
