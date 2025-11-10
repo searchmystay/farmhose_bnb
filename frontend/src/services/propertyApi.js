@@ -248,3 +248,130 @@ export const getFarmhouseName = async (farmhouseId) => {
     throw new Error('Failed to fetch farmhouse name, Network error')
   }
 }
+
+export const saveBasicInfo = async (basicInfo, propertyId = null) => {
+  try {
+    const requestData = { ...basicInfo }
+    if (propertyId) {
+      requestData.propertyId = propertyId
+    }
+    const response = await apiClient.post('/save-basic-info', requestData)
+    return response.data
+  } catch (error) {
+    if (error.response && error.response.data) {
+      throw new Error(error.response.data.message || 'Failed to save basic information')
+    }
+    throw new Error('Failed to save basic information, Network error')
+  }
+}
+
+export const saveEssentialAmenities = async (propertyId, essentialAmenities) => {
+  try {
+    const response = await apiClient.post('/save-essential-amenities', {
+      propertyId,
+      essential_amenities: essentialAmenities
+    })
+    return response.data
+  } catch (error) {
+    if (error.response && error.response.data) {
+      throw new Error(error.response.data.message || 'Failed to save essential amenities')
+    }
+    throw new Error('Failed to save essential amenities, Network error')
+  }
+}
+
+export const saveExperienceAmenities = async (propertyId, experienceAmenities) => {
+  try {
+    const response = await apiClient.post('/save-experience-amenities', {
+      propertyId,
+      experience_amenities: experienceAmenities
+    })
+    return response.data
+  } catch (error) {
+    if (error.response && error.response.data) {
+      throw new Error(error.response.data.message || 'Failed to save experience amenities')
+    }
+    throw new Error('Failed to save experience amenities, Network error')
+  }
+}
+
+export const saveAdditionalAmenities = async (propertyId, additionalAmenities) => {
+  try {
+    const response = await apiClient.post('/save-additional-amenities', {
+      propertyId,
+      additional_amenities: additionalAmenities
+    })
+    return response.data
+  } catch (error) {
+    if (error.response && error.response.data) {
+      throw new Error(error.response.data.message || 'Failed to save additional amenities')
+    }
+    throw new Error('Failed to save additional amenities, Network error')
+  }
+}
+
+export const saveOwnerDetails = async (propertyId, ownerName, ownerDescription) => {
+  try {
+    const response = await apiClient.post('/save-owner-details', {
+      propertyId,
+      owner_name: ownerName,
+      owner_description: ownerDescription
+    })
+    return response.data
+  } catch (error) {
+    if (error.response && error.response.data) {
+      throw new Error(error.response.data.message || 'Failed to save owner details')
+    }
+    throw new Error('Failed to save owner details, Network error')
+  }
+}
+
+export const uploadOwnerPhoto = async (propertyId, ownerPhoto) => {
+  try {
+    const formData = new FormData()
+    formData.append('propertyId', propertyId)
+    formData.append('ownerPhoto', ownerPhoto)
+    
+    const response = await apiClient.post('/upload-owner-photo', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    })
+    return response.data
+  } catch (error) {
+    if (error.response && error.response.data) {
+      throw new Error(error.response.data.message || 'Failed to upload owner photo')
+    }
+    throw new Error('Failed to upload owner photo, Network error')
+  }
+}
+
+export const completePropertyRegistration = async (propertyId, propertyImages, propertyDocuments, aadhaarCard, panCard) => {
+  try {
+    const formData = new FormData()
+    formData.append('propertyId', propertyId)
+    
+    propertyImages.forEach((image) => {
+      formData.append('propertyImages', image)
+    })
+    
+    propertyDocuments.forEach((doc) => {
+      formData.append('propertyDocuments', doc)
+    })
+    
+    formData.append('aadhaarCard', aadhaarCard)
+    formData.append('panCard', panCard)
+    
+    const response = await apiClient.post('/complete-property-registration', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    })
+    return response.data
+  } catch (error) {
+    if (error.response && error.response.data) {
+      throw new Error(error.response.data.message || 'Failed to complete registration')
+    }
+    throw new Error('Failed to complete registration, Network error')
+  }
+}

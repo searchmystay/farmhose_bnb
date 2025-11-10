@@ -2,6 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import { usePropertyRegistration } from '../../hooks/usePropertyData';
 import {
+  saveBasicInfo,
+  saveEssentialAmenities,
+  saveExperienceAmenities,
+  saveAdditionalAmenities,
+  saveOwnerDetails,
+  uploadOwnerPhoto,
+  completePropertyRegistration
+} from '../../services/propertyApi';
+import {
   ProcessExplanation,
   ProgressIndicator,
   RegistrationSuccessMessage,
@@ -15,6 +24,8 @@ import {
 
 const PropertyRegistrationForm = () => {
   const [currentStep, setCurrentStep] = useState(1);
+  const [propertyId, setPropertyId] = useState(null);
+  const [stepLoading, setStepLoading] = useState(false);
   const { submitRegistration, loading, success, resetState } = usePropertyRegistration();
   
   // State Management
@@ -310,7 +321,7 @@ const PropertyRegistrationForm = () => {
   };
 
   // Step Submit Handlers
-  const handleStep1Next = (e) => {
+  const handleStep1Next = async (e) => {
     e.preventDefault();
     const errors = validateBasicInfo();
     
@@ -320,26 +331,66 @@ const PropertyRegistrationForm = () => {
     }
     
     setValidationErrors({});
-    console.log('Basic Info:', basicInfo);
-    setCurrentStep(2);
+    setStepLoading(true);
+    
+    try {
+      const response = await saveBasicInfo(basicInfo, propertyId);
+      setPropertyId(response.propertyId);
+      toast.success('Basic information saved successfully!');
+      setCurrentStep(2);
+    } catch (error) {
+      toast.error(error.message || 'Failed to save basic information');
+    } finally {
+      setStepLoading(false);
+    }
   };
 
-  const handleStep2Next = (e) => {
+  const handleStep2Next = async (e) => {
     e.preventDefault();
-    setCurrentStep(3);
+    setStepLoading(true);
+    
+    try {
+      await saveEssentialAmenities(propertyId, essentialAmenities);
+      toast.success('Essential amenities saved successfully!');
+      setCurrentStep(3);
+    } catch (error) {
+      toast.error(error.message || 'Failed to save essential amenities');
+    } finally {
+      setStepLoading(false);
+    }
   };
 
-  const handleStep3Next = (e) => {
+  const handleStep3Next = async (e) => {
     e.preventDefault();
-    setCurrentStep(4);
+    setStepLoading(true);
+    
+    try {
+      await saveExperienceAmenities(propertyId, experienceAmenities);
+      toast.success('Experience amenities saved successfully!');
+      setCurrentStep(4);
+    } catch (error) {
+      toast.error(error.message || 'Failed to save experience amenities');
+    } finally {
+      setStepLoading(false);
+    }
   };
 
-  const handleStep4Next = (e) => {
+  const handleStep4Next = async (e) => {
     e.preventDefault();
-    setCurrentStep(5);
+    setStepLoading(true);
+    
+    try {
+      await saveAdditionalAmenities(propertyId, additionalAmenities);
+      toast.success('Additional amenities saved successfully!');
+      setCurrentStep(5);
+    } catch (error) {
+      toast.error(error.message || 'Failed to save additional amenities');
+    } finally {
+      setStepLoading(false);
+    }
   };
 
-  const handleStep5Next = (e) => {
+  const handleStep5Next = async (e) => {
     e.preventDefault();
     const errors = validateOwnerDetails();
     
@@ -349,7 +400,22 @@ const PropertyRegistrationForm = () => {
     }
     
     setValidationErrors({});
-    setCurrentStep(6);
+    setStepLoading(true);
+    
+    try {
+      await saveOwnerDetails(propertyId, ownerDetails.ownerName, ownerDetails.ownerDescription);
+      
+      if (ownerDetails.ownerPhoto) {
+        await uploadOwnerPhoto(propertyId, ownerDetails.ownerPhoto);
+      }
+      
+      toast.success('Owner details saved successfully!');
+      setCurrentStep(6);
+    } catch (error) {
+      toast.error(error.message || 'Failed to save owner details');
+    } finally {
+      setStepLoading(false);
+    }
   };
 
   const clearAllStates = () => {
@@ -461,22 +527,25 @@ const PropertyRegistrationForm = () => {
     }
     
     setValidationErrors({});
+    setStepLoading(true);
     
     try {
-      const registrationData = {
-        basicInfo,
-        essentialAmenities,
-        experienceAmenities,
-        additionalAmenities,
-        ownerDetails,
-        uploadData
-      };
+      await completePropertyRegistration(
+        propertyId,
+        uploadData.propertyImages,
+        uploadData.propertyDocuments,
+        uploadData.aadhaarCard,
+        uploadData.panCard
+      );
       
-      await submitRegistration(registrationData);
+      toast.success('Property registration completed successfully!');
       clearAllStates();
+      setPropertyId(null);
       setIsRegistrationComplete(true);
     } catch (error) {
-      toast.error(error.message || 'Failed to register property. Please try again.');
+      toast.error(error.message || 'Failed to complete registration. Please try again.');
+    } finally {
+      setStepLoading(false);
     }
   };
 
