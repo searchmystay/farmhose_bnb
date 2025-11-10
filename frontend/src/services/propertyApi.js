@@ -310,12 +310,14 @@ export const saveAdditionalAmenities = async (propertyId, additionalAmenities) =
   }
 }
 
-export const saveOwnerDetails = async (propertyId, ownerName, ownerDescription) => {
+export const saveOwnerDetails = async (propertyId, ownerName, ownerDescription, dashboardId, dashboardPassword) => {
   try {
     const response = await apiClient.post('/save-owner-details', {
       propertyId,
       owner_name: ownerName,
-      owner_description: ownerDescription
+      owner_description: ownerDescription,
+      owner_dashboard_id: dashboardId,
+      owner_dashboard_password: dashboardPassword
     })
     return response.data
   } catch (error) {

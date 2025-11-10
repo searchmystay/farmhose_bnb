@@ -433,6 +433,27 @@ export const Step5OwnerDetails = ({
         required
       />
 
+      <TextInput
+        name="ownerDashboardId"
+        value={ownerDetails.ownerDashboardId}
+        onChange={onOwnerDetailsChange}
+        label="Dashboard Login ID"
+        placeholder="Create a unique ID for your owner dashboard login (min 3 characters)"
+        error={validationErrors.ownerDashboardId}
+        required
+      />
+
+      <TextInput
+        name="ownerDashboardPassword"
+        type="password"
+        value={ownerDetails.ownerDashboardPassword}
+        onChange={onOwnerDetailsChange}
+        label="Dashboard Password"
+        placeholder="Create a secure password for your dashboard (min 6 characters)"
+        error={validationErrors.ownerDashboardPassword}
+        required
+      />
+
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">
           Owner Photo <span className="text-red-500">*</span>

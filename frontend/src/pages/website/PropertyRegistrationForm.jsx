@@ -126,7 +126,9 @@ const PropertyRegistrationForm = () => {
   const [ownerDetails, setOwnerDetails] = useState({
     ownerName: '',
     ownerDescription: '',
-    ownerPhoto: null
+    ownerPhoto: null,
+    ownerDashboardId: '',
+    ownerDashboardPassword: ''
   });
 
   const [validationErrors, setValidationErrors] = useState({});
@@ -222,6 +224,8 @@ const PropertyRegistrationForm = () => {
     
     if (!basicInfo.name.trim()) {
       errors.name = 'Property name is required';
+    } else if (basicInfo.name.trim().split(/\s+/).length > 3) {
+      errors.name = 'Property name should not exceed 3 words';
     }
     
     if (!basicInfo.description.trim()) {
@@ -278,6 +282,8 @@ const PropertyRegistrationForm = () => {
     
     if (!ownerDetails.ownerName.trim()) {
       errors.ownerName = 'Owner name is required';
+    } else if (ownerDetails.ownerName.trim().split(/\s+/).length > 3) {
+      errors.ownerName = 'Owner name should not exceed 3 words';
     }
     
     if (!ownerDetails.ownerDescription.trim()) {
@@ -293,6 +299,18 @@ const PropertyRegistrationForm = () => {
     
     if (!ownerDetails.ownerPhoto) {
       errors.ownerPhoto = 'Owner photo is required';
+    }
+    
+    if (!ownerDetails.ownerDashboardId.trim()) {
+      errors.ownerDashboardId = 'Dashboard ID is required';
+    } else if (ownerDetails.ownerDashboardId.trim().length < 3) {
+      errors.ownerDashboardId = 'Dashboard ID must be at least 3 characters';
+    }
+    
+    if (!ownerDetails.ownerDashboardPassword.trim()) {
+      errors.ownerDashboardPassword = 'Dashboard password is required';
+    } else if (ownerDetails.ownerDashboardPassword.trim().length < 6) {
+      errors.ownerDashboardPassword = 'Dashboard password must be at least 6 characters';
     }
     
     return errors;
@@ -403,7 +421,13 @@ const PropertyRegistrationForm = () => {
     setStepLoading(true);
     
     try {
-      await saveOwnerDetails(propertyId, ownerDetails.ownerName, ownerDetails.ownerDescription);
+      await saveOwnerDetails(
+        propertyId, 
+        ownerDetails.ownerName, 
+        ownerDetails.ownerDescription,
+        ownerDetails.ownerDashboardId,
+        ownerDetails.ownerDashboardPassword
+      );
       
       if (ownerDetails.ownerPhoto) {
         await uploadOwnerPhoto(propertyId, ownerDetails.ownerPhoto);
@@ -511,7 +535,9 @@ const PropertyRegistrationForm = () => {
     setOwnerDetails({
       ownerName: '',
       ownerDescription: '',
-      ownerPhoto: null
+      ownerPhoto: null,
+      ownerDashboardId: '',
+      ownerDashboardPassword: ''
     });
     setValidationErrors({});
   };
