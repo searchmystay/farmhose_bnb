@@ -18,6 +18,10 @@ export const fetchFarmhouseList = async (searchCriteria = null) => {
       requestData.checkInDate = searchCriteria.checkInDate
       requestData.checkOutDate = searchCriteria.checkOutDate
       requestData.numberOfPeople = searchCriteria.numberOfPeople
+      requestData.address = searchCriteria.address
+      requestData.numberOfAdults = searchCriteria.numberOfAdults
+      requestData.numberOfChildren = searchCriteria.numberOfChildren
+      requestData.numberOfPets = searchCriteria.numberOfPets
     }
     
     const response = await apiClient.post('/farmhouse-list', requestData)
@@ -40,6 +44,10 @@ export const fetchBnbList = async (searchCriteria = null) => {
       requestData.checkInDate = searchCriteria.checkInDate
       requestData.checkOutDate = searchCriteria.checkOutDate
       requestData.numberOfPeople = searchCriteria.numberOfPeople
+      requestData.address = searchCriteria.address
+      requestData.numberOfAdults = searchCriteria.numberOfAdults
+      requestData.numberOfChildren = searchCriteria.numberOfChildren
+      requestData.numberOfPets = searchCriteria.numberOfPets
     }
     
     const response = await apiClient.post('/bnb-list', requestData)
@@ -63,6 +71,10 @@ export const fetchPropertyList = async (searchCriteria = null) => {
       requestData.checkOutDate = searchCriteria.checkOutDate
       requestData.numberOfPeople = searchCriteria.numberOfPeople
       requestData.propertyType = searchCriteria.propertyType
+      requestData.address = searchCriteria.address
+      requestData.numberOfAdults = searchCriteria.numberOfAdults
+      requestData.numberOfChildren = searchCriteria.numberOfChildren
+      requestData.numberOfPets = searchCriteria.numberOfPets
     }
     
     const response = await apiClient.post('/property-list', requestData)
@@ -99,6 +111,10 @@ export const fetchPropertyDetail = async (propertyId, leadEmail = null, searchCr
     requestData.checkInDate = searchCriteria.checkInDate
     requestData.checkOutDate = searchCriteria.checkOutDate
     requestData.numberOfPeople = searchCriteria.numberOfPeople
+    requestData.address = searchCriteria.address
+    requestData.numberOfAdults = searchCriteria.numberOfAdults
+    requestData.numberOfChildren = searchCriteria.numberOfChildren
+    requestData.numberOfPets = searchCriteria.numberOfPets
   }
   
   const response = await apiClient.post(`/property-detail/${propertyId}`, requestData)
