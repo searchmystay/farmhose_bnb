@@ -184,14 +184,6 @@ function PropertyDetailsPage({ propertyId, onBack }) {
             </p>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Max People Allowed</label>
-            <p className="text-gray-900 bg-gray-50 p-3 rounded-md">
-              {basic.max_people !== null && basic.max_people !== undefined && !isNaN(basic.max_people)
-                ? `${basic.max_people} people`
-                : 'Not Available'}
-            </p>
-          </div>
-          <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Credit Balance</label>
             <p className={`font-semibold bg-gray-50 p-3 rounded-md ${
               basic.credit_balance === null || basic.credit_balance === undefined || isNaN(basic.credit_balance)
@@ -215,6 +207,37 @@ function PropertyDetailsPage({ propertyId, onBack }) {
           </div>
         </div>
         
+        <div className="mt-8">
+          <h4 className="text-lg font-semibold text-gray-900 mb-4">Guest Capacity</h4>
+          <p className="text-sm text-gray-600 mb-4">Maximum allowed guests, children, and pets</p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <label className="block text-sm font-medium text-blue-900 mb-2">Max People</label>
+              <p className="text-2xl font-bold text-blue-700">
+                {basic.max_people_allowed !== null && basic.max_people_allowed !== undefined && !isNaN(basic.max_people_allowed)
+                  ? basic.max_people_allowed
+                  : 'N/A'}
+              </p>
+            </div>
+            <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+              <label className="block text-sm font-medium text-green-900 mb-2">Max Children</label>
+              <p className="text-2xl font-bold text-green-700">
+                {basic.max_children_allowed !== null && basic.max_children_allowed !== undefined && !isNaN(basic.max_children_allowed)
+                  ? basic.max_children_allowed
+                  : 'N/A'}
+              </p>
+            </div>
+            <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
+              <label className="block text-sm font-medium text-purple-900 mb-2">Max Pets</label>
+              <p className="text-2xl font-bold text-purple-700">
+                {basic.max_pets_allowed !== null && basic.max_pets_allowed !== undefined && !isNaN(basic.max_pets_allowed)
+                  ? basic.max_pets_allowed
+                  : 'N/A'}
+              </p>
+            </div>
+          </div>
+        </div>
+
         <div className="mt-8">
           <h4 className="text-lg font-semibold text-gray-900 mb-4">Amenities</h4>
           {renderAmenities(basic.amenities)}
