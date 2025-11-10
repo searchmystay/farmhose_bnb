@@ -177,16 +177,32 @@ function PropertyDetailsPage({ propertyId, onBack }) {
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Per Day Cost</label>
-            <p className="text-gray-900 bg-gray-50 p-3 rounded-md">₹{basic.per_day_cost || 0}</p>
+            <p className="text-gray-900 bg-gray-50 p-3 rounded-md">
+              {basic.per_day_cost !== null && basic.per_day_cost !== undefined && !isNaN(basic.per_day_cost) 
+                ? `₹${basic.per_day_cost.toLocaleString('en-IN')}` 
+                : 'Not Available'}
+            </p>
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Max People Allowed</label>
-            <p className="text-gray-900 bg-gray-50 p-3 rounded-md">{basic.max_people || 0} people</p>
+            <p className="text-gray-900 bg-gray-50 p-3 rounded-md">
+              {basic.max_people !== null && basic.max_people !== undefined && !isNaN(basic.max_people)
+                ? `${basic.max_people} people`
+                : 'Not Available'}
+            </p>
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Credit Balance</label>
-            <p className={`font-semibold bg-gray-50 p-3 rounded-md ${basic.credit_balance <= 100 ? 'text-red-600' : basic.credit_balance <= 500 ? 'text-orange-600' : 'text-green-600'}`}>
-              ₹{basic.credit_balance?.toLocaleString('en-IN') || 0}
+            <p className={`font-semibold bg-gray-50 p-3 rounded-md ${
+              basic.credit_balance === null || basic.credit_balance === undefined || isNaN(basic.credit_balance)
+                ? 'text-gray-500'
+                : basic.credit_balance <= 100 ? 'text-red-600' 
+                : basic.credit_balance <= 500 ? 'text-orange-600' 
+                : 'text-green-600'
+            }`}>
+              {basic.credit_balance !== null && basic.credit_balance !== undefined && !isNaN(basic.credit_balance)
+                ? `₹${basic.credit_balance.toLocaleString('en-IN')}`
+                : 'Not Available'}
             </p>
           </div>
           <div>

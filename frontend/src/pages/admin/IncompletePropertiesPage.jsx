@@ -1,6 +1,6 @@
 import { useAllProperties } from '../../hooks/useAdmin'
 
-const IncompletePropertiesPage = () => {
+const IncompletePropertiesPage = ({ onViewDetails }) => {
   const { allProperties, isLoading, error } = useAllProperties()
 
   const incompleteProperties = allProperties.filter(
@@ -40,42 +40,67 @@ const IncompletePropertiesPage = () => {
     </div>
   )
 
-  const renderPropertyRow = (property) => (
-    <div key={property.id} className="bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-all duration-200">
-      <div className="p-4 sm:p-5 lg:p-6 flex flex-col lg:flex-row lg:items-center gap-4 lg:gap-6">
-        <div className="flex-1 min-w-0 mb-3 sm:mb-0">
-          <div className="text-xs font-medium text-gray-500 mb-1">Property Name</div>
-          <h3 className="text-base sm:text-lg font-semibold text-gray-900 truncate">
-            {property.name || 'Unknown Property'}
-          </h3>
-        </div>
+  const getSafeValue = (value, fallback = 'Not Available') => {
+    if (value === null || value === undefined || value === '') {
+      return fallback
+    }
+    return value
+  }
+
+  const getSafeCreditBalance = (balance) => {
+    if (balance === null || balance === undefined || isNaN(balance)) {
+      return { value: 'Not Available', colorClass: 'text-gray-500' }
+    }
+    const colorClass = balance <= 100 ? 'text-red-600' : balance <= 500 ? 'text-orange-600' : 'text-green-600'
+    return { value: `₹${balance.toLocaleString('en-IN')}`, colorClass }
+  }
+
+  const renderPropertyRow = (property) => {
+    const creditInfo = getSafeCreditBalance(property?.credit_balance)
+    
+    return (
+      <div key={property.id} className="bg-white border border-gray-200 rounded-lg p-3 sm:p-4 shadow-sm hover:shadow-md transition-shadow">
+        <div className="flex flex-col lg:flex-row lg:items-center gap-4 lg:gap-6">
+          {/* Property Name - Full width on mobile, larger on tablets */}
+          <div className="flex-1 lg:flex-[2] min-w-0">
+            <div className="text-xs font-medium text-gray-500 mb-1">Property Name</div>
+            <button
+              onClick={() => onViewDetails && onViewDetails(property.id)}
+              className="font-semibold text-blue-600 hover:text-blue-800 text-sm md:text-base block truncate text-left transition-colors w-full"
+            >
+              {getSafeValue(property?.name, 'Unknown Property')}
+            </button>
+          </div>
+          
+          <div className="flex flex-col sm:flex-row sm:gap-4 lg:gap-6 lg:flex-[3]">
+            <div className="flex-1 min-w-0 mb-3 sm:mb-0">
+              <div className="text-xs font-medium text-gray-500 mb-1">Type</div>
+              <span className="text-gray-600 text-sm block truncate">{getSafeValue(property?.type, 'Not Specified')}</span>
+            </div>
+            <div className="flex-1 min-w-0 mb-3 sm:mb-0">
+              <div className="text-xs font-medium text-gray-500 mb-1">Phone Number</div>
+              <span className="text-gray-600 text-sm block truncate">{getSafeValue(property?.phone_number, 'Not Provided')}</span>
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="text-xs font-medium text-gray-500 mb-1">Credit Balance</div>
+              <span className={`text-sm font-semibold block truncate ${creditInfo.colorClass}`}>
+                {creditInfo.value}
+              </span>
+            </div>
+          </div>
         
-        <div className="flex flex-col sm:flex-row sm:gap-4 lg:gap-6 lg:flex-[3]">
-          <div className="flex-1 min-w-0 mb-3 sm:mb-0">
-            <div className="text-xs font-medium text-gray-500 mb-1">Type</div>
-            <span className="text-gray-600 text-sm block truncate">{property.type || 'Not specified'}</span>
-          </div>
-          <div className="flex-1 min-w-0 mb-3 sm:mb-0">
-            <div className="text-xs font-medium text-gray-500 mb-1">Phone Number</div>
-            <span className="text-gray-600 text-sm block truncate">{property.phone_number || 'Not provided'}</span>
-          </div>
-          <div className="flex-1 min-w-0">
-            <div className="text-xs font-medium text-gray-500 mb-1">Credit Balance</div>
-            <span className={`text-sm font-semibold block truncate ${property.credit_balance <= 100 ? 'text-red-600' : property.credit_balance <= 500 ? 'text-orange-600' : 'text-green-600'}`}>
-              ₹{property.credit_balance?.toLocaleString('en-IN') || 0}
-            </span>
-          </div>
-        </div>
-        
-        <div className="flex flex-col sm:flex-row sm:items-center sm:gap-4 lg:gap-6 lg:flex-[1]">
-          <div className="flex-1 min-w-0">
-            <div className="text-xs font-medium text-gray-500 mb-1">Status</div>
-            {getStatusBadge(property.status)}
+          <div className="flex flex-col sm:flex-row sm:items-center sm:gap-4 lg:gap-6 lg:flex-[1]">
+            <div className="flex-1 min-w-0">
+              <div className="text-xs font-medium text-gray-500 mb-1">Status</div>
+              <div className="flex items-center gap-3">
+                {getStatusBadge(property?.status || 'incomplete')}
+              </div>
+            </div>
           </div>
         </div>
       </div>
-    </div>
-  )
+    )
+  }
 
   if (isLoading) return renderLoadingState()
   if (error) return renderErrorState()

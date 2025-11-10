@@ -148,7 +148,7 @@ function MainAdminPage() {
         return <AllPropertiesPage onViewDetails={handleViewPropertyDetails} />
       
       case 'incomplete':
-        return <IncompletePropertiesPage />
+        return <IncompletePropertiesPage onViewDetails={handleViewPropertyDetails} />
       
       case 'pending':
         return <PendingPropertiesPage onViewDetails={handleViewPropertyDetails} />
