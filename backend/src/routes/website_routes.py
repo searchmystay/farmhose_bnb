@@ -31,7 +31,8 @@ def list_farmhouses():
     print(f"Number of People (old field): {number_of_people}")
     print("="*50 + "\n")
     
-    farmhouses_data = get_approved_farmhouses(number_of_people, check_in_date, check_out_date)
+    total_people = number_of_adults if number_of_adults is not None else number_of_people
+    farmhouses_data = get_approved_farmhouses(total_people, number_of_children, number_of_pets, check_in_date, check_out_date)
     
     response_data = {
         "success": True,
@@ -65,7 +66,8 @@ def list_bnbs():
     print(f"Number of People (old field): {number_of_people}")
     print("="*50 + "\n")
     
-    bnbs_data = get_approved_bnbs(number_of_people, check_in_date, check_out_date)
+    total_people = number_of_adults if number_of_adults is not None else number_of_people
+    bnbs_data = get_approved_bnbs(total_people, number_of_children, number_of_pets, check_in_date, check_out_date)
     
     response_data = {
         "success": True,
@@ -98,7 +100,8 @@ def list_properties():
     print(f"Number of People (old field): {number_of_people}")
     print("="*50 + "\n")
     
-    properties_data = get_all_approved_properties(number_of_people, check_in_date, check_out_date)
+    total_people = number_of_adults if number_of_adults is not None else number_of_people
+    properties_data = get_all_approved_properties(total_people, number_of_children, number_of_pets, check_in_date, check_out_date)
     
     response_data = {
         "success": True,

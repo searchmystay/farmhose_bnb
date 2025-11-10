@@ -163,7 +163,7 @@ def get_date_range(start_date, end_date):
 
 
 @handle_exceptions
-def get_approved_properties_by_type(query_filter, number_of_people=None, check_in_date=None, check_out_date=None):
+def get_approved_properties_by_type(query_filter, number_of_people=None, number_of_children=None, number_of_pets=None, check_in_date=None, check_out_date=None):
     projection = {
         "_id": 1,
         "name": 1,
@@ -176,6 +176,12 @@ def get_approved_properties_by_type(query_filter, number_of_people=None, check_i
 
     if number_of_people and not isinstance(number_of_people, str):
         query_filter["max_people_allowed"] = {"$gte": number_of_people}
+    
+    if number_of_children and not isinstance(number_of_children, str):
+        query_filter["max_children_allowed"] = {"$gte": number_of_children}
+    
+    if number_of_pets and not isinstance(number_of_pets, str):
+        query_filter["max_pets_allowed"] = {"$gte": number_of_pets}
     
     if check_in_date and check_out_date:
         check_in_date = datetime.strptime(check_in_date, '%Y-%m-%d')
@@ -275,23 +281,23 @@ def get_property_details(property_id, lead_email=None, check_in_date=None, check
 
 
 @handle_exceptions
-def get_approved_farmhouses(number_of_people=None, check_in_date=None, check_out_date=None):
+def get_approved_farmhouses(number_of_people=None, number_of_children=None, number_of_pets=None, check_in_date=None, check_out_date=None):
     query_filter = {"status": "active", "type": "farmhouse"}
-    farmhouses_list = get_approved_properties_by_type(query_filter, number_of_people, check_in_date, check_out_date)
+    farmhouses_list = get_approved_properties_by_type(query_filter, number_of_people, number_of_children, number_of_pets, check_in_date, check_out_date)
     return farmhouses_list
 
 
 @handle_exceptions
-def get_approved_bnbs(number_of_people=None, check_in_date=None, check_out_date=None):
+def get_approved_bnbs(number_of_people=None, number_of_children=None, number_of_pets=None, check_in_date=None, check_out_date=None):
     query_filter = {"status": "active", "type": "bnb"}
-    bnbs_list = get_approved_properties_by_type(query_filter, number_of_people, check_in_date, check_out_date)
+    bnbs_list = get_approved_properties_by_type(query_filter, number_of_people, number_of_children, number_of_pets, check_in_date, check_out_date)
     return bnbs_list
 
 
 @handle_exceptions
-def get_all_approved_properties(number_of_people=None, check_in_date=None, check_out_date=None):
+def get_all_approved_properties(number_of_people=None, number_of_children=None, number_of_pets=None, check_in_date=None, check_out_date=None):
     query_filter = {"status": "active"}
-    properties_list = get_approved_properties_by_type(query_filter, number_of_people, check_in_date, check_out_date)
+    properties_list = get_approved_properties_by_type(query_filter, number_of_people, number_of_children, number_of_pets, check_in_date, check_out_date)
     return properties_list
 
 
