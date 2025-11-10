@@ -9,7 +9,7 @@ import HomePage from './pages/website/HomePage'
 import SearchPage from './pages/website/SearchPage'
 import PropertiesPage from './pages/website/PropertiesPage'
 import PropertyDetailPage from './pages/website/PropertyDetailPage'
-import RegisterPropertyPage from './pages/website/RegisterPropertyPage'
+import PropertyRegistrationForm from './pages/website/PropertyRegistrationForm'
 import WishlistPage from './pages/website/WishlistPage'
 import AdminLogin from './pages/admin/AdminLogin'
 import MainAdminPage from './pages/admin/MainAdminPage'
@@ -89,7 +89,7 @@ function App() {
             <Route path="/bnb" element={<PropertiesPage propertyType="bnb" />} />
             <Route path="/properties" element={<PropertiesPage propertyType="both" />} />
             <Route path="/property/:propertyId" element={<PropertyDetailPage />} />
-            <Route path="/register-property" element={<RegisterPropertyPage />} />
+            <Route path="/register-property" element={<PropertyRegistrationForm />} />
             <Route path="/wishlist" element={<WishlistPage />} />
             <Route path="/reviews/:farmhouseId" element={<ReviewSubmissionPage />} />
             <Route path="/admin" element={

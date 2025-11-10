@@ -1,0 +1,575 @@
+import React, { useState, useEffect } from 'react';
+import { toast } from 'sonner';
+import { usePropertyRegistration } from '../../hooks/usePropertyData';
+import {
+  ProcessExplanation,
+  ProgressIndicator,
+  RegistrationSuccessMessage,
+  Step1BasicInfo,
+  Step2EssentialAmenities,
+  Step3ExperienceAmenities,
+  Step4AdditionalAmenities,
+  Step5OwnerDetails,
+  Step6DocumentUpload
+} from './PropertyRegistrationSteps';
+
+const PropertyRegistrationForm = () => {
+  const [currentStep, setCurrentStep] = useState(1);
+  const { submitRegistration, loading, success, resetState } = usePropertyRegistration();
+  
+  // State Management
+  const [basicInfo, setBasicInfo] = useState({
+    name: '',
+    description: '',
+    type: 'farmhouse',
+    per_day_price: '',
+    max_people_allowed: '',
+    opening_time: '',
+    closing_time: '',
+    phone_number: '',
+    address: '',
+    pin_code: ''
+  });
+
+  const [essentialAmenities, setEssentialAmenities] = useState({
+    air_conditioning: false,
+    wifi_internet: false,
+    power_backup: false,
+    parking: false,
+    refrigerator: false,
+    microwave: false,
+    cooking_basics: false,
+    drinking_water: false,
+    washing_machine: false,
+    iron: false,
+    geyser_hot_water: false,
+    television: false,
+    smart_tv_ott: false,
+    wardrobe: false,
+    extra_mattress_bedding: false,
+    cleaning_supplies: false,
+    bedrooms: 1,
+    bathrooms: 1,
+    beds: 1,
+    bed_linens: false,
+    towels: false,
+    toiletries: false,
+    mirror: false,
+    hair_dryer: false,
+    attached_bathrooms: false,
+    bathtub: false
+  });
+
+  const [experienceAmenities, setExperienceAmenities] = useState({
+    private_lawn_garden: false,
+    swimming_pool: false,
+    outdoor_seating_area: false,
+    bonfire_setup: false,
+    barbecue_setup: false,
+    terrace_balcony: false,
+    kitchen_access_self_cooking: false,
+    in_house_meals_available: false,
+    dining_table: false,
+    indoor_games: false,
+    outdoor_games: false,
+    pool_table: false,
+    music_system: false,
+    board_games: false,
+    bicycle_access: false,
+    movie_projector: false,
+    jacuzzi: false,
+    private_bar_setup: false,
+    farm_view_nature_view: false,
+    open_shower_outdoor_bath: false,
+    gazebo_cabana_seating: false,
+    hammock: false,
+    high_tea_setup: false,
+    event_space_small_gatherings: false,
+    private_chef_on_request: false
+  });
+
+  const [additionalAmenities, setAdditionalAmenities] = useState({
+    pet_friendly: false,
+    child_friendly: false,
+    kids_play_area: false,
+    fenced_property: false,
+    cctv_cameras: false,
+    first_aid_kit: false,
+    fire_extinguisher: false,
+    security_guard: false,
+    private_gate_compound_wall: false,
+    daily_cleaning_available: false,
+    long_stays_allowed: false,
+    early_check_in_late_check_out: false,
+    staff_quarters_available: false,
+    caretaker_on_site: false
+  });
+
+  const [uploadData, setUploadData] = useState({
+    propertyImages: [],
+    propertyDocuments: [],
+    aadhaarCard: null,
+    panCard: null
+  });
+
+  const [ownerDetails, setOwnerDetails] = useState({
+    ownerName: '',
+    ownerDescription: '',
+    ownerPhoto: null
+  });
+
+  const [validationErrors, setValidationErrors] = useState({});
+  const [isRegistrationComplete, setIsRegistrationComplete] = useState(false);
+
+  // Scroll to top on step change
+  useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      left: 0,
+      behavior: 'smooth'
+    });
+  }, [currentStep]);
+
+  // Event Handlers
+  const handleBasicInfoChange = (e) => {
+    const { name, value } = e.target;
+    setBasicInfo(prev => ({ ...prev, [name]: value }));
+    
+    if (validationErrors[name]) {
+      setValidationErrors(prev => ({ ...prev, [name]: '' }));
+    }
+  };
+
+  const handleEssentialToggleChange = (name) => {
+    setEssentialAmenities(prev => ({
+      ...prev,
+      [name]: !prev[name]
+    }));
+  };
+
+  const handleExperienceToggleChange = (name) => {
+    setExperienceAmenities(prev => ({
+      ...prev,
+      [name]: !prev[name]
+    }));
+  };
+
+  const handleAdditionalToggleChange = (name) => {
+    setAdditionalAmenities(prev => ({
+      ...prev,
+      [name]: !prev[name]
+    }));
+  };
+
+  const handleNumberChange = (e) => {
+    const { name, value } = e.target;
+    setEssentialAmenities(prev => ({
+      ...prev,
+      [name]: parseInt(value) || 0
+    }));
+  };
+
+  const handleOwnerDetailsChange = (e) => {
+    const { name, value } = e.target;
+    setOwnerDetails(prev => ({ ...prev, [name]: value }));
+    
+    if (validationErrors[name]) {
+      setValidationErrors(prev => ({ ...prev, [name]: '' }));
+    }
+  };
+
+  const handleOwnerPhotoUpload = (e) => {
+    const file = e.target.files[0];
+    setOwnerDetails(prev => ({ ...prev, ownerPhoto: file }));
+    
+    if (validationErrors.ownerPhoto) {
+      setValidationErrors(prev => ({ ...prev, ownerPhoto: '' }));
+    }
+  };
+
+  const handleFileUpload = (e, fileType) => {
+    const files = Array.from(e.target.files);
+    setUploadData(prev => ({
+      ...prev,
+      [fileType]: fileType === 'propertyImages' || fileType === 'propertyDocuments' ? files : files[0]
+    }));
+    
+    if (validationErrors[fileType]) {
+      setValidationErrors(prev => ({ ...prev, [fileType]: '' }));
+    }
+  };
+
+  const handlePrevious = () => {
+    if (currentStep > 1) {
+      setCurrentStep(currentStep - 1);
+    }
+  };
+
+  // Validation Functions
+  const validateBasicInfo = () => {
+    const errors = {};
+    
+    if (!basicInfo.name.trim()) {
+      errors.name = 'Property name is required';
+    }
+    
+    if (!basicInfo.description.trim()) {
+      errors.description = 'Description is required';
+    } else if (basicInfo.description.trim().split(/\s+/).length < 10) {
+      errors.description = 'Description must have at least 10 words';
+    }
+    
+    if (!basicInfo.type) {
+      errors.type = 'Property type is required';
+    }
+    
+    if (!basicInfo.phone_number.trim()) {
+      errors.phone_number = 'Phone number is required';
+    } else if (!/^\d{10}$/.test(basicInfo.phone_number.trim())) {
+      errors.phone_number = 'Phone number must contain only numbers and be exactly 10 digits';
+    }
+    
+    if (!basicInfo.address.trim()) {
+      errors.address = 'Address is required';
+    }
+    
+    if (!basicInfo.per_day_price.trim()) {
+      errors.per_day_price = 'Per day price is required';
+    } else if (!/^\d+$/.test(basicInfo.per_day_price.trim()) || parseInt(basicInfo.per_day_price) <= 0) {
+      errors.per_day_price = 'Price must be a valid positive number';
+    }
+    
+    if (!basicInfo.max_people_allowed.trim()) {
+      errors.max_people_allowed = 'Maximum people allowed is required';
+    } else if (!/^\d+$/.test(basicInfo.max_people_allowed.trim()) || parseInt(basicInfo.max_people_allowed) <= 0 || parseInt(basicInfo.max_people_allowed) > 50) {
+      errors.max_people_allowed = 'Must be a number between 1 and 50';
+    }
+    
+    if (!basicInfo.opening_time.trim()) {
+      errors.opening_time = 'Opening time is required';
+    }
+    
+    if (!basicInfo.closing_time.trim()) {
+      errors.closing_time = 'Closing time is required';
+    }
+    
+    if (!basicInfo.pin_code.trim()) {
+      errors.pin_code = 'Pin code is required';
+    } else if (!/^\d{6}$/.test(basicInfo.pin_code.trim())) {
+      errors.pin_code = 'Pin code must contain only numbers and be exactly 6 digits';
+    }
+    
+    return errors;
+  };
+
+  const validateOwnerDetails = () => {
+    const errors = {};
+    
+    if (!ownerDetails.ownerName.trim()) {
+      errors.ownerName = 'Owner name is required';
+    }
+    
+    if (!ownerDetails.ownerDescription.trim()) {
+      errors.ownerDescription = 'Owner description is required';
+    } else {
+      const wordCount = ownerDetails.ownerDescription.trim().split(/\s+/).length;
+      if (wordCount < 10) {
+        errors.ownerDescription = 'Description must have at least 10 words';
+      } else if (wordCount > 200) {
+        errors.ownerDescription = 'Description cannot exceed 200 words';
+      }
+    }
+    
+    if (!ownerDetails.ownerPhoto) {
+      errors.ownerPhoto = 'Owner photo is required';
+    }
+    
+    return errors;
+  };
+
+  const validateFileUploads = () => {
+    const errors = {};
+    
+    if (!uploadData.propertyImages || uploadData.propertyImages.length === 0) {
+      errors.propertyImages = 'Property images are required';
+    }
+    
+    if (!uploadData.propertyDocuments || uploadData.propertyDocuments.length === 0) {
+      errors.propertyDocuments = 'Property documents are required';
+    }
+    
+    if (!uploadData.aadhaarCard) {
+      errors.aadhaarCard = 'Aadhaar card is required';
+    }
+    
+    if (!uploadData.panCard) {
+      errors.panCard = 'Bank card is required';
+    }
+    
+    return errors;
+  };
+
+  // Step Submit Handlers
+  const handleStep1Next = (e) => {
+    e.preventDefault();
+    const errors = validateBasicInfo();
+    
+    if (Object.keys(errors).length > 0) {
+      setValidationErrors(errors);
+      return;
+    }
+    
+    setValidationErrors({});
+    console.log('Basic Info:', basicInfo);
+    setCurrentStep(2);
+  };
+
+  const handleStep2Next = (e) => {
+    e.preventDefault();
+    setCurrentStep(3);
+  };
+
+  const handleStep3Next = (e) => {
+    e.preventDefault();
+    setCurrentStep(4);
+  };
+
+  const handleStep4Next = (e) => {
+    e.preventDefault();
+    setCurrentStep(5);
+  };
+
+  const handleStep5Next = (e) => {
+    e.preventDefault();
+    const errors = validateOwnerDetails();
+    
+    if (Object.keys(errors).length > 0) {
+      setValidationErrors(errors);
+      return;
+    }
+    
+    setValidationErrors({});
+    setCurrentStep(6);
+  };
+
+  const clearAllStates = () => {
+    setBasicInfo({
+      name: '',
+      description: '',
+      type: 'farmhouse',
+      per_day_price: '',
+      max_people_allowed: '',
+      opening_time: '',
+      closing_time: '',
+      phone_number: '',
+      address: '',
+      pin_code: ''
+    });
+    setEssentialAmenities({
+      air_conditioning: false,
+      wifi_internet: false,
+      power_backup: false,
+      parking: false,
+      refrigerator: false,
+      microwave: false,
+      cooking_basics: false,
+      drinking_water: false,
+      washing_machine: false,
+      iron: false,
+      geyser_hot_water: false,
+      television: false,
+      smart_tv_ott: false,
+      wardrobe: false,
+      extra_mattress_bedding: false,
+      cleaning_supplies: false,
+      bedrooms: 1,
+      bathrooms: 1,
+      beds: 1,
+      bed_linens: false,
+      towels: false,
+      toiletries: false,
+      mirror: false,
+      hair_dryer: false,
+      attached_bathrooms: false,
+      bathtub: false
+    });
+    setExperienceAmenities({
+      private_lawn_garden: false,
+      swimming_pool: false,
+      outdoor_seating_area: false,
+      bonfire_setup: false,
+      barbecue_setup: false,
+      terrace_balcony: false,
+      kitchen_access_self_cooking: false,
+      in_house_meals_available: false,
+      dining_table: false,
+      indoor_games: false,
+      outdoor_games: false,
+      pool_table: false,
+      music_system: false,
+      board_games: false,
+      bicycle_access: false,
+      movie_projector: false,
+      jacuzzi: false,
+      private_bar_setup: false,
+      farm_view_nature_view: false,
+      open_shower_outdoor_bath: false,
+      gazebo_cabana_seating: false,
+      hammock: false,
+      high_tea_setup: false,
+      event_space_small_gatherings: false,
+      private_chef_on_request: false
+    });
+    setAdditionalAmenities({
+      pet_friendly: false,
+      child_friendly: false,
+      kids_play_area: false,
+      fenced_property: false,
+      cctv_cameras: false,
+      first_aid_kit: false,
+      fire_extinguisher: false,
+      security_guard: false,
+      private_gate_compound_wall: false,
+      daily_cleaning_available: false,
+      long_stays_allowed: false,
+      early_check_in_late_check_out: false,
+      staff_quarters_available: false,
+      caretaker_on_site: false
+    });
+    setUploadData({
+      propertyImages: [],
+      propertyDocuments: [],
+      aadhaarCard: null,
+      panCard: null
+    });
+    setOwnerDetails({
+      ownerName: '',
+      ownerDescription: '',
+      ownerPhoto: null
+    });
+    setValidationErrors({});
+  };
+
+  const handleFinalSubmit = async (e) => {
+    e.preventDefault();
+    
+    const errors = validateFileUploads();
+    
+    if (Object.keys(errors).length > 0) {
+      setValidationErrors(errors);
+      return;
+    }
+    
+    setValidationErrors({});
+    
+    try {
+      const registrationData = {
+        basicInfo,
+        essentialAmenities,
+        experienceAmenities,
+        additionalAmenities,
+        ownerDetails,
+        uploadData
+      };
+      
+      await submitRegistration(registrationData);
+      clearAllStates();
+      setIsRegistrationComplete(true);
+    } catch (error) {
+      toast.error(error.message || 'Failed to register property. Please try again.');
+    }
+  };
+
+  const handleGoToHome = () => {
+    window.location.href = '/';
+  };
+
+  // Render
+  return (
+    <>
+      {isRegistrationComplete ? (
+        <RegistrationSuccessMessage onGoToHome={handleGoToHome} />
+      ) : (
+        <div className="min-h-screen bg-gray-50 py-8 px-4">
+          <div className="max-w-2xl mx-auto">
+            <div className="bg-white rounded-xl shadow-lg p-8">
+              <div className="text-center mb-8">
+                <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                  Register Your Property
+                </h1>
+                <p className="text-gray-600">
+                  Basic Information
+                </p>
+              </div>
+
+              <ProcessExplanation />
+              <ProgressIndicator currentStep={currentStep} />
+              
+              {currentStep === 1 && (
+                <Step1BasicInfo
+                  basicInfo={basicInfo}
+                  validationErrors={validationErrors}
+                  onBasicInfoChange={handleBasicInfoChange}
+                  onSubmit={handleStep1Next}
+                />
+              )}
+              
+              {currentStep === 2 && (
+                <Step2EssentialAmenities
+                  essentialAmenities={essentialAmenities}
+                  onToggleChange={handleEssentialToggleChange}
+                  onNumberChange={handleNumberChange}
+                  onSubmit={handleStep2Next}
+                  onPrevious={handlePrevious}
+                />
+              )}
+              
+              {currentStep === 3 && (
+                <Step3ExperienceAmenities
+                  experienceAmenities={experienceAmenities}
+                  onToggleChange={handleExperienceToggleChange}
+                  onSubmit={handleStep3Next}
+                  onPrevious={handlePrevious}
+                />
+              )}
+              
+              {currentStep === 4 && (
+                <Step4AdditionalAmenities
+                  additionalAmenities={additionalAmenities}
+                  onToggleChange={handleAdditionalToggleChange}
+                  onSubmit={handleStep4Next}
+                  onPrevious={handlePrevious}
+                />
+              )}
+              
+              {currentStep === 5 && (
+                <Step5OwnerDetails
+                  ownerDetails={ownerDetails}
+                  validationErrors={validationErrors}
+                  onOwnerDetailsChange={handleOwnerDetailsChange}
+                  onOwnerPhotoUpload={handleOwnerPhotoUpload}
+                  onSubmit={handleStep5Next}
+                  onPrevious={handlePrevious}
+                />
+              )}
+              
+              {currentStep === 6 && (
+                <Step6DocumentUpload
+                  uploadData={uploadData}
+                  validationErrors={validationErrors}
+                  success={success}
+                  loading={loading}
+                  onFileUpload={handleFileUpload}
+                  onSubmit={handleFinalSubmit}
+                  onPrevious={handlePrevious}
+                />
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
+};
+
+export default PropertyRegistrationForm;
