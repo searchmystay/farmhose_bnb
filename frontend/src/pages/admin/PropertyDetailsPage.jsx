@@ -184,6 +184,12 @@ function PropertyDetailsPage({ propertyId, onBack }) {
             <p className="text-gray-900 bg-gray-50 p-3 rounded-md">{basic.max_people || 0} people</p>
           </div>
           <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Credit Balance</label>
+            <p className={`font-semibold bg-gray-50 p-3 rounded-md ${basic.credit_balance <= 100 ? 'text-red-600' : basic.credit_balance <= 500 ? 'text-orange-600' : 'text-green-600'}`}>
+              ₹{basic.credit_balance?.toLocaleString('en-IN') || 0}
+            </p>
+          </div>
+          <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Address</label>
             <p className="text-gray-900 bg-gray-50 p-3 rounded-md">{basic.address || 'Not provided'}</p>
           </div>

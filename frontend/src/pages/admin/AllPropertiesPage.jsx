@@ -75,14 +75,20 @@ function AllPropertiesPage({ onViewDetails }) {
           </button>
         </div>
         
-        <div className="flex flex-col sm:flex-row sm:gap-4 lg:gap-6 lg:flex-[2]">
+        <div className="flex flex-col sm:flex-row sm:gap-4 lg:gap-6 lg:flex-[3]">
           <div className="flex-1 min-w-0 mb-3 sm:mb-0">
             <div className="text-xs font-medium text-gray-500 mb-1">Type</div>
             <span className="text-gray-600 text-sm block truncate">{property.type || 'Not specified'}</span>
           </div>
-          <div className="flex-1 min-w-0">
+          <div className="flex-1 min-w-0 mb-3 sm:mb-0">
             <div className="text-xs font-medium text-gray-500 mb-1">Phone Number</div>
             <span className="text-gray-600 text-sm block truncate">{property.phone_number || 'Not provided'}</span>
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="text-xs font-medium text-gray-500 mb-1">Credit Balance</div>
+            <span className={`text-sm font-semibold block truncate ${property.credit_balance <= 100 ? 'text-red-600' : property.credit_balance <= 500 ? 'text-orange-600' : 'text-green-600'}`}>
+              ₹{property.credit_balance?.toLocaleString('en-IN') || 0}
+            </span>
           </div>
         </div>
         
