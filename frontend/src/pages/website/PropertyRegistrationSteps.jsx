@@ -442,16 +442,21 @@ export const Step5OwnerDetails = ({
         required
       />
 
-      <TextInput
-        name="ownerDashboardPassword"
-        type="password"
-        value={ownerDetails.ownerDashboardPassword}
-        onChange={onOwnerDetailsChange}
-        label="Dashboard Password"
-        placeholder="Create a secure password for your dashboard (min 6 characters)"
-        error={validationErrors.ownerDashboardPassword}
-        required
-      />
+      <div>
+        <TextInput
+          name="ownerDashboardPassword"
+          type="password"
+          value={ownerDetails.ownerDashboardPassword}
+          onChange={onOwnerDetailsChange}
+          label="Dashboard Password"
+          placeholder="Must include uppercase, lowercase, number & special char"
+          error={validationErrors.ownerDashboardPassword}
+          required
+        />
+        <p className="mt-1 text-xs text-gray-500">
+          Password must be at least 8 characters and include: uppercase letter, lowercase letter, number, and special character (!@#$%^&*(),.?":{}|&lt;&gt;)
+        </p>
+      </div>
 
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">

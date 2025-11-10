@@ -307,8 +307,19 @@ const PropertyRegistrationForm = () => {
     
     if (!ownerDetails.ownerDashboardPassword.trim()) {
       errors.ownerDashboardPassword = 'Dashboard password is required';
-    } else if (ownerDetails.ownerDashboardPassword.trim().length < 6) {
-      errors.ownerDashboardPassword = 'Dashboard password must be at least 6 characters';
+    } else {
+      const password = ownerDetails.ownerDashboardPassword.trim();
+      if (password.length < 8) {
+        errors.ownerDashboardPassword = 'Password must be at least 8 characters long';
+      } else if (!/[A-Z]/.test(password)) {
+        errors.ownerDashboardPassword = 'Password must contain at least one uppercase letter';
+      } else if (!/[a-z]/.test(password)) {
+        errors.ownerDashboardPassword = 'Password must contain at least one lowercase letter';
+      } else if (!/[0-9]/.test(password)) {
+        errors.ownerDashboardPassword = 'Password must contain at least one number';
+      } else if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
+        errors.ownerDashboardPassword = 'Password must contain at least one special character (!@#$%^&*(),.?":{}|<>)';
+      }
     }
     
     return errors;
