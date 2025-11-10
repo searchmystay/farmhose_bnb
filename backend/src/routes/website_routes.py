@@ -310,7 +310,9 @@ def save_owner_details_route():
     
     step_data = {
         "owner_name": data.get('owner_name'),
-        "owner_description": data.get('owner_description')
+        "owner_description": data.get('owner_description'),
+        "owner_dashboard_id": data.get('owner_dashboard_id'),
+        "owner_dashboard_password": data.get('owner_dashboard_password')
     }
     
     saved_property_id = save_partial_property_registration(step_data, property_id)

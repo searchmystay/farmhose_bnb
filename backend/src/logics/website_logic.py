@@ -463,6 +463,18 @@ def create_incomplete_property():
 
 
 @handle_exceptions
+def validate_name_max_words(name, max_words=3, field_name="Name"):
+    if not name:
+        raise AppException(f"{field_name} is required")
+    
+    word_count = len(name.strip().split())
+    if word_count > max_words:
+        raise AppException(f"{field_name} should not exceed {max_words} words")
+    
+    return True
+
+
+@handle_exceptions
 def safe_int_conversion(value, default=0):
     if value is None or value == "":
         return default
@@ -475,6 +487,9 @@ def safe_int_conversion(value, default=0):
 
 @handle_exceptions
 def prepare_basic_info_update(step_data):
+    property_name = step_data.get("name", "")
+    validate_name_max_words(property_name, 3, "Property name")
+    
     opening_time = step_data.get("opening_time", "")
     closing_time = step_data.get("closing_time", "")
     opening_time_formatted = format_time_with_ampm(opening_time) if opening_time else ""
@@ -484,7 +499,7 @@ def prepare_basic_info_update(step_data):
     max_people = safe_int_conversion(step_data.get("max_people_allowed"), 0)
     
     update_data = {
-        "name": step_data.get("name", ""),
+        "name": property_name,
         "description": step_data.get("description", ""),
         "type": step_data.get("type", ""),
         "per_day_price": per_day_price,
@@ -517,11 +532,28 @@ def prepare_amenities_update(step_data, property_id):
 
 @handle_exceptions
 def prepare_owner_details_update(step_data):
+    owner_name = step_data.get("owner_name", "")
+    validate_name_max_words(owner_name, 3, "Owner name")
+    
+    dashboard_id = step_data.get("owner_dashboard_id", "")
+    dashboard_password = step_data.get("owner_dashboard_password", "")
+    
+    if not dashboard_id:
+        raise AppException("Owner dashboard ID is required")
+    
+    if not dashboard_password:
+        raise AppException("Owner dashboard password is required")
+    
+    if len(dashboard_password) < 6:
+        raise AppException("Owner dashboard password must be at least 6 characters")
+    
     update_data = {
         "owner_details": {
-            "owner_name": step_data.get("owner_name", ""),
+            "owner_name": owner_name,
             "owner_description": step_data.get("owner_description", ""),
-            "owner_photo": ""
+            "owner_photo": "",
+            "owner_dashboard_id": dashboard_id,
+            "owner_dashboard_password": dashboard_password
         }
     }
     return update_data
