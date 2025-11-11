@@ -33,8 +33,7 @@ def get_farmhouse_schema() -> Dict:
             },
             "phone_number_verified": {
                 "bsonType": "bool",
-                "description": "Whether phone number has been verified via OTP",
-                "default": False
+                "description": "Whether phone number has been verified via OTP"
             },
             "otp_last_sent_at": {
                 "bsonType": "date",

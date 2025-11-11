@@ -7,7 +7,8 @@ import {
   ToggleSwitch, 
   FileUploadBox, 
   SectionHeader, 
-  StepNavigation 
+  StepNavigation,
+  PasswordInput
 } from '../../components/common/FormComponents';
 import GooglePlacesAutocomplete from '../../components/common/GooglePlacesAutocomplete';
 
@@ -215,6 +216,36 @@ export const Step2EssentialAmenities = ({
 }) => (
   <form onSubmit={onSubmit} className="space-y-12">
     <div className="space-y-6">
+      <SectionHeader title="Guest Capacity" subtitle="Maximum allowed guests, children, and pets" />
+
+      <div className="grid grid-cols-3 gap-4 p-4 bg-green-50 rounded-lg">
+        <NumberInput name="max_people_allowed" value={essentialAmenities.max_people_allowed} onChange={onNumberChange} label="Max Adults" min={1} max={50} centered required />
+        <NumberInput name="max_children_allowed" value={essentialAmenities.max_children_allowed} onChange={onNumberChange} label="Max Children" min={0} max={20} centered />
+        <NumberInput name="max_pets_allowed" value={essentialAmenities.max_pets_allowed} onChange={onNumberChange} label="Max Pets" min={0} max={10} centered />
+      </div>
+    </div>
+
+    <div className="space-y-6">
+      <SectionHeader title="Bedroom & Bathroom" subtitle="Room details and bathroom amenities" />
+
+      <div className="grid grid-cols-3 gap-4 p-4 bg-blue-50 rounded-lg">
+        <NumberInput name="bedrooms" value={essentialAmenities.bedrooms} onChange={onNumberChange} label="Bedrooms" min={0} max={10} centered />
+        <NumberInput name="bathrooms" value={essentialAmenities.bathrooms} onChange={onNumberChange} label="Bathrooms" min={1} max={10} centered required />
+        <NumberInput name="beds" value={essentialAmenities.beds} onChange={onNumberChange} label="Beds" min={0} max={20} centered />
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <ToggleSwitch name="bed_linens" label="Bed Linens" description="Fresh sheets, pillowcases and blankets" checked={essentialAmenities.bed_linens} onChange={onToggleChange} />
+        <ToggleSwitch name="towels" label="Towels" description="Clean towels for bathing" checked={essentialAmenities.towels} onChange={onToggleChange} />
+        <ToggleSwitch name="toiletries" label="Toiletries" description="Soap, shampoo, toothpaste" checked={essentialAmenities.toiletries} onChange={onToggleChange} />
+        <ToggleSwitch name="mirror" label="Mirror" description="For grooming in bathroom/bedroom" checked={essentialAmenities.mirror} onChange={onToggleChange} />
+        <ToggleSwitch name="hair_dryer" label="Hair Dryer" description="For drying hair after bath" checked={essentialAmenities.hair_dryer} onChange={onToggleChange} />
+        <ToggleSwitch name="attached_bathrooms" label="Attached Bathrooms" description="Private bathrooms with bedrooms" checked={essentialAmenities.attached_bathrooms} onChange={onToggleChange} />
+        <ToggleSwitch name="bathtub" label="Bathtub" description="For relaxing baths" checked={essentialAmenities.bathtub} onChange={onToggleChange} />
+      </div>
+    </div>
+
+    <div className="space-y-6">
       <SectionHeader title="Core Amenities" subtitle="Essential facilities and services" />
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -234,36 +265,6 @@ export const Step2EssentialAmenities = ({
         <ToggleSwitch name="wardrobe" label="Wardrobe" description="Closet space for clothes" checked={essentialAmenities.wardrobe} onChange={onToggleChange} />
         <ToggleSwitch name="extra_mattress_bedding" label="Extra Bedding" description="Additional mattress and bedding" checked={essentialAmenities.extra_mattress_bedding} onChange={onToggleChange} />
         <ToggleSwitch name="cleaning_supplies" label="Cleaning Supplies" description="Cleaning materials provided" checked={essentialAmenities.cleaning_supplies} onChange={onToggleChange} />
-      </div>
-    </div>
-
-    <div className="space-y-6">
-      <SectionHeader title="Bedroom & Bathroom" subtitle="Room details and bathroom amenities" />
-
-      <div className="grid grid-cols-3 gap-4 p-4 bg-blue-50 rounded-lg">
-        <NumberInput name="bedrooms" value={essentialAmenities.bedrooms} onChange={onNumberChange} label="Bedrooms" min={1} max={10} centered />
-        <NumberInput name="bathrooms" value={essentialAmenities.bathrooms} onChange={onNumberChange} label="Bathrooms" min={1} max={10} centered />
-        <NumberInput name="beds" value={essentialAmenities.beds} onChange={onNumberChange} label="Beds" min={1} max={20} centered />
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <ToggleSwitch name="bed_linens" label="Bed Linens" description="Fresh sheets, pillowcases and blankets" checked={essentialAmenities.bed_linens} onChange={onToggleChange} />
-        <ToggleSwitch name="towels" label="Towels" description="Clean towels for bathing" checked={essentialAmenities.towels} onChange={onToggleChange} />
-        <ToggleSwitch name="toiletries" label="Toiletries" description="Soap, shampoo, toothpaste" checked={essentialAmenities.toiletries} onChange={onToggleChange} />
-        <ToggleSwitch name="mirror" label="Mirror" description="For grooming in bathroom/bedroom" checked={essentialAmenities.mirror} onChange={onToggleChange} />
-        <ToggleSwitch name="hair_dryer" label="Hair Dryer" description="For drying hair after bath" checked={essentialAmenities.hair_dryer} onChange={onToggleChange} />
-        <ToggleSwitch name="attached_bathrooms" label="Attached Bathrooms" description="Private bathrooms with bedrooms" checked={essentialAmenities.attached_bathrooms} onChange={onToggleChange} />
-        <ToggleSwitch name="bathtub" label="Bathtub" description="For relaxing baths" checked={essentialAmenities.bathtub} onChange={onToggleChange} />
-      </div>
-    </div>
-
-    <div className="space-y-6">
-      <SectionHeader title="Guest Capacity" subtitle="Maximum allowed guests, children, and pets" />
-
-      <div className="grid grid-cols-3 gap-4 p-4 bg-green-50 rounded-lg">
-        <NumberInput name="max_people_allowed" value={essentialAmenities.max_people_allowed} onChange={onNumberChange} label="Max People" min={1} max={50} centered />
-        <NumberInput name="max_children_allowed" value={essentialAmenities.max_children_allowed} onChange={onNumberChange} label="Max Children" min={0} max={20} centered />
-        <NumberInput name="max_pets_allowed" value={essentialAmenities.max_pets_allowed} onChange={onNumberChange} label="Max Pets" min={0} max={10} centered />
       </div>
     </div>
 
@@ -445,9 +446,8 @@ export const Step5OwnerDetails = ({
       />
 
       <div>
-        <TextInput
+        <PasswordInput
           name="ownerDashboardPassword"
-          type="password"
           value={ownerDetails.ownerDashboardPassword}
           onChange={onOwnerDetailsChange}
           label="Dashboard Password"

@@ -131,12 +131,14 @@ def save_basic_info_route():
     location_data = data.get('location')
     if not location_data:
         location_data = {
-            "address": data.get('address'),
-            "pin_code": data.get('pin_code')
+            "address": data.get('address', ''),
+            "pin_code": data.get('pin_code', '')
         }
     else:
-        if 'pin_code' not in location_data and data.get('pin_code'):
-            location_data['pin_code'] = data.get('pin_code')
+        if 'pin_code' not in location_data or not location_data.get('pin_code'):
+            location_data['pin_code'] = data.get('pin_code', '')
+        if 'address' not in location_data:
+            location_data['address'] = data.get('address', '')
     
     step_data = {
         "name": data.get('name'),

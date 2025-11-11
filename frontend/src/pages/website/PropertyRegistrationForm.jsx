@@ -57,9 +57,9 @@ const PropertyRegistrationForm = () => {
     wardrobe: false,
     extra_mattress_bedding: false,
     cleaning_supplies: false,
-    bedrooms: 1,
+    bedrooms: 0,
     bathrooms: 1,
-    beds: 1,
+    beds: 0,
     bed_linens: false,
     towels: false,
     toiletries: false,
@@ -136,6 +136,19 @@ const PropertyRegistrationForm = () => {
   const [isRegistrationComplete, setIsRegistrationComplete] = useState(false);
 
   useEffect(() => {
+    const savedPropertyId = sessionStorage.getItem('currentPropertyId');
+    if (savedPropertyId) {
+      setPropertyId(savedPropertyId);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (propertyId) {
+      sessionStorage.setItem('currentPropertyId', propertyId);
+    }
+  }, [propertyId]);
+
+  useEffect(() => {
     window.scrollTo({
       top: 0,
       left: 0,
@@ -175,6 +188,10 @@ const PropertyRegistrationForm = () => {
     
     if (locationData.pin_code && validationErrors.pin_code) {
       setValidationErrors(prev => ({ ...prev, pin_code: '' }));
+    }
+    
+    if (!locationData.pin_code) {
+      toast.info('Pin code not found for this location. Please enter it manually.');
     }
   };
 
@@ -250,8 +267,8 @@ const PropertyRegistrationForm = () => {
       errors.name = 'Property name is required';
     } else if (basicInfo.name.trim().length < 3) {
       errors.name = 'Property name must be at least 3 characters';
-    } else if (basicInfo.name.trim().split(/\s+/).length > 3) {
-      errors.name = 'Property name should not exceed 3 words';
+    } else if (basicInfo.name.trim().split(/\s+/).length > 5) {
+      errors.name = 'Property name should not exceed 5 words';
     }
     
     if (!basicInfo.description.trim()) {
@@ -395,6 +412,17 @@ const PropertyRegistrationForm = () => {
 
   const handleStep2Next = async (e) => {
     e.preventDefault();
+    
+    if (essentialAmenities.max_people_allowed < 1) {
+      toast.error('Max Adults must be at least 1. Properties must allow guests to stay.');
+      return;
+    }
+    
+    if (essentialAmenities.bathrooms < 1) {
+      toast.error('Bathrooms must be at least 1. Properties must have bathroom facilities.');
+      return;
+    }
+    
     setStepLoading(true);
     
     try {
@@ -501,9 +529,9 @@ const PropertyRegistrationForm = () => {
       wardrobe: false,
       extra_mattress_bedding: false,
       cleaning_supplies: false,
-      bedrooms: 1,
+      bedrooms: 0,
       bathrooms: 1,
-      beds: 1,
+      beds: 0,
       bed_linens: false,
       towels: false,
       toiletries: false,
@@ -599,6 +627,7 @@ const PropertyRegistrationForm = () => {
       toast.success('Property registration completed successfully!');
       clearAllStates();
       setPropertyId(null);
+      sessionStorage.removeItem('currentPropertyId');
       setIsRegistrationComplete(true);
     } catch (error) {
       toast.error(error.message || 'Failed to complete registration. Please try again.');
