@@ -2,12 +2,13 @@ from src.database.db_common_operations import db_find_many, db_find_one, db_inse
 from src.database.db_owner_analysis_operations import record_visit, record_contact
 from src.utils.exception_handler import handle_exceptions, AppException
 from src.logics.cloudfare_bucket import upload_farmhouse_image_to_r2, upload_farmhouse_document_to_r2
-from src.config import LEAD_COST_RUPEES, MINIMUM_BALANCE_THRESHOLD, OTP_EXPIRY_MINUTES
+from src.config import LEAD_COST_RUPEES, MINIMUM_BALANCE_THRESHOLD, OTP_EXPIRY_MINUTES, TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_PHONE_NUMBER
 from bson import ObjectId
 from datetime import datetime, timedelta
 import pytz
 import re
 import random
+from twilio.rest import Client
     
 
 
@@ -938,8 +939,34 @@ def generate_and_save_otp(phone_number):
 
 
 @handle_exceptions
+def format_phone_number_for_india(phone_number):
+    if not phone_number.startswith('+91'):
+        formatted_phone = f"+91{phone_number}"
+    else:
+        formatted_phone = phone_number
+    return formatted_phone
+
+
+@handle_exceptions
+def send_sms_via_twilio_client(formatted_phone, message_body):
+    client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
+    message = client.messages.create(
+        body=message_body,
+        from_=TWILIO_PHONE_NUMBER,
+        to=formatted_phone
+    )
+    return message.sid
+
+
+@handle_exceptions
 def send_otp_via_twilio(phone_number, otp_code):
-    print(f"Sending OTP {otp_code} to phone number {phone_number} via Twilio SMS")
+    credentials_available = all([TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_PHONE_NUMBER])
+    if not credentials_available:
+        raise Exception("Twilio Creds not configured")
+    
+    formatted_phone = format_phone_number_for_india(phone_number)
+    message_body = f"Your verification code for SearchMyStay is {otp_code}. Valid for 10 minutes. Do not share with anyone."
+    send_sms_via_twilio_client(formatted_phone, message_body)
     return True
 
 
@@ -947,8 +974,36 @@ def send_otp_via_twilio(phone_number, otp_code):
 def process_otp_request(phone_number):
     otp_code = generate_and_save_otp(phone_number)
     sms_sent = send_otp_via_twilio(phone_number, otp_code)
+    return True
+
+
+@handle_exceptions
+def verify_otp_and_update_phone(property_id, entered_otp):
+    farmhouse_data = db_find_one("farmhouses", {"_id": ObjectId(property_id)}, {"otp_code": 1, "otp_last_sent_at": 1})
     
-    if not sms_sent:
-        raise AppException("Failed to send OTP via SMS")
+    if not farmhouse_data:
+        raise AppException("Property not found")
     
+    stored_otp = farmhouse_data.get("otp_code")
+    otp_last_sent_at = farmhouse_data.get("otp_last_sent_at")
+    
+    if not stored_otp:
+        raise AppException("No OTP found for this property")
+    
+    if stored_otp != str(entered_otp):
+        raise AppException("OTP is not correct")
+    
+    ist_timezone = pytz.timezone('Asia/Kolkata')
+    current_time = datetime.now(ist_timezone)
+    time_difference = current_time - otp_last_sent_at
+    
+    if time_difference.total_seconds() > (OTP_EXPIRY_MINUTES * 60):
+        raise AppException("OTP has expired")
+    
+    update_data = {
+        "$set": {"phone_number_verified": True},
+        "$unset": {"otp_code": "", "otp_last_sent_at": ""}
+    }
+    
+    db_update_one("farmhouses", {"_id": ObjectId(property_id)}, update_data)
     return True

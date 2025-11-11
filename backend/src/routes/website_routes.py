@@ -453,3 +453,26 @@ def get_farmhouse_name_route(farmhouse_id):
     }
     
     return jsonify(response_data), 200
+
+
+@website_bp.route('/verify-otp', methods=['POST'])
+@handle_route_exceptions
+def verify_otp_route():
+    data = request.get_json() or {}
+    property_id = data.get('propertyId')
+    entered_otp = data.get('otpCode')
+    
+    if not property_id:
+        raise AppException("Property ID is required")
+    
+    if not entered_otp:
+        raise AppException("OTP is required")
+    
+    verify_otp_and_update_phone(property_id, entered_otp)
+    
+    response_data = {
+        "success": True,
+        "message": "Phone number verified successfully"
+    }
+    
+    return jsonify(response_data), 200
