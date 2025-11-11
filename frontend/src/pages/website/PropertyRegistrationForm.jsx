@@ -28,7 +28,6 @@ const PropertyRegistrationForm = () => {
   const [stepLoading, setStepLoading] = useState(false);
   const { submitRegistration, loading, success, resetState } = usePropertyRegistration();
   
-  // State Management
   const [basicInfo, setBasicInfo] = useState({
     name: '',
     description: '',
@@ -136,7 +135,6 @@ const PropertyRegistrationForm = () => {
   const [validationErrors, setValidationErrors] = useState({});
   const [isRegistrationComplete, setIsRegistrationComplete] = useState(false);
 
-  // Scroll to top on step change
   useEffect(() => {
     window.scrollTo({
       top: 0,
@@ -145,13 +143,38 @@ const PropertyRegistrationForm = () => {
     });
   }, [currentStep]);
 
-  // Event Handlers
   const handleBasicInfoChange = (e) => {
     const { name, value } = e.target;
     setBasicInfo(prev => ({ ...prev, [name]: value }));
     
     if (validationErrors[name]) {
       setValidationErrors(prev => ({ ...prev, [name]: '' }));
+    }
+  };
+
+  const handleLocationSelected = (locationData) => {
+    setBasicInfo(prev => ({
+      ...prev,
+      address: locationData.address,
+      pin_code: locationData.pin_code || prev.pin_code,
+      location: {
+        address: locationData.address,
+        pin_code: locationData.pin_code || prev.pin_code,
+        city: locationData.city,
+        state: locationData.state,
+        country: locationData.country,
+        latitude: locationData.latitude,
+        longitude: locationData.longitude,
+        coordinates: locationData.coordinates
+      }
+    }));
+    
+    if (validationErrors.address) {
+      setValidationErrors(prev => ({ ...prev, address: '' }));
+    }
+    
+    if (locationData.pin_code && validationErrors.pin_code) {
+      setValidationErrors(prev => ({ ...prev, pin_code: '' }));
     }
   };
 
@@ -220,7 +243,6 @@ const PropertyRegistrationForm = () => {
     }
   };
 
-  // Validation Functions
   const validateBasicInfo = () => {
     const errors = {};
     
@@ -347,7 +369,6 @@ const PropertyRegistrationForm = () => {
     return errors;
   };
 
-  // Step Submit Handlers
   const handleStep1Next = async (e) => {
     e.preventDefault();
     const errors = validateBasicInfo();
@@ -590,7 +611,6 @@ const PropertyRegistrationForm = () => {
     window.location.href = '/';
   };
 
-  // Render
   return (
     <>
       {isRegistrationComplete ? (
@@ -616,6 +636,7 @@ const PropertyRegistrationForm = () => {
                   basicInfo={basicInfo}
                   validationErrors={validationErrors}
                   onBasicInfoChange={handleBasicInfoChange}
+                  onLocationSelected={handleLocationSelected}
                   onSubmit={handleStep1Next}
                 />
               )}

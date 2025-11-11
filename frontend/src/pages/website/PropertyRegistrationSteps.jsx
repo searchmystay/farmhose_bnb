@@ -9,6 +9,7 @@ import {
   SectionHeader, 
   StepNavigation 
 } from '../../components/common/FormComponents';
+import GooglePlacesAutocomplete from '../../components/common/GooglePlacesAutocomplete';
 
 // Helper Components
 export const ProcessExplanation = () => (
@@ -81,7 +82,8 @@ export const RegistrationSuccessMessage = ({ onGoToHome }) => (
 export const Step1BasicInfo = ({ 
   basicInfo, 
   validationErrors, 
-  onBasicInfoChange, 
+  onBasicInfoChange,
+  onLocationSelected,
   onSubmit 
 }) => (
   <form onSubmit={onSubmit} className="space-y-6">
@@ -173,12 +175,12 @@ export const Step1BasicInfo = ({
       )}
     </div>
 
-    <TextInput
-      name="address"
+    <GooglePlacesAutocomplete
       value={basicInfo.address}
       onChange={onBasicInfoChange}
-      label="Address"
-      placeholder="Enter your property address"
+      onPlaceSelected={onLocationSelected}
+      label="Property Address"
+      placeholder="Start typing your property address..."
       error={validationErrors.address}
     />
 
@@ -193,7 +195,7 @@ export const Step1BasicInfo = ({
         }
       }}
       label="Pin Code"
-      placeholder="Enter 6-digit pin code"
+      placeholder="Auto-filled from address or enter manually"
       maxLength="6"
       pattern="[0-9]{6}"
       error={validationErrors.pin_code}
