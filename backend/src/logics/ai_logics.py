@@ -48,7 +48,7 @@ def create_vector_store(file_ids):
 def create_global_vector_store(first_file_id):
     vector_store_id = create_vector_store(file_ids=[first_file_id])
     ist_timezone = pytz.timezone('Asia/Kolkata')
-    current_time = datetime.now(ist_timezone)
+    current_time = datetime.now(ist_timezone).replace(tzinfo=None)
     
     db_update_one(
         "admin_analysis", 
@@ -151,7 +151,10 @@ def search_vector_store(vector_store_id, query_string, top_k=5, rewrite_query=Tr
 
 @handle_exceptions
 def train_data(text_data):
-    temp_file_path = f"temp_training.txt"
+    ist_timezone = pytz.timezone('Asia/Kolkata')
+    current_time = datetime.now(ist_timezone)
+    timestamp = current_time.strftime("%Y%m%d_%H%M%S")
+    temp_file_path = f"temp_training_{timestamp}.txt"
 
     with open(temp_file_path, "w", encoding="utf-8") as f:
         f.write(text_data)
