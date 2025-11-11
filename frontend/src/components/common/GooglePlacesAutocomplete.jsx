@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useState } from 'react';
 
-const GooglePlacesAutocomplete = ({ value, onChange, onPlaceSelected, label, placeholder = 'Start typing address...', error, apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY }) => {
+const GooglePlacesAutocomplete = ({ value, onChange, onPlaceSelected, onInputChange, label, placeholder = 'Start typing address...', error, apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY }) => {
   const containerRef = useRef(null);
   const autocompleteElementRef = useRef(null);
   const [isLoaded, setIsLoaded] = useState(false);
