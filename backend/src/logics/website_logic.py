@@ -2,7 +2,7 @@ from src.database.db_common_operations import db_find_many, db_find_one, db_inse
 from src.database.db_owner_analysis_operations import record_visit, record_contact
 from src.utils.exception_handler import handle_exceptions, AppException
 from src.logics.cloudfare_bucket import upload_farmhouse_image_to_r2, upload_farmhouse_document_to_r2
-from src.config import LEAD_COST_RUPEES, MINIMUM_BALANCE_THRESHOLD, OTP_EXPIRY_MINUTES, TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_PHONE_NUMBER
+from src.config import LEAD_COST_RUPEES, MINIMUM_BALANCE_THRESHOLD, OTP_EXPIRY_MINUTES, TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_PHONE_NUMBER, AUTO_PAYMENT_THRESHOLD
 from bson import ObjectId
 from datetime import datetime, timedelta
 import pytz
@@ -752,6 +752,8 @@ def check_farmhouse_credit_balance(farmhouse_id):
 
 @handle_exceptions
 def deduct_lead_cost_from_farmhouse(farmhouse_id):
+    from src.logics.payment_logic import trigger_auto_recharge_in_background
+    
     current_balance, whatsapp_link = check_farmhouse_credit_balance(farmhouse_id)
     
     if current_balance < MINIMUM_BALANCE_THRESHOLD:
@@ -776,6 +778,9 @@ def deduct_lead_cost_from_farmhouse(farmhouse_id):
     
     query_filter = {"_id": ObjectId(farmhouse_id)}
     db_update_one("farmhouses", query_filter, update_data)
+    
+    if new_balance < AUTO_PAYMENT_THRESHOLD:
+        trigger_auto_recharge_in_background(farmhouse_id)
     
     return new_balance, whatsapp_link
 

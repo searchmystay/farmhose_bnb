@@ -569,6 +569,50 @@ def get_farmhouse_schema() -> Dict:
                 "bsonType": "number",
                 "description": "Available credit balance for lead charges (40 rupees per lead)",
             },
+            "payment_method": {
+                "bsonType": "object",
+                "description": "Saved payment method details for auto-recharge functionality",
+                "properties": {
+                    "razorpay_customer_id": {
+                        "bsonType": "string",
+                        "description": "Razorpay customer ID for processing payments"
+                    },
+                    "razorpay_token": {
+                        "bsonType": "string",
+                        "description": "Razorpay payment token for auto-charging"
+                    },
+                    "payment_type": {
+                        "bsonType": "string",
+                        "description": "Type of payment method",
+                        "enum": ["card", "upi", "netbanking"]
+                    },
+                    "auto_recharge_enabled": {
+                        "bsonType": "bool",
+                        "description": "Whether auto-recharge is enabled for this property owner"
+                    },
+                    "consent_given": {
+                        "bsonType": "bool",
+                        "description": "Legal consent for auto-debit from owner"
+                    },
+                    "consent_timestamp": {
+                        "bsonType": "date",
+                        "description": "Timestamp when owner gave consent for auto-debit"
+                    },
+                    "first_payment_id": {
+                        "bsonType": "string",
+                        "description": "Reference to the first payment ID that created this payment method"
+                    },
+                    "last_auto_recharge_date": {
+                        "bsonType": "date",
+                        "description": "Last date when auto-recharge was triggered"
+                    },
+                    "total_auto_recharges": {
+                        "bsonType": "int",
+                        "description": "Total count of successful auto-recharges",
+                        "minimum": 0
+                    }
+                }
+            },
             "status": {
                 "bsonType": "string",
                 "description": "Status of the farmhouse listing",
