@@ -2,6 +2,7 @@ import { Helmet } from 'react-helmet-async'
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Footer from '../../components/Footer'
+import GooglePlacesAutocomplete from '../../components/common/GooglePlacesAutocomplete'
 
 function SearchPage() {
   const navigate = useNavigate()
@@ -10,6 +11,8 @@ function SearchPage() {
     checkOut: '',
     propertyType: 'both',
     address: '',
+    searchLatitude: null,
+    searchLongitude: null,
     numberOfAdults: '',
     numberOfChildren: '',
     numberOfPets: ''
@@ -36,6 +39,15 @@ function SearchPage() {
     setFormData(prev => ({ ...prev, [name]: value }))
   }
 
+  const handleLocationSelected = (locationData) => {
+    setFormData(prev => ({
+      ...prev,
+      address: locationData.address,
+      searchLatitude: locationData.latitude,
+      searchLongitude: locationData.longitude
+    }))
+  }
+
   const handleSubmit = (e) => {
     e.preventDefault()
     
@@ -44,16 +56,12 @@ function SearchPage() {
       checkOutDate: formData.checkOut,
       propertyType: formData.propertyType,
       address: formData.address,
+      searchLatitude: formData.searchLatitude,
+      searchLongitude: formData.searchLongitude,
       numberOfAdults: formData.numberOfAdults ? parseInt(formData.numberOfAdults) : 0,
       numberOfChildren: formData.numberOfChildren ? parseInt(formData.numberOfChildren) : 0,
       numberOfPets: formData.numberOfPets ? parseInt(formData.numberOfPets) : 0
     }
-    
-    console.log('Search Form Data:', searchData)
-    console.log('Address:', searchData.address)
-    console.log('Number of Adults:', searchData.numberOfAdults)
-    console.log('Number of Children:', searchData.numberOfChildren)
-    console.log('Number of Pets:', searchData.numberOfPets)
     
     sessionStorage.setItem('searchCriteria', JSON.stringify(searchData))
     
@@ -150,16 +158,16 @@ function SearchPage() {
   const renderGuestDetails = () => (
     <div className="space-y-4">
       <div>
-        <label htmlFor="address" className="block text-sm font-medium text-gray-700 mb-2">Address / Location</label>
-        <input
-          type="text"
-          id="address"
-          name="address"
+        <GooglePlacesAutocomplete
           value={formData.address}
           onChange={handleInputChange}
-          placeholder="Enter city, area, or pincode"
-          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors duration-200"
+          onPlaceSelected={handleLocationSelected}
+          label="Search Location"
+          placeholder="Type a location to search nearby properties..."
         />
+        <p className="text-xs text-gray-500 mt-1">
+          Properties within 10km radius will be shown
+        </p>
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
