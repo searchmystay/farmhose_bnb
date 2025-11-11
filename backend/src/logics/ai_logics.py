@@ -70,63 +70,12 @@ def upload_file_in_openai(file_path):
 
 
 @handle_exceptions
-def list_vector_store_files(vector_store_id):
-    client = get_openai_client()
-    response = client.vector_stores.files.list(
-        vector_store_id=vector_store_id
-    )
+def search_vector_store(query_string, top_k=5, rewrite_query=True):
+    vector_store_id = get_vector_store_id()
     
-    return response.data
-
-
-@handle_exceptions
-def get_vector_store_file_content(vector_store_id, file_id):
-    client = get_openai_client()
-    response = client.vector_stores.files.content(
-        vector_store_id=vector_store_id, file_id=file_id
-    )
-    
-    if hasattr(response, 'data') and response.data:
-        return response.data[0]
-    
-    return None
-
-
-@handle_exceptions
-def get_training_data(vector_store_id):
     if not vector_store_id:
-        raise AppException("No training data found", 404)
+        raise Exception("vector store id not found")
     
-    files = list_vector_store_files(vector_store_id)
-    file_content = get_vector_store_file_content(vector_store_id, files[0].id)
-    if not file_content:
-        raise AppException("File content not found", 404)
-    
-    if hasattr(file_content, 'text'):
-        return file_content.text
-    
-    return ""
-
-
-@handle_exceptions
-def chat_with_openai(messages, model="gpt-3.5-turbo"):
-    client = get_openai_client()
-    response = client.chat.completions.create(
-        model=model,
-        messages=messages,
-        max_tokens=1500,
-        temperature=0.7
-    )
-    
-    result = response.choices[0].message.content.strip()
-    return result
-
-
-
-
-
-@handle_exceptions
-def search_vector_store(vector_store_id, query_string, top_k=5, rewrite_query=True):
     client = get_openai_client()
     response = client.vector_stores.search(
         vector_store_id=vector_store_id,
@@ -146,7 +95,6 @@ def search_vector_store(vector_store_id, query_string, top_k=5, rewrite_query=Tr
                     text_chunks += f"\n\n{chunk_text}"
 
     return text_chunks
-
 
 
 @handle_exceptions
