@@ -921,7 +921,8 @@ def get_farmhouse_name(farmhouse_id):
 def generate_and_save_otp(phone_number):
     otp_code = random.randint(100000, 999999)
     ist_timezone = pytz.timezone('Asia/Kolkata')
-    otp_last_sent_at = datetime.now(ist_timezone)
+    ist_time = datetime.now(ist_timezone)
+    otp_last_sent_at = ist_time.replace(tzinfo=None)
     
     otp_data = {
         "otp_code": str(otp_code),
@@ -994,7 +995,8 @@ def verify_otp_and_update_phone(property_id, entered_otp):
         raise AppException("OTP is not correct")
     
     ist_timezone = pytz.timezone('Asia/Kolkata')
-    current_time = datetime.now(ist_timezone)
+    ist_time = datetime.now(ist_timezone)
+    current_time = ist_time.replace(tzinfo=None)
     time_difference = current_time - otp_last_sent_at
     
     if time_difference.total_seconds() > (OTP_EXPIRY_MINUTES * 60):
