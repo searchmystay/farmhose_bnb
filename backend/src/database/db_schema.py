@@ -848,6 +848,10 @@ def get_admin_analysis_schema():
             "updated_at": {
                 "bsonType": "date",
                 "description": "Last update timestamp"
+            },
+            "vector_store_id": {
+                "bsonType": "string",
+                "description": "OpenAI vector store ID for AI training data"
             }
         }
     }
