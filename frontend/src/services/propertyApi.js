@@ -22,6 +22,8 @@ export const fetchFarmhouseList = async (searchCriteria = null) => {
       requestData.numberOfAdults = searchCriteria.numberOfAdults
       requestData.numberOfChildren = searchCriteria.numberOfChildren
       requestData.numberOfPets = searchCriteria.numberOfPets
+      requestData.searchLatitude = searchCriteria.searchLatitude
+      requestData.searchLongitude = searchCriteria.searchLongitude
     }
     
     const response = await apiClient.post('/farmhouse-list', requestData)
@@ -48,6 +50,8 @@ export const fetchBnbList = async (searchCriteria = null) => {
       requestData.numberOfAdults = searchCriteria.numberOfAdults
       requestData.numberOfChildren = searchCriteria.numberOfChildren
       requestData.numberOfPets = searchCriteria.numberOfPets
+      requestData.searchLatitude = searchCriteria.searchLatitude
+      requestData.searchLongitude = searchCriteria.searchLongitude
     }
     
     const response = await apiClient.post('/bnb-list', requestData)
@@ -75,6 +79,8 @@ export const fetchPropertyList = async (searchCriteria = null) => {
       requestData.numberOfAdults = searchCriteria.numberOfAdults
       requestData.numberOfChildren = searchCriteria.numberOfChildren
       requestData.numberOfPets = searchCriteria.numberOfPets
+      requestData.searchLatitude = searchCriteria.searchLatitude
+      requestData.searchLongitude = searchCriteria.searchLongitude
     }
     
     const response = await apiClient.post('/property-list', requestData)
