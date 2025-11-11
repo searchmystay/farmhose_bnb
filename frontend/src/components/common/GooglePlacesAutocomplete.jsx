@@ -51,7 +51,10 @@ const GooglePlacesAutocomplete = ({ value, onChange, onPlaceSelected, label, pla
       if (types.includes('administrative_area_level_1')) result.state = component.longText;
       if (types.includes('country')) result.country = component.longText;
       if (types.includes('postal_code')) result.pinCode = component.longText;
-      if (types.includes('postal_code_suffix')) result.pinCode = `${result.pinCode}-${component.longText}`;
+      if (types.includes('postal_code_suffix') && result.pinCode) {
+        result.pinCode = `${result.pinCode}-${component.longText}`;
+      }
+      if (!result.city && types.includes('sublocality_level_1')) result.city = component.longText;
     }
 
     return result;
