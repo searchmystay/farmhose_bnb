@@ -4,7 +4,6 @@ import { usePropertyRegistration } from '../../hooks/usePropertyData';
 import {
   saveBasicInfo,
   verifyOtp,
-  resendOtp,
   saveEssentialAmenities,
   saveExperienceAmenities,
   saveAdditionalAmenities,
@@ -139,7 +138,6 @@ const PropertyRegistrationForm = () => {
   const [isRegistrationComplete, setIsRegistrationComplete] = useState(false);
   
   const [otpCode, setOtpCode] = useState('');
-  const [resendTimer, setResendTimer] = useState(0);
   const [isVerifying, setIsVerifying] = useState(false);
 
   useEffect(() => {
@@ -163,27 +161,9 @@ const PropertyRegistrationForm = () => {
     });
   }, [currentStep]);
 
-  useEffect(() => {
-    if (resendTimer > 0) {
-      const timer = setTimeout(() => setResendTimer(resendTimer - 1), 1000);
-      return () => clearTimeout(timer);
-    }
-  }, [resendTimer]);
-
   const handleOtpChange = (e) => {
     const value = e.target.value.replace(/\D/g, '');
     setOtpCode(value);
-  };
-
-  const handleResendOtp = async () => {
-    try {
-      await resendOtp(propertyId);
-      toast.success('OTP resent successfully!');
-      setResendTimer(60);
-      setOtpCode('');
-    } catch (error) {
-      toast.error(error.message || 'Failed to resend OTP');
-    }
   };
 
   const handleBasicInfoChange = (e) => {
@@ -432,7 +412,6 @@ const PropertyRegistrationForm = () => {
       const response = await saveBasicInfo(basicInfo, propertyId);
       setPropertyId(response.propertyId);
       toast.success('Basic information saved! OTP sent to your phone number.');
-      setResendTimer(60);
       setCurrentStep(2);
     } catch (error) {
       toast.error(error.message || 'Failed to save basic information');
@@ -730,9 +709,7 @@ const PropertyRegistrationForm = () => {
                   otpCode={otpCode}
                   onOtpChange={handleOtpChange}
                   onSubmit={handleStep2Next}
-                  onResend={handleResendOtp}
                   onPrevious={handlePrevious}
-                  resendTimer={resendTimer}
                   isVerifying={isVerifying}
                 />
               )}

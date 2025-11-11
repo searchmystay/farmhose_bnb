@@ -286,20 +286,6 @@ export const verifyOtp = async (propertyId, otpCode) => {
   }
 }
 
-export const resendOtp = async (propertyId) => {
-  try {
-    const response = await apiClient.post('/resend-otp', {
-      propertyId
-    })
-    return response.data
-  } catch (error) {
-    if (error.response && error.response.data) {
-      throw new Error(error.response.data.message || 'Failed to resend OTP')
-    }
-    throw new Error('Failed to resend OTP, Network error')
-  }
-}
-
 export const saveEssentialAmenities = async (propertyId, essentialAmenities) => {
   try {
     const response = await apiClient.post('/save-essential-amenities', {

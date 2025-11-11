@@ -211,9 +211,7 @@ export const Step2OTPVerification = ({
   otpCode,
   onOtpChange,
   onSubmit,
-  onResend,
   onPrevious,
-  resendTimer,
   isVerifying
 }) => {
   return (
@@ -246,24 +244,7 @@ export const Step2OTPVerification = ({
             placeholder="000000"
             required
           />
-          <p className="text-sm text-gray-500 mt-2 text-left">Please enter the 6-digit code</p>
-        </div>
-
-        <div className="mt-6 flex items-center justify-center gap-2">
-          <span className="text-gray-600">Didn't receive the code?</span>
-          {resendTimer > 0 ? (
-            <span className="text-green-600 font-medium">
-              Resend in {resendTimer}s
-            </span>
-          ) : (
-            <button
-              type="button"
-              onClick={onResend}
-              className="text-green-600 font-medium hover:text-green-700 underline transition-colors"
-            >
-              Resend OTP
-            </button>
-          )}
+          <p className="text-sm text-gray-500 mt-2 text-left">Please enter the 6-digit code sent via SMS</p>
         </div>
       </div>
 
