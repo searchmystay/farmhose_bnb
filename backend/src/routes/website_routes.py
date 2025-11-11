@@ -1,6 +1,7 @@
 from flask import Blueprint, jsonify, request
 from src.logics.website_logic import *
 from src.utils.exception_handler import handle_route_exceptions, AppException
+from src.config import MAX_SEARCH_DISTANCE_KM
 from bson import ObjectId
 import json
 
@@ -19,20 +20,11 @@ def list_farmhouses():
     number_of_children = data.get('numberOfChildren')
     number_of_pets = data.get('numberOfPets')
     
-    print("\n" + "="*50)
-    print("FARMHOUSE LIST - Search Criteria Received:")
-    print("="*50)
-    print(f"Check-in Date: {check_in_date}")
-    print(f"Check-out Date: {check_out_date}")
-    print(f"Address/Location: {address}")
-    print(f"Number of Adults: {number_of_adults}")
-    print(f"Number of Children: {number_of_children}")
-    print(f"Number of Pets: {number_of_pets}")
-    print(f"Number of People (old field): {number_of_people}")
-    print("="*50 + "\n")
+    search_latitude = data.get('searchLatitude')
+    search_longitude = data.get('searchLongitude')
     
     total_people = number_of_adults if number_of_adults is not None else number_of_people
-    farmhouses_data = get_approved_farmhouses(total_people, number_of_children, number_of_pets, check_in_date, check_out_date)
+    farmhouses_data = get_approved_farmhouses(total_people, number_of_children, number_of_pets, search_latitude, search_longitude, MAX_SEARCH_DISTANCE_KM, check_in_date, check_out_date)
     
     response_data = {
         "success": True,
@@ -54,20 +46,11 @@ def list_bnbs():
     number_of_children = data.get('numberOfChildren')
     number_of_pets = data.get('numberOfPets')
     
-    print("\n" + "="*50)
-    print("BnB LIST - Search Criteria Received:")
-    print("="*50)
-    print(f"Check-in Date: {check_in_date}")
-    print(f"Check-out Date: {check_out_date}")
-    print(f"Address/Location: {address}")
-    print(f"Number of Adults: {number_of_adults}")
-    print(f"Number of Children: {number_of_children}")
-    print(f"Number of Pets: {number_of_pets}")
-    print(f"Number of People (old field): {number_of_people}")
-    print("="*50 + "\n")
+    search_latitude = data.get('searchLatitude')
+    search_longitude = data.get('searchLongitude')
     
     total_people = number_of_adults if number_of_adults is not None else number_of_people
-    bnbs_data = get_approved_bnbs(total_people, number_of_children, number_of_pets, check_in_date, check_out_date)
+    bnbs_data = get_approved_bnbs(total_people, number_of_children, number_of_pets, search_latitude, search_longitude, MAX_SEARCH_DISTANCE_KM, check_in_date, check_out_date)
     
     response_data = {
         "success": True,
@@ -80,28 +63,19 @@ def list_bnbs():
 @handle_route_exceptions
 def list_properties():
     data = request.get_json() or {}
-    number_of_people = data.get('numberOfPeople')
     check_in_date = data.get('checkInDate')
     check_out_date = data.get('checkOutDate')
+    number_of_people = data.get('numberOfPeople')
     address = data.get('address')
     number_of_adults = data.get('numberOfAdults')
     number_of_children = data.get('numberOfChildren')
     number_of_pets = data.get('numberOfPets')
     
-    print("\n" + "="*50)
-    print("ALL PROPERTIES LIST - Search Criteria Received:")
-    print("="*50)
-    print(f"Check-in Date: {check_in_date}")
-    print(f"Check-out Date: {check_out_date}")
-    print(f"Address/Location: {address}")
-    print(f"Number of Adults: {number_of_adults}")
-    print(f"Number of Children: {number_of_children}")
-    print(f"Number of Pets: {number_of_pets}")
-    print(f"Number of People (old field): {number_of_people}")
-    print("="*50 + "\n")
+    search_latitude = data.get('searchLatitude')
+    search_longitude = data.get('searchLongitude')
     
     total_people = number_of_adults if number_of_adults is not None else number_of_people
-    properties_data = get_all_approved_properties(total_people, number_of_children, number_of_pets, check_in_date, check_out_date)
+    properties_data = get_all_approved_properties(total_people, number_of_children, number_of_pets, search_latitude, search_longitude, MAX_SEARCH_DISTANCE_KM, check_in_date, check_out_date)
     
     response_data = {
         "success": True,
@@ -212,6 +186,16 @@ def save_basic_info_route():
     data = request.get_json() or {}
     property_id = data.get('propertyId')
     
+    location_data = data.get('location')
+    if not location_data:
+        location_data = {
+            "address": data.get('address'),
+            "pin_code": data.get('pin_code')
+        }
+    else:
+        if 'pin_code' not in location_data and data.get('pin_code'):
+            location_data['pin_code'] = data.get('pin_code')
+    
     step_data = {
         "name": data.get('name'),
         "description": data.get('description'),
@@ -221,8 +205,7 @@ def save_basic_info_route():
         "opening_time": data.get('opening_time'),
         "closing_time": data.get('closing_time'),
         "phone_number": data.get('phone_number'),
-        "address": data.get('address'),
-        "pin_code": data.get('pin_code')
+        "location": location_data
     }
     
     saved_property_id = save_partial_property_registration(step_data, property_id)

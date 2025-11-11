@@ -6,6 +6,8 @@ from src.config import LEAD_COST_RUPEES, MINIMUM_BALANCE_THRESHOLD
 from bson import ObjectId
 from datetime import datetime, timedelta
 import pytz
+import re
+    
 
 
 @handle_exceptions
@@ -163,7 +165,7 @@ def get_date_range(start_date, end_date):
 
 
 @handle_exceptions
-def get_approved_properties_by_type(query_filter, number_of_people=None, number_of_children=None, number_of_pets=None, check_in_date=None, check_out_date=None):
+def get_approved_properties_by_type(query_filter, number_of_people=None, number_of_children=None, number_of_pets=None, search_latitude=None, search_longitude=None, max_distance_km=10, check_in_date=None, check_out_date=None):
     projection = {
         "_id": 1,
         "name": 1,
@@ -182,6 +184,18 @@ def get_approved_properties_by_type(query_filter, number_of_people=None, number_
     
     if number_of_pets and not isinstance(number_of_pets, str):
         query_filter["max_pets_allowed"] = {"$gte": number_of_pets}
+    
+    # Add geospatial filter if search location is provided
+    if search_latitude is not None and search_longitude is not None:
+        query_filter["location.coordinates"] = {
+            "$near": {
+                "$geometry": {
+                    "type": "Point",
+                    "coordinates": [float(search_longitude), float(search_latitude)]  # [lng, lat] order
+                },
+                "$maxDistance": max_distance_km * 1000  # Convert km to meters
+            }
+        }
     
     if check_in_date and check_out_date:
         check_in_date = datetime.strptime(check_in_date, '%Y-%m-%d')
@@ -281,23 +295,23 @@ def get_property_details(property_id, lead_email=None, check_in_date=None, check
 
 
 @handle_exceptions
-def get_approved_farmhouses(number_of_people=None, number_of_children=None, number_of_pets=None, check_in_date=None, check_out_date=None):
+def get_approved_farmhouses(number_of_people=None, number_of_children=None, number_of_pets=None, search_latitude=None, search_longitude=None, max_distance_km=10, check_in_date=None, check_out_date=None):
     query_filter = {"status": "active", "type": "farmhouse"}
-    farmhouses_list = get_approved_properties_by_type(query_filter, number_of_people, number_of_children, number_of_pets, check_in_date, check_out_date)
+    farmhouses_list = get_approved_properties_by_type(query_filter, number_of_people, number_of_children, number_of_pets, search_latitude, search_longitude, max_distance_km, check_in_date, check_out_date)
     return farmhouses_list
 
 
 @handle_exceptions
-def get_approved_bnbs(number_of_people=None, number_of_children=None, number_of_pets=None, check_in_date=None, check_out_date=None):
+def get_approved_bnbs(number_of_people=None, number_of_children=None, number_of_pets=None, search_latitude=None, search_longitude=None, max_distance_km=10, check_in_date=None, check_out_date=None):
     query_filter = {"status": "active", "type": "bnb"}
-    bnbs_list = get_approved_properties_by_type(query_filter, number_of_people, number_of_children, number_of_pets, check_in_date, check_out_date)
+    bnbs_list = get_approved_properties_by_type(query_filter, number_of_people, number_of_children, number_of_pets, search_latitude, search_longitude, max_distance_km, check_in_date, check_out_date)
     return bnbs_list
 
 
 @handle_exceptions
-def get_all_approved_properties(number_of_people=None, number_of_children=None, number_of_pets=None, check_in_date=None, check_out_date=None):
+def get_all_approved_properties(number_of_people=None, number_of_children=None, number_of_pets=None, search_latitude=None, search_longitude=None, max_distance_km=10, check_in_date=None, check_out_date=None):
     query_filter = {"status": "active"}
-    properties_list = get_approved_properties_by_type(query_filter, number_of_people, number_of_children, number_of_pets, check_in_date, check_out_date)
+    properties_list = get_approved_properties_by_type(query_filter, number_of_people, number_of_children, number_of_pets, search_latitude, search_longitude, max_distance_km, check_in_date, check_out_date)
     return properties_list
 
 
@@ -506,6 +520,13 @@ def prepare_basic_info_update(step_data):
     
     per_day_price = safe_int_conversion(step_data.get("per_day_price"), 0)
     
+    location_data = step_data.get("location")
+    if not location_data:
+        location_data = {
+            "address": step_data.get("address", ""),
+            "pin_code": step_data.get("pin_code", "")
+        }
+    
     update_data = {
         "name": property_name,
         "description": step_data.get("description", ""),
@@ -514,10 +535,7 @@ def prepare_basic_info_update(step_data):
         "phone_number": step_data.get("phone_number", ""),
         "opening_time": opening_time_formatted,
         "closing_time": closing_time_formatted,
-        "location": {
-            "address": step_data.get("address", ""),
-            "pin_code": step_data.get("pin_code", "")
-        }
+        "location": location_data
     }
     return update_data
 
@@ -549,8 +567,6 @@ def prepare_amenities_update(step_data, property_id):
 
 @handle_exceptions
 def validate_strong_password(password):
-    import re
-    
     if len(password) < 8:
         raise AppException("Password must be at least 8 characters long")
     
