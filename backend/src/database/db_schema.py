@@ -51,7 +51,7 @@ def get_farmhouse_schema() -> Dict:
             },
             "location": {
                 "bsonType": "object",
-                "description": "Property location details",
+                "description": "Property location details with geospatial coordinates",
                 "required": ["address", "pin_code"],
                 "properties": {
                     "address": {
@@ -63,6 +63,50 @@ def get_farmhouse_schema() -> Dict:
                         "bsonType": "string",
                         "description": "Postal code of the property",
                         "pattern": "^[0-9]{6}$"
+                    },
+                    "city": {
+                        "bsonType": "string",
+                        "description": "City name"
+                    },
+                    "state": {
+                        "bsonType": "string",
+                        "description": "State name"
+                    },
+                    "country": {
+                        "bsonType": "string",
+                        "description": "Country name"
+                    },
+                    "latitude": {
+                        "bsonType": "double",
+                        "description": "Latitude coordinate for geolocation",
+                        "minimum": -90,
+                        "maximum": 90
+                    },
+                    "longitude": {
+                        "bsonType": "double",
+                        "description": "Longitude coordinate for geolocation",
+                        "minimum": -180,
+                        "maximum": 180
+                    },
+                    "coordinates": {
+                        "bsonType": "object",
+                        "description": "GeoJSON Point format for MongoDB geospatial queries",
+                        "properties": {
+                            "type": {
+                                "bsonType": "string",
+                                "enum": ["Point"],
+                                "description": "GeoJSON type must be Point"
+                            },
+                            "coordinates": {
+                                "bsonType": "array",
+                                "description": "Array of [longitude, latitude] in that order",
+                                "minItems": 2,
+                                "maxItems": 2,
+                                "items": {
+                                    "bsonType": "double"
+                                }
+                            }
+                        }
                     }
                 }
             },
@@ -808,3 +852,18 @@ def get_admin_analysis_schema():
         }
     }
     return schema
+
+
+def create_geospatial_indexes(db):
+    """
+    Create geospatial indexes for location-based queries.
+    This enables efficient radius searches for properties.
+    """
+    try:
+        # Create 2dsphere index on coordinates for geospatial queries
+        db.farmhouses.create_index([("location.coordinates", "2dsphere")])
+        print("✅ Geospatial index created on farmhouses.location.coordinates")
+        return True
+    except Exception as e:
+        print(f"❌ Error creating geospatial index: {str(e)}")
+        return False
