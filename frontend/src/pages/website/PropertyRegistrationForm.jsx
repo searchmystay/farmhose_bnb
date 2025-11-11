@@ -3,6 +3,7 @@ import { toast } from 'sonner';
 import { usePropertyRegistration } from '../../hooks/usePropertyData';
 import {
   saveBasicInfo,
+  verifyOtp,
   saveEssentialAmenities,
   saveExperienceAmenities,
   saveAdditionalAmenities,
@@ -15,11 +16,12 @@ import {
   ProgressIndicator,
   RegistrationSuccessMessage,
   Step1BasicInfo,
-  Step2EssentialAmenities,
-  Step3ExperienceAmenities,
-  Step4AdditionalAmenities,
-  Step5OwnerDetails,
-  Step6DocumentUpload
+  Step2OTPVerification,
+  Step3EssentialAmenities,
+  Step4ExperienceAmenities,
+  Step5AdditionalAmenities,
+  Step6OwnerDetails,
+  Step7DocumentUpload
 } from './PropertyRegistrationSteps';
 
 const PropertyRegistrationForm = () => {
@@ -134,6 +136,9 @@ const PropertyRegistrationForm = () => {
 
   const [validationErrors, setValidationErrors] = useState({});
   const [isRegistrationComplete, setIsRegistrationComplete] = useState(false);
+  
+  const [otpCode, setOtpCode] = useState('');
+  const [isVerifying, setIsVerifying] = useState(false);
 
   useEffect(() => {
     const savedPropertyId = sessionStorage.getItem('currentPropertyId');
@@ -155,6 +160,11 @@ const PropertyRegistrationForm = () => {
       behavior: 'smooth'
     });
   }, [currentStep]);
+
+  const handleOtpChange = (e) => {
+    const value = e.target.value.replace(/\D/g, '');
+    setOtpCode(value);
+  };
 
   const handleBasicInfoChange = (e) => {
     const { name, value } = e.target;
@@ -401,7 +411,7 @@ const PropertyRegistrationForm = () => {
     try {
       const response = await saveBasicInfo(basicInfo, propertyId);
       setPropertyId(response.propertyId);
-      toast.success('Basic information saved successfully!');
+      toast.success('Basic information saved! OTP sent to your phone number.');
       setCurrentStep(2);
     } catch (error) {
       toast.error(error.message || 'Failed to save basic information');
@@ -411,6 +421,30 @@ const PropertyRegistrationForm = () => {
   };
 
   const handleStep2Next = async (e) => {
+    e.preventDefault();
+    
+    if (!otpCode || otpCode.length !== 6) {
+      toast.error('Please enter a valid 6-digit OTP');
+      return;
+    }
+    
+    setIsVerifying(true);
+    
+    try {
+      const response = await verifyOtp(propertyId, otpCode);
+      if (response.verified) {
+        toast.success('Phone number verified successfully!');
+        setOtpCode('');
+        setCurrentStep(3);
+      }
+    } catch (error) {
+      toast.error(error.message || 'Invalid OTP. Please try again.');
+    } finally {
+      setIsVerifying(false);
+    }
+  };
+
+  const handleStep3Next = async (e) => {
     e.preventDefault();
     
     if (essentialAmenities.max_people_allowed < 1) {
@@ -428,24 +462,9 @@ const PropertyRegistrationForm = () => {
     try {
       await saveEssentialAmenities(propertyId, essentialAmenities);
       toast.success('Essential amenities saved successfully!');
-      setCurrentStep(3);
-    } catch (error) {
-      toast.error(error.message || 'Failed to save essential amenities');
-    } finally {
-      setStepLoading(false);
-    }
-  };
-
-  const handleStep3Next = async (e) => {
-    e.preventDefault();
-    setStepLoading(true);
-    
-    try {
-      await saveExperienceAmenities(propertyId, experienceAmenities);
-      toast.success('Experience amenities saved successfully!');
       setCurrentStep(4);
     } catch (error) {
-      toast.error(error.message || 'Failed to save experience amenities');
+      toast.error(error.message || 'Failed to save essential amenities');
     } finally {
       setStepLoading(false);
     }
@@ -456,9 +475,24 @@ const PropertyRegistrationForm = () => {
     setStepLoading(true);
     
     try {
+      await saveExperienceAmenities(propertyId, experienceAmenities);
+      toast.success('Experience amenities saved successfully!');
+      setCurrentStep(5);
+    } catch (error) {
+      toast.error(error.message || 'Failed to save experience amenities');
+    } finally {
+      setStepLoading(false);
+    }
+  };
+
+  const handleStep5Next = async (e) => {
+    e.preventDefault();
+    setStepLoading(true);
+    
+    try {
       await saveAdditionalAmenities(propertyId, additionalAmenities);
       toast.success('Additional amenities saved successfully!');
-      setCurrentStep(5);
+      setCurrentStep(6);
     } catch (error) {
       toast.error(error.message || 'Failed to save additional amenities');
     } finally {
@@ -466,7 +500,7 @@ const PropertyRegistrationForm = () => {
     }
   };
 
-  const handleStep5Next = async (e) => {
+  const handleStep6Next = async (e) => {
     e.preventDefault();
     const errors = validateOwnerDetails();
     
@@ -492,7 +526,7 @@ const PropertyRegistrationForm = () => {
       }
       
       toast.success('Owner details saved successfully!');
-      setCurrentStep(6);
+      setCurrentStep(7);
     } catch (error) {
       toast.error(error.message || 'Failed to save owner details');
     } finally {
@@ -671,46 +705,56 @@ const PropertyRegistrationForm = () => {
               )}
               
               {currentStep === 2 && (
-                <Step2EssentialAmenities
+                <Step2OTPVerification
+                  otpCode={otpCode}
+                  onOtpChange={handleOtpChange}
+                  onSubmit={handleStep2Next}
+                  onPrevious={handlePrevious}
+                  isVerifying={isVerifying}
+                />
+              )}
+
+              {currentStep === 3 && (
+                <Step3EssentialAmenities
                   essentialAmenities={essentialAmenities}
                   onToggleChange={handleEssentialToggleChange}
                   onNumberChange={handleNumberChange}
-                  onSubmit={handleStep2Next}
-                  onPrevious={handlePrevious}
-                />
-              )}
-              
-              {currentStep === 3 && (
-                <Step3ExperienceAmenities
-                  experienceAmenities={experienceAmenities}
-                  onToggleChange={handleExperienceToggleChange}
                   onSubmit={handleStep3Next}
                   onPrevious={handlePrevious}
                 />
               )}
               
               {currentStep === 4 && (
-                <Step4AdditionalAmenities
-                  additionalAmenities={additionalAmenities}
-                  onToggleChange={handleAdditionalToggleChange}
+                <Step4ExperienceAmenities
+                  experienceAmenities={experienceAmenities}
+                  onToggleChange={handleExperienceToggleChange}
                   onSubmit={handleStep4Next}
                   onPrevious={handlePrevious}
                 />
               )}
               
               {currentStep === 5 && (
-                <Step5OwnerDetails
-                  ownerDetails={ownerDetails}
-                  validationErrors={validationErrors}
-                  onOwnerDetailsChange={handleOwnerDetailsChange}
-                  onOwnerPhotoUpload={handleOwnerPhotoUpload}
+                <Step5AdditionalAmenities
+                  additionalAmenities={additionalAmenities}
+                  onToggleChange={handleAdditionalToggleChange}
                   onSubmit={handleStep5Next}
                   onPrevious={handlePrevious}
                 />
               )}
               
               {currentStep === 6 && (
-                <Step6DocumentUpload
+                <Step6OwnerDetails
+                  ownerDetails={ownerDetails}
+                  validationErrors={validationErrors}
+                  onOwnerDetailsChange={handleOwnerDetailsChange}
+                  onOwnerPhotoUpload={handleOwnerPhotoUpload}
+                  onSubmit={handleStep6Next}
+                  onPrevious={handlePrevious}
+                />
+              )}
+              
+              {currentStep === 7 && (
+                <Step7DocumentUpload
                   uploadData={uploadData}
                   validationErrors={validationErrors}
                   success={success}

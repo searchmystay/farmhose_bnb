@@ -271,6 +271,21 @@ export const saveBasicInfo = async (basicInfo, propertyId = null) => {
   }
 }
 
+export const verifyOtp = async (propertyId, otpCode) => {
+  try {
+    const response = await apiClient.post('/verify-otp', {
+      propertyId,
+      otpCode
+    })
+    return response.data
+  } catch (error) {
+    if (error.response && error.response.data) {
+      throw new Error(error.response.data.message || 'Failed to verify OTP')
+    }
+    throw new Error('Failed to verify OTP, Network error')
+  }
+}
+
 export const saveEssentialAmenities = async (propertyId, essentialAmenities) => {
   try {
     const response = await apiClient.post('/save-essential-amenities', {
