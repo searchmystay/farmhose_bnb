@@ -149,8 +149,10 @@ def save_basic_info_route():
         "phone_number": data.get('phone_number'),
         "location": location_data
     }
-    
+
     saved_property_id = save_partial_property_registration(step_data, property_id)
+    phone_number = step_data.get("phone_number")
+    process_otp_request(phone_number)
     
     response_data = {
         "success": True,

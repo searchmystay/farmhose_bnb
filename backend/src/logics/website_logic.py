@@ -2,11 +2,12 @@ from src.database.db_common_operations import db_find_many, db_find_one, db_inse
 from src.database.db_owner_analysis_operations import record_visit, record_contact
 from src.utils.exception_handler import handle_exceptions, AppException
 from src.logics.cloudfare_bucket import upload_farmhouse_image_to_r2, upload_farmhouse_document_to_r2
-from src.config import LEAD_COST_RUPEES, MINIMUM_BALANCE_THRESHOLD
+from src.config import LEAD_COST_RUPEES, MINIMUM_BALANCE_THRESHOLD, OTP_EXPIRY_MINUTES
 from bson import ObjectId
 from datetime import datetime, timedelta
 import pytz
 import re
+import random
     
 
 
@@ -913,3 +914,41 @@ def get_farmhouse_name(farmhouse_id):
     
     farmhouse_name = farmhouse_data["name"]
     return farmhouse_name
+
+
+@handle_exceptions
+def generate_and_save_otp(phone_number):
+    otp_code = random.randint(100000, 999999)
+    ist_timezone = pytz.timezone('Asia/Kolkata')
+    otp_last_sent_at = datetime.now(ist_timezone)
+    
+    otp_data = {
+        "otp_code": str(otp_code),
+        "otp_last_sent_at": otp_last_sent_at,
+        "phone_number_verified": False
+    }
+    
+    farmhouse_exists = db_exists("farmhouses", {"phone_number": phone_number})
+    if not farmhouse_exists:
+        raise AppException("Phone number not found in farmhouse records")
+    
+    db_update_one("farmhouses", {"phone_number": phone_number}, {"$set": otp_data})
+    
+    return otp_code
+
+
+@handle_exceptions
+def send_otp_via_twilio(phone_number, otp_code):
+    print(f"Sending OTP {otp_code} to phone number {phone_number} via Twilio SMS")
+    return True
+
+
+@handle_exceptions
+def process_otp_request(phone_number):
+    otp_code = generate_and_save_otp(phone_number)
+    sms_sent = send_otp_via_twilio(phone_number, otp_code)
+    
+    if not sms_sent:
+        raise AppException("Failed to send OTP via SMS")
+    
+    return True
