@@ -1,14 +1,13 @@
 import { useState, useEffect, useCallback } from 'react'
 import { toast } from 'sonner'
 
-const API_BASE_URL = 'http://localhost:5000'
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000'
 
 function useBookedDates(farmhouseId) {
   const [bookedDates, setBookedDates] = useState([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
 
-  // Fetch booked dates
   const fetchBookedDates = useCallback(async () => {
     if (!farmhouseId) return
 
@@ -34,7 +33,6 @@ function useBookedDates(farmhouseId) {
     }
   }, [farmhouseId])
 
-  // Add booked date
   const addBookedDate = async (dateString) => {
     try {
       const response = await fetch(`${API_BASE_URL}/booked-dates/${farmhouseId}`, {
@@ -50,7 +48,7 @@ function useBookedDates(farmhouseId) {
 
       if (result.success) {
         toast.success('Date marked as booked')
-        await fetchBookedDates() // Refresh list
+        await fetchBookedDates()
         return true
       } else {
         throw new Error(result.message || 'Failed to add booked date')
@@ -61,7 +59,6 @@ function useBookedDates(farmhouseId) {
     }
   }
 
-  // Remove booked date
   const removeBookedDate = async (dateString) => {
     try {
       const response = await fetch(`${API_BASE_URL}/booked-dates/${farmhouseId}`, {
@@ -77,7 +74,7 @@ function useBookedDates(farmhouseId) {
 
       if (result.success) {
         toast.success('Date unmarked')
-        await fetchBookedDates() // Refresh list
+        await fetchBookedDates()
         return true
       } else {
         throw new Error(result.message || 'Failed to remove booked date')
@@ -88,7 +85,6 @@ function useBookedDates(farmhouseId) {
     }
   }
 
-  // Fetch on mount
   useEffect(() => {
     fetchBookedDates()
   }, [fetchBookedDates])
