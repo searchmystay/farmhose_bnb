@@ -975,3 +975,35 @@ def process_otp_request(phone_number):
     otp_code = generate_and_save_otp(phone_number)
     sms_sent = send_otp_via_twilio(phone_number, otp_code)
     return True
+
+
+@handle_exceptions
+def verify_otp_and_update_phone(property_id, entered_otp):
+    farmhouse_data = db_find_one("farmhouses", {"_id": ObjectId(property_id)}, {"otp_code": 1, "otp_last_sent_at": 1})
+    
+    if not farmhouse_data:
+        raise AppException("Property not found")
+    
+    stored_otp = farmhouse_data.get("otp_code")
+    otp_last_sent_at = farmhouse_data.get("otp_last_sent_at")
+    
+    if not stored_otp:
+        raise AppException("No OTP found for this property")
+    
+    if stored_otp != str(entered_otp):
+        raise AppException("OTP is not correct")
+    
+    ist_timezone = pytz.timezone('Asia/Kolkata')
+    current_time = datetime.now(ist_timezone)
+    time_difference = current_time - otp_last_sent_at
+    
+    if time_difference.total_seconds() > (OTP_EXPIRY_MINUTES * 60):
+        raise AppException("OTP has expired")
+    
+    update_data = {
+        "$set": {"phone_number_verified": True},
+        "$unset": {"otp_code": "", "otp_last_sent_at": ""}
+    }
+    
+    db_update_one("farmhouses", {"_id": ObjectId(property_id)}, update_data)
+    return True
