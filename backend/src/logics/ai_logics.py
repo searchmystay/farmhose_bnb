@@ -28,96 +28,6 @@ def add_file_to_vector_store(vector_store_id, file_id):
 
 
 @handle_exceptions
-def upload_file_in_openai(file_path):
-    client = get_openai_client()
-    with open(file_path, "rb") as file:
-        response = client.files.create(file=file, purpose="assistants")
-    
-    return response.id
-
-
-@handle_exceptions
-def create_vector_store(file_ids):
-    client = get_openai_client()
-    vector_store = client.beta.vector_stores.create(file_ids=file_ids)
-    return vector_store.id
-
-
-@handle_exceptions
-def retrieve_vector_store_status(vector_store_id):
-    client = get_openai_client()
-    vector_store = client.beta.vector_stores.retrieve(vector_store_id)
-    return vector_store
-
-
-@handle_exceptions
-def train_data(text_data):
-    temp_file_path = f"temp_training.txt"
-
-    with open(temp_file_path, "w", encoding="utf-8") as f:
-        f.write(text_data)
-    
-    file_id = upload_file_in_openai(temp_file_path)
-    vector_store_id = create_vector_store(file_ids=[file_id])
-    os.remove(temp_file_path)
-    
-    return vector_store_id
-
-
-@handle_exceptions
-def list_vector_store_files(vector_store_id):
-    client = get_openai_client()
-    response = client.vector_stores.files.list(
-        vector_store_id=vector_store_id
-    )
-    
-    return response.data
-
-
-@handle_exceptions
-def get_vector_store_file_content(vector_store_id, file_id):
-    client = get_openai_client()
-    response = client.vector_stores.files.content(
-        vector_store_id=vector_store_id, file_id=file_id
-    )
-    
-    if hasattr(response, 'data') and response.data:
-        return response.data[0]
-    
-    return None
-
-
-@handle_exceptions
-def get_training_data(vector_store_id):
-    if not vector_store_id:
-        raise AppException("No training data found", 404)
-    
-    files = list_vector_store_files(vector_store_id)
-    file_content = get_vector_store_file_content(vector_store_id, files[0].id)
-    if not file_content:
-        raise AppException("File content not found", 404)
-    
-    if hasattr(file_content, 'text'):
-        return file_content.text
-    
-    return ""
-
-
-@handle_exceptions
-def chat_with_openai(messages, model="gpt-3.5-turbo"):
-    client = get_openai_client()
-    response = client.chat.completions.create(
-        model=model,
-        messages=messages,
-        max_tokens=1500,
-        temperature=0.7
-    )
-    
-    result = response.choices[0].message.content.strip()
-    return result
-
-
-@handle_exceptions
 def get_vector_store_id():
     admin_analysis = db_find_one("admin_analysis", {"_id": "admin_analysis_singleton"}, {"vector_store_id": 1})
     
@@ -128,10 +38,17 @@ def get_vector_store_id():
 
 
 @handle_exceptions
+def create_vector_store(file_ids):
+    client = get_openai_client()
+    vector_store = client.beta.vector_stores.create(file_ids=file_ids)
+    return vector_store.id
+
+
+@handle_exceptions
 def create_global_vector_store(first_file_id):
     vector_store_id = create_vector_store(file_ids=[first_file_id])
     ist_timezone = pytz.timezone('Asia/Kolkata')
-    current_time = datetime.now(ist_timezone)
+    current_time = datetime.now(ist_timezone).replace(tzinfo=None)
     
     db_update_one(
         "admin_analysis", 
@@ -143,7 +60,22 @@ def create_global_vector_store(first_file_id):
 
 
 @handle_exceptions
-def search_vector_store(vector_store_id, query_string, top_k=5, rewrite_query=True):
+def upload_file_in_openai(file_path):
+    client = get_openai_client()
+    with open(file_path, "rb") as file:
+        response = client.files.create(file=file, purpose="assistants")
+    
+    file_id = response.id
+    return file_id
+
+
+@handle_exceptions
+def search_vector_store(query_string, top_k=5, rewrite_query=True):
+    vector_store_id = get_vector_store_id()
+    
+    if not vector_store_id:
+        raise Exception("vector store id not found")
+    
     client = get_openai_client()
     response = client.vector_stores.search(
         vector_store_id=vector_store_id,
@@ -165,3 +97,24 @@ def search_vector_store(vector_store_id, query_string, top_k=5, rewrite_query=Tr
     return text_chunks
 
 
+@handle_exceptions
+def train_data(text_data):
+    ist_timezone = pytz.timezone('Asia/Kolkata')
+    current_time = datetime.now(ist_timezone)
+    timestamp = current_time.strftime("%Y%m%d_%H%M%S")
+    temp_file_path = f"temp_training_{timestamp}.txt"
+
+    with open(temp_file_path, "w", encoding="utf-8") as f:
+        f.write(text_data)
+    
+    file_id = upload_file_in_openai(temp_file_path)
+    os.remove(temp_file_path)
+
+    existing_vector_store_id = get_vector_store_id()
+    
+    if existing_vector_store_id:
+        add_file_to_vector_store(existing_vector_store_id, file_id)
+    else:
+        create_global_vector_store(file_id)
+    
+    return True
