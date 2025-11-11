@@ -42,9 +42,9 @@ const useRazorpay = (farmhouseId, onSuccess) => {
         order_id: orderData.order_id,
         name: 'Farmhouse Listing',
         description: 'Recharge Credits',
-        customer_id: orderData.customer_id,
-        recurring: 1,
-        save: 1,
+        // customer_id: orderData.customer_id,  // TODO: Uncomment after Razorpay approves recurring payments
+        // recurring: 1,                         // TODO: Uncomment after Razorpay approves recurring payments
+        // save: 1,                              // TODO: Uncomment after Razorpay approves recurring payments
         handler: async (response) => {
           try {
             const webhookData = {
