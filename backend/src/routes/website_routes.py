@@ -122,64 +122,6 @@ def get_property_detail(property_id):
     return jsonify(response_data)
 
 
-@website_bp.route('/register-property', methods=['POST'])
-@handle_route_exceptions
-def register_property_route():
-    name = request.form.get('name')
-    description = request.form.get('description')
-    property_type = request.form.get('type')
-    phone_number = request.form.get('phone_number')
-    address = request.form.get('address')
-    pin_code = request.form.get('pin_code')
-    per_day_price = request.form.get('per_day_price')
-    max_people_allowed = request.form.get('max_people_allowed')
-    opening_time = request.form.get('opening_time')
-    closing_time = request.form.get('closing_time')
-    
-    owner_name = request.form.get('owner_name')
-    owner_description = request.form.get('owner_description')
-    owner_photo = request.files.get('owner_photo')
-    
-    essential_amenities = json.loads(request.form.get('essentialAmenities', '{}'))
-    experience_amenities = json.loads(request.form.get('experienceAmenities', '{}'))
-    additional_amenities = json.loads(request.form.get('additionalAmenities', '{}'))
-
-    property_images = request.files.getlist('propertyImages')
-    property_documents = request.files.getlist('propertyDocuments')
-    aadhaar_card = request.files.get('aadhaarCard')
-    pan_card = request.files.get('panCard')
-    
-    farmhouse_data = {
-        "name": name,
-        "description": description,
-        "type": property_type,
-        "per_day_price": per_day_price,
-        "max_people_allowed": max_people_allowed,
-        "opening_time": opening_time,
-        "closing_time": closing_time,
-        "phone_number": phone_number,
-        "address": address,
-        "pin_code": pin_code,
-        "essential_amenities": essential_amenities,
-        "experience_amenities": experience_amenities,
-        "additional_amenities": additional_amenities,
-        "owner_name": owner_name,
-        "owner_description": owner_description
-    }
-    
-    if not name or not description or not property_type:
-        raise AppException("Basic information is required")
-    
-    register_property(farmhouse_data, property_images, property_documents, aadhaar_card, pan_card, owner_photo)
-
-    response_data = {
-        "success": True,
-        "message": "Property registered successfully",
-    }
-    
-    return jsonify(response_data), 200
-
-
 @website_bp.route('/save-basic-info', methods=['POST'])
 @handle_route_exceptions
 def save_basic_info_route():
