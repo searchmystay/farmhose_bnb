@@ -25,7 +25,7 @@ export const ProcessExplanation = () => (
   </div>
 );
 
-export const ProgressIndicator = ({ currentStep, totalSteps = 6 }) => {
+export const ProgressIndicator = ({ currentStep, totalSteps = 7 }) => {
   const progressPercent = (currentStep / totalSteps) * 100;
   return (
     <div className="mb-8">
@@ -206,8 +206,79 @@ export const Step1BasicInfo = ({
   </form>
 );
 
-// Step 2: Essential Amenities
-export const Step2EssentialAmenities = ({ 
+// Step 2: OTP Verification
+export const Step2OTPVerification = ({ 
+  otpCode,
+  onOtpChange,
+  onSubmit,
+  onResend,
+  onPrevious,
+  resendTimer,
+  isVerifying
+}) => {
+  return (
+    <form onSubmit={onSubmit} className="space-y-8">
+      <div className="bg-gradient-to-r from-green-50 to-blue-50 p-8 rounded-lg text-center">
+        <div className="mb-6">
+          <svg className="w-20 h-20 mx-auto text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+          </svg>
+        </div>
+        
+        <h3 className="text-2xl font-bold text-gray-800 mb-3">Verify Your Phone Number</h3>
+        <p className="text-gray-600 mb-6">
+          We've sent a 6-digit verification code to your registered phone number. 
+          Please enter the code below to continue.
+        </p>
+
+        <div className="max-w-md mx-auto">
+          <label className="block text-sm font-medium text-gray-700 mb-3 text-left">
+            Enter OTP Code <span className="text-red-500">*</span>
+          </label>
+          <input
+            type="text"
+            name="otpCode"
+            value={otpCode}
+            onChange={onOtpChange}
+            maxLength="6"
+            pattern="[0-9]{6}"
+            className="w-full px-6 py-4 text-center text-2xl font-bold tracking-widest border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
+            placeholder="000000"
+            required
+          />
+          <p className="text-sm text-gray-500 mt-2 text-left">Please enter the 6-digit code</p>
+        </div>
+
+        <div className="mt-6 flex items-center justify-center gap-2">
+          <span className="text-gray-600">Didn't receive the code?</span>
+          {resendTimer > 0 ? (
+            <span className="text-green-600 font-medium">
+              Resend in {resendTimer}s
+            </span>
+          ) : (
+            <button
+              type="button"
+              onClick={onResend}
+              className="text-green-600 font-medium hover:text-green-700 underline transition-colors"
+            >
+              Resend OTP
+            </button>
+          )}
+        </div>
+      </div>
+
+      <StepNavigation 
+        showPrevious={true} 
+        onPrevious={onPrevious}
+        isSubmitting={isVerifying}
+        submitText={isVerifying ? "Verifying..." : "Verify & Continue"}
+      />
+    </form>
+  );
+};
+
+// Step 3: Essential Amenities (previously Step 2)
+export const Step3EssentialAmenities = ({ 
   essentialAmenities, 
   onToggleChange, 
   onNumberChange, 
@@ -272,8 +343,8 @@ export const Step2EssentialAmenities = ({
   </form>
 );
 
-// Step 3: Experience Amenities  
-export const Step3ExperienceAmenities = ({ 
+// Step 4: Experience Amenities (previously Step 3)
+export const Step4ExperienceAmenities = ({ 
   experienceAmenities, 
   onToggleChange, 
   onSubmit, 
@@ -345,8 +416,8 @@ export const Step3ExperienceAmenities = ({
   );
 };
 
-// Step 4: Additional Amenities
-export const Step4AdditionalAmenities = ({ 
+// Step 5: Additional Amenities (previously Step 4)
+export const Step5AdditionalAmenities = ({ 
   additionalAmenities, 
   onToggleChange, 
   onSubmit, 
@@ -401,8 +472,8 @@ export const Step4AdditionalAmenities = ({
   );
 };
 
-// Step 5: Owner Details
-export const Step5OwnerDetails = ({ 
+// Step 6: Owner Details (previously Step 5)
+export const Step6OwnerDetails = ({ 
   ownerDetails, 
   validationErrors, 
   onOwnerDetailsChange, 
@@ -506,8 +577,8 @@ export const Step5OwnerDetails = ({
   </form>
 );
 
-// Step 6: Document Upload
-export const Step6DocumentUpload = ({ 
+// Step 7: Document Upload (previously Step 6)
+export const Step7DocumentUpload = ({ 
   uploadData, 
   validationErrors, 
   success, 
