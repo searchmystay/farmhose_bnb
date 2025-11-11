@@ -9,7 +9,10 @@ function SearchPage() {
     checkIn: '',
     checkOut: '',
     propertyType: 'both',
-    numberOfPeople: 'flexible'
+    address: '',
+    numberOfAdults: '',
+    numberOfChildren: '',
+    numberOfPets: ''
   })
 
   useEffect(() => {
@@ -20,7 +23,10 @@ function SearchPage() {
         checkIn: parsedData.checkInDate || '',
         checkOut: parsedData.checkOutDate || '',
         propertyType: parsedData.propertyType || 'both',
-        numberOfPeople: parsedData.numberOfPeople || 'flexible'
+        address: parsedData.address || '',
+        numberOfAdults: parsedData.numberOfAdults || '',
+        numberOfChildren: parsedData.numberOfChildren || '',
+        numberOfPets: parsedData.numberOfPets || ''
       })
     }
   }, [])
@@ -37,8 +43,17 @@ function SearchPage() {
       checkInDate: formData.checkIn,
       checkOutDate: formData.checkOut,
       propertyType: formData.propertyType,
-      numberOfPeople: formData.numberOfPeople === 'flexible' ? 'flexible' : parseInt(formData.numberOfPeople)
+      address: formData.address,
+      numberOfAdults: formData.numberOfAdults ? parseInt(formData.numberOfAdults) : 0,
+      numberOfChildren: formData.numberOfChildren ? parseInt(formData.numberOfChildren) : 0,
+      numberOfPets: formData.numberOfPets ? parseInt(formData.numberOfPets) : 0
     }
+    
+    console.log('Search Form Data:', searchData)
+    console.log('Address:', searchData.address)
+    console.log('Number of Adults:', searchData.numberOfAdults)
+    console.log('Number of Children:', searchData.numberOfChildren)
+    console.log('Number of Pets:', searchData.numberOfPets)
     
     sessionStorage.setItem('searchCriteria', JSON.stringify(searchData))
     
@@ -57,7 +72,10 @@ function SearchPage() {
       checkIn: '',
       checkOut: '',
       propertyType: 'both',
-      numberOfPeople: 'flexible'
+      address: '',
+      numberOfAdults: '',
+      numberOfChildren: '',
+      numberOfPets: ''
     })
   }
 
@@ -129,17 +147,64 @@ function SearchPage() {
     </div>
   )
 
-  const renderNumberOfPeople = () => (
-    <div>
-      <label htmlFor="numberOfPeople" className="block text-sm font-medium text-gray-700 mb-2">Number of People</label>
-      <select id="numberOfPeople" name="numberOfPeople" value={formData.numberOfPeople} onChange={handleInputChange} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors duration-200">
-        <option value="flexible">Flexible</option>
-        {[...Array(20)].map((_, i) => (
-          <option key={i + 1} value={i + 1}>
-            {i + 1} {i + 1 === 1 ? 'Person' : 'People'}
-          </option>
-        ))}
-      </select>
+  const renderGuestDetails = () => (
+    <div className="space-y-4">
+      <div>
+        <label htmlFor="address" className="block text-sm font-medium text-gray-700 mb-2">Address / Location</label>
+        <input
+          type="text"
+          id="address"
+          name="address"
+          value={formData.address}
+          onChange={handleInputChange}
+          placeholder="Enter city, area, or pincode"
+          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors duration-200"
+        />
+      </div>
+      
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div>
+          <label htmlFor="numberOfAdults" className="block text-sm font-medium text-gray-700 mb-2">Number of Adults</label>
+          <input
+            type="number"
+            id="numberOfAdults"
+            name="numberOfAdults"
+            value={formData.numberOfAdults}
+            onChange={handleInputChange}
+            min="0"
+            placeholder="0"
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors duration-200"
+          />
+        </div>
+        
+        <div>
+          <label htmlFor="numberOfChildren" className="block text-sm font-medium text-gray-700 mb-2">Number of Children</label>
+          <input
+            type="number"
+            id="numberOfChildren"
+            name="numberOfChildren"
+            value={formData.numberOfChildren}
+            onChange={handleInputChange}
+            min="0"
+            placeholder="0"
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors duration-200"
+          />
+        </div>
+        
+        <div>
+          <label htmlFor="numberOfPets" className="block text-sm font-medium text-gray-700 mb-2">Number of Pets</label>
+          <input
+            type="number"
+            id="numberOfPets"
+            name="numberOfPets"
+            value={formData.numberOfPets}
+            onChange={handleInputChange}
+            min="0"
+            placeholder="0"
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors duration-200"
+          />
+        </div>
+      </div>
     </div>
   )
 
@@ -173,7 +238,7 @@ function SearchPage() {
               <form onSubmit={handleSubmit} className="space-y-6">
                 {renderPropertyTypeSelection()}
                 {renderDateSelection()}
-                {renderNumberOfPeople()}
+                {renderGuestDetails()}
                 
                 <div className="pt-4 space-y-3">
                   <button type="submit" className="w-full bg-green-600 text-white py-3 md:py-4 px-6 rounded-lg font-medium text-base md:text-lg hover:bg-green-700 focus:ring-4 focus:ring-green-200 transition-all duration-200 transform hover:scale-[1.02]">

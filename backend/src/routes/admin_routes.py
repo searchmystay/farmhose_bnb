@@ -173,6 +173,29 @@ def mark_property_favourite_route(property_id):
     return jsonify(response_data), 200
 
 
+@admin_bp.route('/toggle_property_status/<property_id>', methods=['POST'])
+@admin_required
+@handle_route_exceptions
+def toggle_property_status_route(property_id):
+    request_data = request.get_json()
+    new_status = request_data.get("status")
+    
+    if not new_status:
+        raise AppException("Status is required")
+    
+    if new_status not in ['active', 'inactive']:
+        raise AppException("Status must be 'active' or 'inactive'")
+    
+    toggle_property_status(property_id, new_status)
+    
+    response_data = {
+        "success": True,
+        "message": f"Property {new_status} successfully",
+    }
+    
+    return jsonify(response_data), 200
+
+
 @admin_bp.route('/pending_reviews', methods=['GET'])
 @admin_required
 @handle_route_exceptions

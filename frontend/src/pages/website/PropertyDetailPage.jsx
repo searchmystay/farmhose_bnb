@@ -283,6 +283,25 @@ function PropertyDetailPage() {
             alt={`${property.name} - Image ${currentImageIndex + 1}`}
             className="w-full h-64 md:h-96 object-cover rounded-lg shadow-lg"
           />
+          <button
+            onClick={handleAddToWishlist}
+            disabled={wishlistLoading}
+            className={`absolute top-3 right-3 ${
+              isInWishlist 
+                ? 'bg-red-50 border-red-300 text-red-700 hover:bg-red-100' 
+                : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
+            } ${
+              wishlistLoading ? 'opacity-50 cursor-not-allowed' : ''
+            } p-2 rounded-full border-2 transition-all duration-200 shadow-lg`}
+          >
+            {wishlistLoading ? (
+              <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
+            ) : (
+              <svg className="w-5 h-5" fill={isInWishlist ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+              </svg>
+            )}
+          </button>
           <div className="absolute bottom-3 left-1/2 transform -translate-x-1/2 flex space-x-2">
             {property.images.map((_, index) => (
               <div
@@ -466,7 +485,7 @@ function PropertyDetailPage() {
             <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.148.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347zm-5.421 7.403c-1.877 0-3.71-.5-5.32-1.448l-.380-.225-3.958 1.039 1.057-3.867-.248-.396c-1.002-1.594-1.532-3.431-1.532-5.339 0-5.518 4.491-10.01 10.011-10.01 2.676 0 5.19 1.042 7.078 2.931 1.889 1.888 2.931 4.403 2.931 7.079-.007 5.519-4.498 10.01-10.009 10.01z"/>
           </svg>
         )}
-        <span className="hidden md:inline text-sm font-medium">
+        <span className="text-sm font-medium">
           {whatsappLoading ? 'Connecting...' : 'Connect with Owner'}
         </span>
       </button>
@@ -549,40 +568,15 @@ function PropertyDetailPage() {
       <div className="space-y-6">
         {renderAvailabilityStatus()}
         <div>
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl md:text-2xl font-bold text-gray-900">{property.name}</h2>
-            <div className="flex flex-col items-end">
-              <div className="flex items-center gap-2">
-                <button 
-                  onClick={handleAddToWishlist}
-                  disabled={wishlistLoading}
-                  className={`${
-                    isInWishlist 
-                      ? 'bg-red-50 border-red-300 text-red-700 hover:bg-red-100 hover:border-red-400' 
-                      : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400'
-                  } ${
-                    wishlistLoading ? 'opacity-50 cursor-not-allowed' : ''
-                  } p-2 md:px-4 md:py-2 rounded-full transition-all duration-200 flex items-center gap-2`}
-                >
-                  {wishlistLoading ? (
-                    <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
-                  ) : (
-                    <svg className="w-4 h-4 md:w-5 md:h-5" fill={isInWishlist ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                    </svg>
-                  )}
-                  <span className="hidden md:inline text-sm font-medium">
-                    {wishlistLoading ? 'Updating...' : isInWishlist ? 'Remove from Wishlist' : 'Add to Wishlist'}
-                  </span>
-                </button>
-
-                {renderContactButton()}
-              </div>
+          <div className="flex items-start justify-between mb-4 gap-2">
+            <h2 className="text-base md:text-2xl font-bold text-gray-900 leading-tight flex-1">{property.name}</h2>
+            <div className="flex flex-col items-end gap-2 flex-shrink-0 mr-3 md:mr-0">
+              {renderContactButton()}
               
               {!hasSearchCriteria && (
                 <button 
                   onClick={() => navigate('/search')}
-                  className="text-xs text-green-600 hover:text-green-700 font-medium underline mt-1"
+                  className="text-xs text-green-600 hover:text-green-700 font-medium underline"
                 >
                   Fill form to check availability
                 </button>
@@ -609,7 +603,7 @@ function PropertyDetailPage() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
               <span className="text-sm md:text-base">
-                <span className="font-medium">Price:</span> ₹{property.per_day_cost.toLocaleString('en-IN')} / day
+                <span className="font-medium">Estimated Price:</span> ₹{property.per_day_cost.toLocaleString('en-IN')} / day
               </span>
             </div>
           )}

@@ -137,6 +137,20 @@ export const markPropertyAsFavourite = async (propertyId, favouriteStatus) => {
   }
 }
 
+export const togglePropertyStatus = async (propertyId, newStatus) => {
+  try {
+    const response = await adminApiClient.post(`/toggle_property_status/${propertyId}`, { status: newStatus })
+    const result = response.data
+    return result
+  } catch (error) {
+    if (error.response && error.response.data) {
+      const backendError = error.response.data
+      throw new Error(backendError.message || 'Failed to toggle property status')
+    }
+    throw new Error('Failed to toggle property status, Network error')
+  }
+}
+
 export const fetchPendingReviews = async () => {
   try {
     const response = await adminApiClient.get('/pending_reviews')

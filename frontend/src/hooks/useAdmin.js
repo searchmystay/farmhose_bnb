@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
-import { adminLogin, fetchPendingReviews, acceptReview, rejectReview, fetchPendingProperties, approveProperty, rejectProperty, fetchAdminPropertyDetails, fetchAllProperties, markPropertyAsFavourite, adminLogout } from '../services/adminApi'
+import { adminLogin, fetchPendingReviews, acceptReview, rejectReview, fetchPendingProperties, approveProperty, rejectProperty, fetchAdminPropertyDetails, fetchAllProperties, markPropertyAsFavourite, togglePropertyStatus, adminLogout } from '../services/adminApi'
 
 export const useAdminAuth = () => {
   const [isLoading, setIsLoading] = useState(false)
@@ -257,9 +257,31 @@ export const useAllProperties = () => {
     }
   }
 
+  const handleToggleStatus = async (propertyId, currentStatus) => {
+    setActionLoading(propertyId)
+    try {
+      const newStatus = currentStatus === 'active' ? 'inactive' : 'active'
+      const result = await togglePropertyStatus(propertyId, newStatus)
+      if (result.success) {
+        toast.success(result.message || `Property ${newStatus} successfully`)
+        setAllProperties(prevProperties => 
+          prevProperties.map(property => 
+            property.id === propertyId 
+              ? { ...property, status: newStatus }
+              : property
+          )
+        )
+      }
+    } catch (error) {
+      toast.error(error.message || 'Failed to toggle property status')
+    } finally {
+      setActionLoading(null)
+    }
+  }
+
   useEffect(() => {
     fetchProperties()
   }, [])
 
-  return {allProperties, isLoading, error, actionLoading, refetch: fetchProperties, handleToggleFavourite}
+  return {allProperties, isLoading, error, actionLoading, refetch: fetchProperties, handleToggleFavourite, handleToggleStatus}
 }
