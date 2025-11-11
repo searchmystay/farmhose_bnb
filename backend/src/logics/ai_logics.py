@@ -28,12 +28,13 @@ def add_file_to_vector_store(vector_store_id, file_id):
 
 
 @handle_exceptions
-def upload_file_in_openai(file_path):
-    client = get_openai_client()
-    with open(file_path, "rb") as file:
-        response = client.files.create(file=file, purpose="assistants")
+def get_vector_store_id():
+    admin_analysis = db_find_one("admin_analysis", {"_id": "admin_analysis_singleton"}, {"vector_store_id": 1})
     
-    return response.id
+    if admin_analysis and admin_analysis.get("vector_store_id"):
+        return admin_analysis["vector_store_id"]
+    
+    return None
 
 
 @handle_exceptions
@@ -44,24 +45,28 @@ def create_vector_store(file_ids):
 
 
 @handle_exceptions
-def retrieve_vector_store_status(vector_store_id):
-    client = get_openai_client()
-    vector_store = client.beta.vector_stores.retrieve(vector_store_id)
-    return vector_store
+def create_global_vector_store(first_file_id):
+    vector_store_id = create_vector_store(file_ids=[first_file_id])
+    ist_timezone = pytz.timezone('Asia/Kolkata')
+    current_time = datetime.now(ist_timezone)
+    
+    db_update_one(
+        "admin_analysis", 
+        {"_id": "admin_analysis_singleton"},
+        {"$set": {"vector_store_id": vector_store_id, "updated_at": current_time}}
+    )
+    
+    return vector_store_id
 
 
 @handle_exceptions
-def train_data(text_data):
-    temp_file_path = f"temp_training.txt"
-
-    with open(temp_file_path, "w", encoding="utf-8") as f:
-        f.write(text_data)
+def upload_file_in_openai(file_path):
+    client = get_openai_client()
+    with open(file_path, "rb") as file:
+        response = client.files.create(file=file, purpose="assistants")
     
-    file_id = upload_file_in_openai(temp_file_path)
-    vector_store_id = create_vector_store(file_ids=[file_id])
-    os.remove(temp_file_path)
-    
-    return vector_store_id
+    file_id = response.id
+    return file_id
 
 
 @handle_exceptions
@@ -117,29 +122,7 @@ def chat_with_openai(messages, model="gpt-3.5-turbo"):
     return result
 
 
-@handle_exceptions
-def get_vector_store_id():
-    admin_analysis = db_find_one("admin_analysis", {"_id": "admin_analysis_singleton"}, {"vector_store_id": 1})
-    
-    if admin_analysis and admin_analysis.get("vector_store_id"):
-        return admin_analysis["vector_store_id"]
-    
-    return None
 
-
-@handle_exceptions
-def create_global_vector_store(first_file_id):
-    vector_store_id = create_vector_store(file_ids=[first_file_id])
-    ist_timezone = pytz.timezone('Asia/Kolkata')
-    current_time = datetime.now(ist_timezone)
-    
-    db_update_one(
-        "admin_analysis", 
-        {"_id": "admin_analysis_singleton"},
-        {"$set": {"vector_store_id": vector_store_id, "updated_at": current_time}}
-    )
-    
-    return vector_store_id
 
 
 @handle_exceptions
@@ -165,3 +148,22 @@ def search_vector_store(vector_store_id, query_string, top_k=5, rewrite_query=Tr
     return text_chunks
 
 
+
+@handle_exceptions
+def train_data(text_data):
+    temp_file_path = f"temp_training.txt"
+
+    with open(temp_file_path, "w", encoding="utf-8") as f:
+        f.write(text_data)
+    
+    file_id = upload_file_in_openai(temp_file_path)
+    os.remove(temp_file_path)
+
+    existing_vector_store_id = get_vector_store_id()
+    
+    if existing_vector_store_id:
+        add_file_to_vector_store(existing_vector_store_id, file_id)
+    else:
+        create_global_vector_store(file_id)
+    
+    return True
