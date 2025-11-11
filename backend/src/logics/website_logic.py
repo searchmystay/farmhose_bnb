@@ -2,11 +2,12 @@ from src.database.db_common_operations import db_find_many, db_find_one, db_inse
 from src.database.db_owner_analysis_operations import record_visit, record_contact
 from src.utils.exception_handler import handle_exceptions, AppException
 from src.logics.cloudfare_bucket import upload_farmhouse_image_to_r2, upload_farmhouse_document_to_r2
-from src.config import LEAD_COST_RUPEES, MINIMUM_BALANCE_THRESHOLD
+from src.config import LEAD_COST_RUPEES, MINIMUM_BALANCE_THRESHOLD, OTP_EXPIRY_MINUTES
 from bson import ObjectId
 from datetime import datetime, timedelta
 import pytz
 import re
+import random
     
 
 
@@ -720,79 +721,6 @@ def complete_property_registration(property_id, property_images, property_docume
     
     return property_id
 
-
-@handle_exceptions
-def register_property(farmhouse_data, property_images, property_documents, aadhaar_card, pan_card, owner_photo):
-    amenities = process_amenities_data(
-        farmhouse_data.get("essential_amenities", {}),
-        farmhouse_data.get("experience_amenities", {}),
-        farmhouse_data.get("additional_amenities", {})
-    )
-
-    location = {
-        "address": farmhouse_data.get("address", ""),
-        "pin_code": farmhouse_data.get("pin_code", "")
-    }
-    
-    ist_timezone = pytz.timezone('Asia/Kolkata')
-    current_time = datetime.now(ist_timezone).replace(tzinfo=None)
-    opening_time_formatted = format_time_with_ampm(farmhouse_data.get("opening_time", ""))
-    closing_time_formatted = format_time_with_ampm(farmhouse_data.get("closing_time", ""))
-    
-    owner_details = {
-        "owner_name": farmhouse_data.get("owner_name", ""),
-        "owner_description": farmhouse_data.get("owner_description", ""),
-        "owner_photo": ""
-    }
-    
-    farmhouse_record = {
-        "name": farmhouse_data.get("name"),
-        "description":  farmhouse_data.get("description", ""),
-        "type": farmhouse_data.get("type"),
-        "per_day_price": int(farmhouse_data.get("per_day_price", 0)) if farmhouse_data.get("per_day_price") else 0,
-        "max_people_allowed": int(farmhouse_data.get("max_people_allowed", 0)) if farmhouse_data.get("max_people_allowed") else 0,
-        "opening_time": opening_time_formatted,
-        "closing_time": closing_time_formatted,
-        "location": location,
-        "phone_number": farmhouse_data.get("phone_number"), 
-        "amenities": amenities,
-        "owner_details": owner_details,
-        "status": "pending_approval",
-        "images": [],
-        "credit_balance": 0,
-        "favourite": False,
-        "created_at": current_time,
-        "updated_at": current_time
-    }
-    
-    insert_result = db_insert_one("farmhouses", farmhouse_record)
-    farmhouse_id = str(insert_result.inserted_id)
-    
-    uploaded_images = upload_farmhouse_images(property_images, farmhouse_id)
-    aadhaar_url, pan_url= upload_identity_documents(aadhaar_card, pan_card, farmhouse_id)
-    uploaded_property_documents = upload_farmhouse_documents(property_documents, farmhouse_id)
-    
-    owner_photo_url = ""
-    if owner_photo and owner_photo.filename:
-        owner_photo_url = upload_farmhouse_image_to_r2(owner_photo, farmhouse_id, "owner_photo")
-    
-    documents_data = {
-        "property_docs": uploaded_property_documents,
-        "aadhar_card": aadhaar_url,
-        "pan_card": pan_url 
-    }
-    
-    update_data = {
-        "images": uploaded_images,
-        "documents": documents_data,
-        "owner_details.owner_photo": owner_photo_url
-    }
-    
-    query_filter = {"_id": ObjectId(farmhouse_id)}
-    db_update_one("farmhouses", query_filter, {"$set": update_data})
-    return farmhouse_id 
-
-
 @handle_exceptions
 def generate_whatsapp_url(phone_number):
     if not phone_number:
@@ -986,3 +914,41 @@ def get_farmhouse_name(farmhouse_id):
     
     farmhouse_name = farmhouse_data["name"]
     return farmhouse_name
+
+
+@handle_exceptions
+def generate_and_save_otp(phone_number):
+    otp_code = random.randint(100000, 999999)
+    ist_timezone = pytz.timezone('Asia/Kolkata')
+    otp_last_sent_at = datetime.now(ist_timezone)
+    
+    otp_data = {
+        "otp_code": str(otp_code),
+        "otp_last_sent_at": otp_last_sent_at,
+        "phone_number_verified": False
+    }
+    
+    farmhouse_exists = db_exists("farmhouses", {"phone_number": phone_number})
+    if not farmhouse_exists:
+        raise AppException("Phone number not found in farmhouse records")
+    
+    db_update_one("farmhouses", {"phone_number": phone_number}, {"$set": otp_data})
+    
+    return otp_code
+
+
+@handle_exceptions
+def send_otp_via_twilio(phone_number, otp_code):
+    print(f"Sending OTP {otp_code} to phone number {phone_number} via Twilio SMS")
+    return True
+
+
+@handle_exceptions
+def process_otp_request(phone_number):
+    otp_code = generate_and_save_otp(phone_number)
+    sms_sent = send_otp_via_twilio(phone_number, otp_code)
+    
+    if not sms_sent:
+        raise AppException("Failed to send OTP via SMS")
+    
+    return True

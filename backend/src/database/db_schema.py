@@ -31,6 +31,20 @@ def get_farmhouse_schema() -> Dict:
                 "description": "Phone number for property owner",
                 "pattern": "^[0-9]{10}$"
             },
+            "phone_number_verified": {
+                "bsonType": "bool",
+                "description": "Whether phone number has been verified via OTP",
+                "default": False
+            },
+            "otp_last_sent_at": {
+                "bsonType": "date",
+                "description": "Timestamp when OTP was last sent to this phone number"
+            },
+            "otp_code": {
+                "bsonType": "string",
+                "description": "Current OTP code for phone verification (6 digits)",
+                "pattern": "^[0-9]{6}$"
+            },
             "max_people_allowed": {
                 "bsonType": "int",
                 "description": "Maximum number of people that can stay at the property",
@@ -848,6 +862,10 @@ def get_admin_analysis_schema():
             "updated_at": {
                 "bsonType": "date",
                 "description": "Last update timestamp"
+            },
+            "vector_store_id": {
+                "bsonType": "string",
+                "description": "OpenAI vector store ID for AI training data"
             }
         }
     }
