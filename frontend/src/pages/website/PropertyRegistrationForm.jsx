@@ -166,6 +166,10 @@ const PropertyRegistrationForm = () => {
     setOtpCode(value);
   };
 
+  const handleAddressInputChange = () => {
+    setIsAddressSelectedFromGoogle(false);
+  };
+
   const handleBasicInfoChange = (e) => {
     const { name, value } = e.target;
     setBasicInfo(prev => ({ ...prev, [name]: value }));
@@ -432,8 +436,8 @@ const PropertyRegistrationForm = () => {
     
     try {
       const response = await verifyOtp(propertyId, otpCode);
-      if (response.verified) {
-        toast.success('Phone number verified successfully!');
+      if (response.success) {
+        toast.success(response.message || 'Phone number verified successfully!');
         setOtpCode('');
         setCurrentStep(3);
       }
@@ -700,6 +704,7 @@ const PropertyRegistrationForm = () => {
                   validationErrors={validationErrors}
                   onBasicInfoChange={handleBasicInfoChange}
                   onLocationSelected={handleLocationSelected}
+                  onAddressInputChange={handleAddressInputChange}
                   onSubmit={handleStep1Next}
                 />
               )}

@@ -124,7 +124,7 @@ const GooglePlacesAutocomplete = ({ value, onChange, onPlaceSelected, label, pla
   useEffect(() => {
     if (!isLoaded || !containerRef.current || autocompleteElementRef.current) return;
     initPlaceAutocomplete();
-  }, [isLoaded, onPlaceSelected, onChange, placeholder]);
+  }, [isLoaded, onPlaceSelected, onChange, onInputChange, placeholder]);
 
   return (
     <div className="space-y-1">

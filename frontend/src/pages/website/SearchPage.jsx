@@ -1,6 +1,7 @@
 import { Helmet } from 'react-helmet-async'
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { toast } from 'sonner'
 import Footer from '../../components/Footer'
 import GooglePlacesAutocomplete from '../../components/common/GooglePlacesAutocomplete'
 
@@ -17,6 +18,7 @@ function SearchPage() {
     numberOfChildren: '',
     numberOfPets: ''
   })
+  const [isAddressSelectedFromGoogle, setIsAddressSelectedFromGoogle] = useState(false)
 
   useEffect(() => {
     const savedSearchData = sessionStorage.getItem('searchCriteria')
@@ -39,6 +41,10 @@ function SearchPage() {
     setFormData(prev => ({ ...prev, [name]: value }))
   }
 
+  const handleAddressInputChange = () => {
+    setIsAddressSelectedFromGoogle(false)
+  }
+
   const handleLocationSelected = (locationData) => {
     setFormData(prev => ({
       ...prev,
@@ -46,10 +52,16 @@ function SearchPage() {
       searchLatitude: locationData.latitude,
       searchLongitude: locationData.longitude
     }))
+    setIsAddressSelectedFromGoogle(true)
   }
 
   const handleSubmit = (e) => {
     e.preventDefault()
+    
+    if (formData.address && !isAddressSelectedFromGoogle) {
+      toast.error('Please select an address from the Google Places dropdown suggestions')
+      return
+    }
     
     const searchData = {
       checkInDate: formData.checkIn,
@@ -162,6 +174,7 @@ function SearchPage() {
           value={formData.address}
           onChange={handleInputChange}
           onPlaceSelected={handleLocationSelected}
+          onInputChange={handleAddressInputChange}
           label="Search Location"
           placeholder="Type a location to search nearby properties..."
         />
