@@ -112,7 +112,7 @@ export const fetchPropertyDetail = async (propertyId, leadEmail = null, searchCr
   if (leadEmail) {
     requestData.leadEmail = leadEmail
   }
-  
+
   if (searchCriteria) {
     requestData.checkInDate = searchCriteria.checkInDate
     requestData.checkOutDate = searchCriteria.checkOutDate

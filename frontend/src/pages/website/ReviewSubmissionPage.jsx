@@ -76,23 +76,30 @@ function ReviewSubmissionPage() {
   const handleSubmit = async (e) => {
     e.preventDefault()
     
+    // TC-016: Add proper name validation (2 words minimum)
     if (!formData.reviewerName.trim()) {
-      alert('Please enter your name')
+      toast.error('Please enter your name')
+      return
+    }
+    
+    const nameParts = formData.reviewerName.trim().split(' ').filter(part => part.length > 0)
+    if (nameParts.length < 2) {
+      toast.error('Please enter your full name (first and last name)')
       return
     }
     
     if (formData.rating === 0) {
-      alert('Please select a rating')
+      toast.error('Please select a rating')
       return
     }
     
     if (!formData.description.trim()) {
-      alert('Please write a review description')
+      toast.error('Please write a review description')
       return
     }
     
     if (wordCount < MIN_WORDS) {
-      alert(`Please write at least ${MIN_WORDS} words. Current: ${wordCount} words`)
+      toast.error(`Please write at least ${MIN_WORDS} words. Current: ${wordCount} words`)
       return
     }
     

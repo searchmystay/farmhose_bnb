@@ -63,6 +63,29 @@ function SearchPage() {
       return
     }
     
+    // Validate guest counts
+    const adults = formData.numberOfAdults ? parseInt(formData.numberOfAdults) : 0
+    const children = formData.numberOfChildren ? parseInt(formData.numberOfChildren) : 0
+    const pets = formData.numberOfPets ? parseInt(formData.numberOfPets) : 0
+    
+    // TC-GST-02: At least 1 adult required
+    if (adults === 0) {
+      toast.error('At least 1 adult is required for booking')
+      return
+    }
+    
+    // TC-GST-03: Maximum guest limit
+    const totalGuests = adults + children
+    if (totalGuests > 40) {
+      toast.error('Maximum 40 guests allowed per property')
+      return
+    }
+    
+    if (pets > 20) {
+      toast.error('Maximum 20 pets allowed per property')
+      return
+    }
+    
     const searchData = {
       checkInDate: formData.checkIn,
       checkOutDate: formData.checkOut,
@@ -70,9 +93,9 @@ function SearchPage() {
       address: formData.address,
       searchLatitude: formData.searchLatitude,
       searchLongitude: formData.searchLongitude,
-      numberOfAdults: formData.numberOfAdults ? parseInt(formData.numberOfAdults) : 0,
-      numberOfChildren: formData.numberOfChildren ? parseInt(formData.numberOfChildren) : 0,
-      numberOfPets: formData.numberOfPets ? parseInt(formData.numberOfPets) : 0
+      numberOfAdults: adults,
+      numberOfChildren: children,
+      numberOfPets: pets
     }
     
     sessionStorage.setItem('searchCriteria', JSON.stringify(searchData))

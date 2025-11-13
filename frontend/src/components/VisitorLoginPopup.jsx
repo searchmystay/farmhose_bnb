@@ -18,8 +18,16 @@ const VisitorLoginPopup = ({ isOpen, onClose, onSubmit }) => {
       newErrors.email = 'Please enter a valid email address'
     }
 
-    if (formData.name.trim() && formData.name.trim().length < 2) {
-      newErrors.name = 'Name must be at least 2 characters'
+    // Fix: Add full name validation (2 words minimum)
+    if (formData.name.trim()) {
+      if (formData.name.trim().length < 2) {
+        newErrors.name = 'Name must be at least 2 characters'
+      } else {
+        const nameParts = formData.name.trim().split(' ').filter(part => part.length > 0)
+        if (nameParts.length < 2) {
+          newErrors.name = 'Please enter your full name (first and last name)'
+        }
+      }
     }
 
     if (formData.mobile.trim() && !/^[6-9]\d{9}$/.test(formData.mobile)) {

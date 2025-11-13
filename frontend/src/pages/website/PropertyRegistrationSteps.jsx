@@ -164,6 +164,12 @@ export const Step1BasicInfo = ({
           name="phone_number"
           value={basicInfo.phone_number}
           onChange={onBasicInfoChange}
+          onKeyPress={(e) => {
+            // Only allow numbers (0-9)
+            if (!/[0-9]/.test(e.key) && e.key !== 'Backspace' && e.key !== 'Delete' && e.key !== 'Tab') {
+              e.preventDefault()
+            }
+          }}
           className={`flex-1 px-4 py-3 border rounded-r-lg focus:ring-2 focus:border-transparent transition-all ${
             validationErrors.phone_number ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-green-500'
           }`}

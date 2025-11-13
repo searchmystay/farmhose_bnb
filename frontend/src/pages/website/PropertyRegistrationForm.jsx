@@ -249,6 +249,19 @@ const PropertyRegistrationForm = () => {
 
   const handleOwnerPhotoUpload = (e) => {
     const file = e.target.files[0];
+    
+    // Validate file type for owner photo (exclude SVG)
+    if (file) {
+      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+      if (!allowedTypes.includes(file.type)) {
+        setValidationErrors(prev => ({
+          ...prev,
+          ownerPhoto: 'Only JPG, JPEG, and PNG files are allowed for photos'
+        }));
+        return;
+      }
+    }
+    
     setOwnerDetails(prev => ({ ...prev, ownerPhoto: file }));
     
     if (validationErrors.ownerPhoto) {
@@ -258,6 +271,21 @@ const PropertyRegistrationForm = () => {
 
   const handleFileUpload = (e, fileType) => {
     const files = Array.from(e.target.files);
+    
+    // Validate file types for images (exclude SVG)
+    if (fileType === 'propertyImages' || fileType === 'ownerPhoto') {
+      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+      const invalidFiles = files.filter(file => !allowedTypes.includes(file.type));
+      
+      if (invalidFiles.length > 0) {
+        setValidationErrors(prev => ({
+          ...prev,
+          [fileType]: 'Only JPG, JPEG, and PNG files are allowed for images'
+        }));
+        return;
+      }
+    }
+    
     setUploadData(prev => ({
       ...prev,
       [fileType]: fileType === 'propertyImages' || fileType === 'propertyDocuments' ? files : files[0]
@@ -283,6 +311,8 @@ const PropertyRegistrationForm = () => {
       errors.name = 'Property name must be at least 3 characters';
     } else if (basicInfo.name.trim().split(/\s+/).length > 5) {
       errors.name = 'Property name should not exceed 5 words';
+    } else if (!/^[a-zA-Z\s\-'&.]+$/.test(basicInfo.name.trim())) {
+      errors.name = 'Property name can only contain letters, spaces, hyphens, apostrophes, ampersands, and periods';
     }
     
     if (!basicInfo.description.trim()) {
