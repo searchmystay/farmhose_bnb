@@ -97,7 +97,7 @@ def get_total_contacts(farmhouse_id):
 
 @handle_exceptions
 def get_contacts_last_days(farmhouse_id, days):
-    start_date = (datetime.utcnow() - timedelta(days=days)).strftime("%Y-%m-%d")
+    start_date = (datetime.utcnow() - timedelta(days=days-1)).strftime("%Y-%m-%d")
     
     collection = db["farmhouse_analysis"]
     filter_dict = {"farmhouse_id": ObjectId(farmhouse_id)}
