@@ -94,13 +94,38 @@ const GooglePlacesAutocomplete = ({ value, onChange, onPlaceSelected, onInputCha
     }
   };
 
-  const setupAutocompleteElement = (autocomplete) => {
+  const applyCustomStyles = (autocomplete) => {
     autocomplete.style.width = '100%';
     autocomplete.style.fontSize = '16px';
+    autocomplete.style.backgroundColor = '#ffffff';
+    autocomplete.style.borderRadius = '12px';
+    autocomplete.style.border = '1px solid #d1d5db';
+    autocomplete.style.boxShadow = 'none';
+    autocomplete.style.padding = '0';
+
+    const inputElement = autocomplete.shadowRoot?.querySelector('input');
+    if (inputElement) {
+      inputElement.style.backgroundColor = '#ffffff';
+      inputElement.style.color = '#111827';
+      inputElement.style.fontSize = '16px';
+      inputElement.style.padding = '12px 16px';
+      inputElement.style.borderRadius = '12px';
+      inputElement.style.border = 'none';
+      inputElement.style.boxShadow = 'none';
+    }
+
+    const trailingIcon = autocomplete.shadowRoot?.querySelector('button');
+    if (trailingIcon) {
+      trailingIcon.style.paddingRight = '12px';
+    }
+  };
+
+  const setupAutocompleteElement = (autocomplete) => {
+    applyCustomStyles(autocomplete);
     
     if (placeholder) {
       setTimeout(() => {
-        const inputElement = autocomplete.querySelector('input');
+        const inputElement = autocomplete.shadowRoot?.querySelector('input') || autocomplete.querySelector('input');
         if (inputElement) inputElement.placeholder = placeholder;
       }, 0);
     }
@@ -135,8 +160,8 @@ const GooglePlacesAutocomplete = ({ value, onChange, onPlaceSelected, onInputCha
       )}
       <div 
         ref={containerRef}
-        className={`w-full border rounded-lg transition-all ${
-          error ? 'border-red-500' : 'border-gray-300'
+        className={`w-full rounded-lg transition-all ${
+          error ? 'border border-red-500' : ''
         }`}
         style={{ minHeight: '48px' }}
       >
