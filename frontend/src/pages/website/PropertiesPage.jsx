@@ -5,7 +5,6 @@ import { useFarmhouseList, useBnbList, usePropertyList, useLeadRegistration } fr
 import Footer from '../../components/Footer'
 import VisitorLoginPopup from '../../components/VisitorLoginPopup'
 
-
 const SearchNavbar = ({ onWishlistClick }) => {
   const navigate = useNavigate()
   

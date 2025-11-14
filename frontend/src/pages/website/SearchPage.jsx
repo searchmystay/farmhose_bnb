@@ -202,7 +202,7 @@ function SearchPage() {
           placeholder="Type a location to search nearby properties..."
         />
         <p className="text-xs text-gray-500 mt-1">
-          Properties within 10km radius will be shown
+          Properties within 25km radius will be shown
         </p>
       </div>
       

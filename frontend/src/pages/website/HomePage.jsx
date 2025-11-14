@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom'
 import Footer from '../../components/Footer'
 import { useTopProperties, useLeadRegistration } from '../../hooks/usePropertyData'
 import VisitorLoginPopup from '../../components/VisitorLoginPopup'
+import AISuggestions from '../../components/AISuggestions'
 
 
 // Component for full-screen hero with scrolling background
@@ -71,7 +72,7 @@ function HeroSection({ onWishlistClick }) {
           Discover handpicked farmhouses and boutique stays
         </p>
         <p className="text-base md:text-lg text-white/80 mb-12 max-w-xl">
-          Escape to serene locations and create unforgettable memories
+          Talk directly with hosts and book at the best price
         </p>
         <div className="flex justify-center">
           <button 
@@ -455,6 +456,11 @@ function HomePage() {
           loading={loading} 
           error={error} 
           navigateTo="/bnb"
+        />
+        
+        <AISuggestions 
+          propertyType="both"
+          onPropertyClick={(propertyId) => navigate(`/property/${propertyId}`)}
         />
         
         <TestimonialsSection />
