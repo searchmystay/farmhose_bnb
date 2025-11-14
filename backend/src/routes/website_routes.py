@@ -1,5 +1,6 @@
 from flask import Blueprint, jsonify, request
 from src.logics.website_logic import *
+from src.logics.ai_logics import process_ai_suggestion_request
 from src.utils.exception_handler import handle_route_exceptions, AppException
 from src.config import MAX_SEARCH_DISTANCE_KM
 from bson import ObjectId
@@ -473,6 +474,24 @@ def verify_otp_route():
     response_data = {
         "success": True,
         "message": "Phone number verified successfully"
+    }
+    
+    return jsonify(response_data), 200
+
+
+@website_bp.route('/ai_suggestion', methods=['POST'])
+@handle_route_exceptions
+def ai_suggestions():
+    data = request.get_json() or {}
+    
+    user_query = data.get('userQuery', '')
+    property_type = data.get('propertyType', 'both')
+    
+    result = process_ai_suggestion_request(user_query, property_type)
+    
+    response_data = {
+        "success": True,
+        **result
     }
     
     return jsonify(response_data), 200
