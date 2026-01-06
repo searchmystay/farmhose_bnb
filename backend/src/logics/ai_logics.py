@@ -1,426 +1,439 @@
 import os
+import re
+import logging
 from datetime import datetime
 import pytz
-from openai import OpenAI
-from ..utils.exception_handler import handle_exceptions, AppException
-from ..utils.logger import logger
-from ..database.db_common_operations import db_find_one, db_update_one, db_insert_one
-from src.utils.exception_handler import AppException
+import requests
+from bson import ObjectId
+from tempfile import NamedTemporaryFile
+from src.config import OPENAI_API_KEY, VECTOR_STORE_ID
+from src.utils.exception_handler import handle_exceptions, AppException
+from src.database.db_common_operations import db_find_one, db_find_many, db_update_one
+
 
 @handle_exceptions
-def get_openai_client():
-    api_key = os.getenv("OPENAI_API_KEY")
-    if not api_key:
+def get_openai_headers(extra_headers=None):
+    if not OPENAI_API_KEY:
         raise Exception("OpenAI API key not configured", 500)
     
-    client = OpenAI(api_key=api_key)
-    return client
+    headers = {
+        "Authorization": f"Bearer {OPENAI_API_KEY}",
+        "OpenAI-Beta": "assistants=v2"
+    }
+    if extra_headers:
+        headers.update(extra_headers)
+    return headers
 
+
+logger = logging.getLogger(__name__)
 
 @handle_exceptions
 def add_file_to_vector_store(vector_store_id, file_id):
-    client = get_openai_client()
-    response = client.vector_stores.files.create(
-        vector_store_id=vector_store_id,
-        file_id=file_id,
-    )
-    return response
+    url = "https://api.openai.com/v1/vector_stores/{}/files".format(vector_store_id)
+    headers = get_openai_headers({"Content-Type": "application/json"})
+    payload = {
+        "file_id": file_id,
+        "chunking_strategy": {
+            "type": "static",
+            "static": {
+                "max_chunk_size_tokens": 4096,
+                "chunk_overlap_tokens": 0
+            }
+        }
+    }
+    response = requests.post(url, headers=headers, json=payload, timeout=30)
+    if response.status_code >= 400:
+        logger.error("attach error %s: %s", response.status_code, response.text)
+        raise AppException(f"attach error {response.status_code}: {response.text}")
+    attach_resp = response.json()
+    logger.info("File %s attached successfully with static chunking (single chunk)", file_id)
+    return attach_resp
 
 
 @handle_exceptions
 def get_vector_store_id():
-    admin_analysis = db_find_one("admin_analysis", {"_id": "admin_analysis_singleton"}, {"vector_store_id": 1})
-    
-    if admin_analysis and admin_analysis.get("vector_store_id"):
-        return admin_analysis["vector_store_id"]
+    if VECTOR_STORE_ID:
+        return VECTOR_STORE_ID
     
     return None
 
 
 @handle_exceptions
 def create_vector_store(file_ids):
-    client = get_openai_client()
-    vector_store = client.beta.vector_stores.create(file_ids=file_ids)
-    return vector_store.id
-
-
-@handle_exceptions
-def create_global_vector_store(first_file_id):
-    vector_store_id = create_vector_store(file_ids=[first_file_id])
-    ist_timezone = pytz.timezone('Asia/Kolkata')
-    current_time = datetime.now(ist_timezone).replace(tzinfo=None)
-    
-    db_update_one(
-        "admin_analysis", 
-        {"_id": "admin_analysis_singleton"},
-        {"$set": {"vector_store_id": vector_store_id, "updated_at": current_time}}
-    )
-    
-    return vector_store_id
+    url = "https://api.openai.com/v1/vector_stores"
+    headers = get_openai_headers({"Content-Type": "application/json"})
+    payload = {}
+    if file_ids:
+        payload["file_ids"] = file_ids
+    response = requests.post(url, headers=headers, json=payload, timeout=30)
+    if response.status_code >= 400:
+        raise AppException("Failed to create vector store")
+    vector_store = response.json()
+    return vector_store.get("id")
 
 
 @handle_exceptions
 def upload_file_in_openai(file_path):
-    client = get_openai_client()
-    with open(file_path, "rb") as file:
-        response = client.files.create(file=file, purpose="assistants")
+    url = "https://api.openai.com/v1/files"
+    headers = get_openai_headers()
+    data = {"purpose": "assistants"}
+    with open(file_path, "rb") as file_handle:
+        files = {"file": (os.path.basename(file_path), file_handle)}
+        response = requests.post(url, headers=headers, data=data, files=files, timeout=60)
+    if response.status_code >= 400:
+        raise AppException("Failed to upload file to OpenAI")
+    file_data = response.json()
+    return file_data.get("id")
+
+
+@handle_exceptions
+def ensure_vector_store_with_file(file_id):
+    existing_vector_store_id = get_vector_store_id()
+    if not existing_vector_store_id:
+        raise AppException("Vector store not configured. Set VECTOR_STORE_ID in config.")
+    add_file_to_vector_store(existing_vector_store_id, file_id)
+    return existing_vector_store_id
+
+
+@handle_exceptions
+def fetch_property_for_vector(property_id):
+    query_filter = {"_id": ObjectId(property_id)}
+    projection = {
+        "_id": 1,
+        "name": 1,
+        "description": 1,
+        "type": 1,
+        "location": 1,
+        "amenities": 1,
+        "status": 1,
+        "per_day_price": 1,
+        "images": 1,
+        "review_average": 1
+    }
+    property_data = db_find_one("farmhouses", query_filter, projection)
+    if not property_data:
+        raise AppException("Property not found")
     
-    file_id = response.id
+    property_status = property_data.get("status")
+    if property_status != "active":
+        raise AppException("Property is not active")
+    
+    return property_data
+
+@handle_exceptions
+def build_location_summary(location_data):
+    parts = []
+    for key in ["address", "area", "city", "state", "country", "pincode"]:
+        value = location_data.get(key) if location_data else None
+        if value:
+            parts.append(str(value))
+    if not parts:
+        parts.append("Not specified")
+    summary = ", ".join(parts)
+    return summary
+
+@handle_exceptions
+def build_amenities_summary(amenities_data):
+    names = []
+    if amenities_data:
+        for category in amenities_data.values():
+            for amenity_name, available in category.items():
+                if available:
+                    names.append(amenity_name.replace("_", " "))
+    if not names:
+        names.append("No specific amenities")
+    summary = ", ".join(sorted(names))
+    return summary
+
+@handle_exceptions
+def build_property_vector_text(property_data):
+    property_id = str(property_data.get("_id"))
+    name = property_data.get("name", "")
+    description = property_data.get("description", "")
+    property_type = property_data.get("type", "")
+    location_text = build_location_summary(property_data.get("location", {}))
+    amenities_text = build_amenities_summary(property_data.get("amenities", {}))
+    price = property_data.get("per_day_price", 0)
+    text_parts = [
+        f"Property ID: {property_id}",
+        f"Name: {name}",
+        f"Type: {property_type}",
+        f"Location: {location_text}",
+        f"Price: {price}",
+        f"Description: {description}",
+        f"Amenities: {amenities_text}"
+    ]
+    consolidated_text = "\n".join(text_parts)
+    return consolidated_text
+
+
+@handle_exceptions
+def upload_text_to_openai(text_data):
+    ist_timezone = pytz.timezone('Asia/Kolkata')
+    current_time = datetime.now(ist_timezone).strftime("%Y%m%d_%H%M%S")
+    with NamedTemporaryFile("w", delete=False, encoding="utf-8", prefix=f"property_{current_time}_", suffix=".txt") as temp_file:
+        temp_file.write(text_data)
+        temp_path = temp_file.name
+    file_id = upload_file_in_openai(temp_path)
+    os.remove(temp_path)
     return file_id
 
 
 @handle_exceptions
-def search_vector_store(query_string, top_k=5, rewrite_query=True):
-    vector_store_id = get_vector_store_id()
-    
-    if not vector_store_id:
-        raise Exception("vector store id not found")
-    
-    client = get_openai_client()
-    response = client.vector_stores.search(
-        vector_store_id=vector_store_id,
-        query=query_string,
-        max_num_results=top_k,
-        rewrite_query=rewrite_query,
+def save_ai_file_metadata(property_id, file_id, vector_store_id):
+    ist_timezone = pytz.timezone('Asia/Kolkata')
+    current_time = datetime.now(ist_timezone).replace(tzinfo=None)
+    existing_doc = db_find_one("farmhouses", {"_id": ObjectId(property_id)}, {"ai": 1})
+    if not existing_doc:
+        raise AppException("Property not found for AI metadata")
+    existing_ai = existing_doc.get("ai", {}) or {}
+    created_at = existing_ai.get("created_at", current_time)
+    update_payload = {
+        "file_id": file_id,
+        "vector_store_id": vector_store_id,
+        "updated_at": current_time,
+        "created_at": created_at
+    }
+    db_update_one(
+        "farmhouses",
+        {"_id": ObjectId(property_id)},
+        {"$set": {"ai": update_payload}}
     )
-
-    text_chunks = ""
-    for match in response.data:
-        content = getattr(match, 'content', None)
-        if content:
-            for chunk in content:
-                chunk_type = getattr(chunk, 'type', None)
-                chunk_text = getattr(chunk, 'text', None)
-                if chunk_type == "text":
-                    text_chunks += f"\n\n{chunk_text}"
-
-    return text_chunks
+    result = True
+    return result
 
 
 @handle_exceptions
-def train_data(text_data):
-    ist_timezone = pytz.timezone('Asia/Kolkata')
-    current_time = datetime.now(ist_timezone)
-    timestamp = current_time.strftime("%Y%m%d_%H%M%S")
-    temp_file_path = f"temp_training_{timestamp}.txt"
+def add_property_to_vector_store(property_id):
+    property_data = fetch_property_for_vector(property_id)
+    consolidated_text = build_property_vector_text(property_data)
+    file_id = upload_text_to_openai(consolidated_text)
+    vector_store_id = ensure_vector_store_with_file(file_id)
+    save_ai_file_metadata(property_id, file_id, vector_store_id)
+    result = True
+    return result
 
-    with open(temp_file_path, "w", encoding="utf-8") as f:
-        f.write(text_data)
+
+@handle_exceptions
+def search_vector_store_for_files(query_string, top_k=20, rewrite_query=True):
+    vector_store_id = get_vector_store_id()
+    if not vector_store_id:
+        raise AppException("Vector store not configured")
     
-    file_id = upload_file_in_openai(temp_file_path)
-    os.remove(temp_file_path)
-
-    existing_vector_store_id = get_vector_store_id()
-    
-    if existing_vector_store_id:
-        add_file_to_vector_store(existing_vector_store_id, file_id)
-    else:
-        create_global_vector_store(file_id)
-    
-    return True
-
-
-
-def build_property_type_text(property_type):
-    property_text = f"User is looking for {property_type} properties"
-    return property_text
-
-
-def build_location_text(location):
-    if location:
-        location_text = f"in {location}"
-    else:
-        location_text = "in any location"
-    return location_text
-
-
-def build_date_text(check_in_date, check_out_date):
-    if check_in_date and check_out_date:
-        date_text = f"Check-in: {check_in_date}, Check-out: {check_out_date}"
-        return date_text
-    return ""
-
-
-def build_guest_info_list(number_of_adults, number_of_children, number_of_pets):
-    guest_info = []
-    if number_of_adults > 0:
-        guest_info.append(f"{number_of_adults} adults")
-    if number_of_children > 0:
-        guest_info.append(f"{number_of_children} children")
-    if number_of_pets > 0:
-        guest_info.append(f"{number_of_pets} pets")
-    return guest_info
-
-
-def build_guest_text(guest_info):
-    if guest_info:
-        guest_text = f"Guests: {', '.join(guest_info)}"
-        return guest_text
-    return ""
-
-
-def create_ai_prompt(location, check_in_date, check_out_date, number_of_adults, number_of_children, number_of_pets, property_type):
-    prompt_parts = []
-    
-    property_text = build_property_type_text(property_type)
-    prompt_parts.append(property_text)
-    
-    location_text = build_location_text(location)
-    prompt_parts.append(location_text)
-    
-    date_text = build_date_text(check_in_date, check_out_date)
-    if date_text:
-        prompt_parts.append(date_text)
-    
-    guest_info = build_guest_info_list(number_of_adults, number_of_children, number_of_pets)
-    guest_text = build_guest_text(guest_info)
-    if guest_text:
-        prompt_parts.append(guest_text)
-    
-    prompt_parts.append("Please suggest the best properties based on these criteria.")
-    
-    final_prompt = ". ".join(prompt_parts)
-    return final_prompt
-
-
-def create_farmhouse_property(property_id, title, image_url, price, rating, description):
-    property_data = {
-        "_id": property_id,
-        "title": title,
-        "image": image_url,
-        "price": price,
-        "rating": rating,
-        "description": description
+    url = "https://api.openai.com/v1/vector_stores/{}/search".format(vector_store_id)
+    headers = get_openai_headers({"Content-Type": "application/json"})
+    payload = {
+        "query": query_string,
+        "max_num_results": top_k,
+        "rewrite_query": rewrite_query
     }
-    return property_data
+    response = requests.post(url, headers=headers, json=payload, timeout=30)
+    if response.status_code >= 400:
+        raise AppException("Vector store search failed")
+    search_data = response.json()
+    matches = search_data.get("data", [])
+    cleaned_matches = []
+    for match in matches:
+        file_id = match.get("file_id")
+        if not file_id:
+            continue
+        score = match.get("score") or 0.0
+        cleaned_matches.append({"file_id": file_id, "score": score})
+    return cleaned_matches
 
 
-def build_farmhouse_list():
-    farmhouse_list = []
-    
-    property_1 = create_farmhouse_property(
-        "ai_suggestion_1", 
-        "Serene Valley Farmhouse",
-        "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800&h=600&fit=crop",
-        3500, 4.8, "Perfect peaceful retreat surrounded by lush greenery"
+@handle_exceptions
+def map_files_to_property_ids(file_ids):
+    if not file_ids:
+        ordered_property_ids = []
+        file_to_property = {}
+        return ordered_property_ids, file_to_property
+    records = db_find_many(
+        "farmhouses",
+        {"ai.file_id": {"$in": file_ids}},
+        {"ai.file_id": 1}
     )
-    farmhouse_list.append(property_1)
-    
-    property_2 = create_farmhouse_property(
-        "ai_suggestion_2",
-        "Sunset Hills Farmhouse", 
-        "https://images.unsplash.com/photo-1582268611958-ebfd161ef9cf?w=800&h=600&fit=crop",
-        4200, 4.9, "Luxury farmhouse with stunning sunset views"
-    )
-    farmhouse_list.append(property_2)
-    
-    return farmhouse_list
+    mapping = {}
+    for record in records:
+        ai_data = record.get("ai") or {}
+        file_id = ai_data.get("file_id")
+        property_ref = record.get("_id")
+        if file_id and property_ref:
+            mapping[file_id] = str(property_ref)
+    ordered_property_ids = []
+    file_to_property = {}
+    seen_properties = set()
+    for file_id in file_ids:
+        property_id = mapping.get(file_id)
+        if not property_id:
+            continue
+        file_to_property[file_id] = property_id
+        if property_id not in seen_properties:
+            ordered_property_ids.append(property_id)
+            seen_properties.add(property_id)
+    return ordered_property_ids, file_to_property
 
 
-def build_additional_farmhouses():
-    additional_list = []
-    
-    property_3 = create_farmhouse_property(
-        "ai_suggestion_3",
-        "Riverside Farm Paradise",
-        "https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=800&h=600&fit=crop",
-        2800, 4.6, "Charming farmhouse by the riverside with modern amenities"
-    )
-    additional_list.append(property_3)
-    
-    property_4 = create_farmhouse_property(
-        "ai_suggestion_4",
-        "Mountain View Retreat",
-        "https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=800&h=600&fit=crop",
-        3800, 4.7, "Stunning mountain views with luxury amenities"
-    )
-    additional_list.append(property_4)
-    
-    property_5 = create_farmhouse_property(
-        "ai_suggestion_5",
-        "Garden Oasis Farmhouse",
-        "https://images.unsplash.com/photo-1518780664697-55e3ad937233?w=800&h=600&fit=crop",
-        3200, 4.5, "Beautiful garden setting with peaceful ambiance"
-    )
-    additional_list.append(property_5)
-    
-    return additional_list
-
-
-def get_farmhouse_suggestions():
-    base_farmhouses = build_farmhouse_list()
-    additional_farmhouses = build_additional_farmhouses()
-    
-    all_farmhouses = base_farmhouses + additional_farmhouses
-    return all_farmhouses
-
-
-def build_bnb_list():
-    bnb_list = []
-    
-    property_1 = create_farmhouse_property(
-        "ai_suggestion_1",
-        "Cozy Heritage BnB",
-        "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800&h=600&fit=crop",
-        2200, 4.7, "Charming bed & breakfast in historic building"
-    )
-    bnb_list.append(property_1)
-    
-    property_2 = create_farmhouse_property(
-        "ai_suggestion_2",
-        "Garden View BnB",
-        "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=800&h=600&fit=crop",
-        1800, 4.6, "Peaceful BnB with beautiful garden views"
-    )
-    bnb_list.append(property_2)
-    
-    return bnb_list
-
-
-def build_additional_bnbs():
-    additional_list = []
-    
-    property_3 = create_farmhouse_property(
-        "ai_suggestion_3",
-        "Royal Palace BnB",
-        "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?w=800&h=600&fit=crop",
-        3200, 4.9, "Luxurious bed & breakfast with royal ambiance"
-    )
-    additional_list.append(property_3)
-    
-    property_4 = create_farmhouse_property(
-        "ai_suggestion_4",
-        "Boutique City BnB",
-        "https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?w=800&h=600&fit=crop",
-        2600, 4.8, "Modern boutique BnB in city center"
-    )
-    additional_list.append(property_4)
-    
-    property_5 = create_farmhouse_property(
-        "ai_suggestion_5",
-        "Countryside Manor BnB",
-        "https://images.unsplash.com/photo-1587061949409-02df41d5e562?w=800&h=600&fit=crop",
-        2900, 4.4, "Elegant manor house with countryside charm"
-    )
-    additional_list.append(property_5)
-    
-    return additional_list
-
-
-def get_bnb_suggestions():
-    base_bnbs = build_bnb_list()
-    additional_bnbs = build_additional_bnbs()
-    
-    all_bnbs = base_bnbs + additional_bnbs
-    return all_bnbs
-
-
-def build_mixed_property_list():
-    mixed_list = []
-    
-    farmhouse_property = create_farmhouse_property(
-        "ai_suggestion_1",
-        "Serene Valley Farmhouse",
-        "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800&h=600&fit=crop",
-        3500, 4.8, "Perfect peaceful retreat surrounded by lush greenery"
-    )
-    mixed_list.append(farmhouse_property)
-    
-    bnb_property = create_farmhouse_property(
-        "ai_suggestion_2",
-        "Cozy Heritage BnB",
-        "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800&h=600&fit=crop",
-        2200, 4.7, "Charming bed & breakfast in historic building"
-    )
-    mixed_list.append(bnb_property)
-    
-    return mixed_list
-
-
-def build_additional_mixed_properties():
-    additional_list = []
-    
-    property_3 = create_farmhouse_property(
-        "ai_suggestion_3",
-        "Riverside Paradise",
-        "https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=800&h=600&fit=crop",
-        2800, 4.6, "Charming property by the riverside with modern amenities"
-    )
-    additional_list.append(property_3)
-    
-    property_4 = create_farmhouse_property(
-        "ai_suggestion_4",
-        "Mountain View Retreat",
-        "https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=800&h=600&fit=crop",
-        3800, 4.7, "Stunning mountain views with luxury amenities"
-    )
-    additional_list.append(property_4)
-    
-    property_5 = create_farmhouse_property(
-        "ai_suggestion_5",
-        "Garden View BnB",
-        "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=800&h=600&fit=crop",
-        1800, 4.6, "Peaceful BnB with beautiful garden views"
-    )
-    additional_list.append(property_5)
-    
-    return additional_list
-
-
-def get_mixed_suggestions():
-    base_mixed = build_mixed_property_list()
-    additional_mixed = build_additional_mixed_properties()
-    
-    all_mixed = base_mixed + additional_mixed
-    return all_mixed
-
-
-def get_ai_suggestions_by_type(property_type):
-    if property_type == 'farmhouse':
-        suggestions = get_farmhouse_suggestions()
-        return suggestions
-    elif property_type == 'bnb':
-        suggestions = get_bnb_suggestions()
-        return suggestions
-    else:
-        suggestions = get_mixed_suggestions()
-        return suggestions
-
-
-def build_response_data(suggestions, prompt):
+@handle_exceptions
+def format_search_property(property_data):
+    property_id = str(property_data.get("_id"))
+    name = property_data.get("name", "")
+    description = property_data.get("description", "")
+    property_type = property_data.get("type", "")
+    price = property_data.get("per_day_price", 0)
+    location_text = build_location_summary(property_data.get("location", {}))
+    images = property_data.get("images") or []
+    image_url = images[0] if images else ""
+    rating = property_data.get("review_average", 0)
     result = {
-        "suggestions": suggestions,
-        "prompt": prompt,
-        "message": "AI suggestions generated successfully"
+        "_id": property_id,
+        "title": name,
+        "description": description,
+        "type": property_type,
+        "price": price,
+        "location": location_text,
+        "image": image_url,
+        "rating": rating
     }
     return result
 
 
-def extract_details_from_query(user_query):
-    extraction_prompt = f"""
-    Extract the following details from this user query: "{user_query}"
-    
-    Return JSON format:
-    {{
-        "location": "extracted location or empty",
-        "guests": "total number of guests or 0", 
-        "dates": "check-in and check-out dates or empty",
-        "property_type": "farmhouse, bnb, or both",
-        "budget": "price range or empty",
-        "amenities": "specific requirements"
-    }}
-    """
-    return extraction_prompt
+@handle_exceptions
+def build_active_properties_filter(property_ids):
+    object_ids = [ObjectId(pid) for pid in property_ids]
+    filter_data = {"_id": {"$in": object_ids}, "status": "active"}
+    return filter_data
 
-def process_ai_suggestion_request(user_query, property_type):
-    if user_query:
-        prompt = f"User request: {user_query}"
-        
-        extraction_prompt = extract_details_from_query(user_query)
-        suggestions = get_ai_suggestions_by_type(property_type)
-    else:
-        prompt = "No specific request provided"
-        suggestions = get_ai_suggestions_by_type(property_type)
-    
-    result = build_response_data(suggestions, prompt)
+
+@handle_exceptions
+def build_active_properties_projection():
+    projection = {
+        "_id": 1,
+        "name": 1,
+        "description": 1,
+        "type": 1,
+        "per_day_price": 1,
+        "location": 1,
+        "images": 1,
+        "review_average": 1,
+        "amenities": 1,
+        "tags": 1
+    }
+    return projection
+
+
+@handle_exceptions
+def build_property_map(properties):
+    property_map = {}
+    for property_data in properties:
+        property_id = str(property_data.get("_id"))
+        property_map[property_id] = property_data
+    return property_map
+
+
+@handle_exceptions
+def order_properties_by_ids(property_map, property_ids):
+    ordered_list = []
+    for property_id in property_ids:
+        property_item = property_map.get(property_id)
+        if property_item:
+            ordered_list.append(property_item)
+    return ordered_list
+
+
+@handle_exceptions
+def fetch_active_property_docs(property_ids):
+    if not property_ids:
+        result = []
+        return result
+    query_filter = build_active_properties_filter(property_ids)
+    projection = build_active_properties_projection()
+    properties = db_find_many("farmhouses", query_filter, projection)
+    property_map = build_property_map(properties)
+    ordered_properties = order_properties_by_ids(property_map, property_ids)
+    return ordered_properties
+
+@handle_exceptions
+def tokenize_query(query_string):
+    tokens = re.findall(r"\w+", query_string.lower())
+    meaningful_tokens = [token for token in tokens if len(token) > 2]
+    return meaningful_tokens
+
+
+@handle_exceptions
+def extract_property_text(property_data):
+    parts = [
+        property_data.get("name", ""),
+        property_data.get("description", ""),
+        property_data.get("type", ""),
+        str(property_data.get("per_day_price", ""))
+    ]
+    location = property_data.get("location") or {}
+    location_parts = [
+        location.get("address", ""),
+        location.get("area", ""),
+        location.get("city", ""),
+        location.get("state", "")
+    ]
+    parts.extend(location_parts)
+    amenities = property_data.get("amenities") or {}
+    for category in amenities.values():
+        if isinstance(category, dict):
+            for amenity_name, enabled in category.items():
+                if enabled:
+                    parts.append(amenity_name)
+    tags = property_data.get("tags") or []
+    if isinstance(tags, list):
+        parts.extend(tags)
+    aggregated_text = " ".join(filter(None, parts)).lower()
+    return aggregated_text
+
+
+@handle_exceptions
+def compute_property_score(property_id, vector_score_map):
+    score = vector_score_map.get(property_id)
+    if score is None:
+        return 0.0
+    return score
+
+
+@handle_exceptions
+def search_properties(query_string):
+    if not query_string:
+        raise AppException("Search query is required")
+    matches = search_vector_store_for_files(query_string)
+    file_ids = [match["file_id"] for match in matches]
+    property_ids, file_to_property = map_files_to_property_ids(file_ids)
+    if not property_ids:
+        return {"properties": []}
+
+    vector_rank_map = {property_id: index for index, property_id in enumerate(property_ids)}
+    vector_score_map = {}
+    for match in matches:
+        file_id = match.get("file_id")
+        score = match.get("score") or 0.0
+        property_id = file_to_property.get(file_id)
+        if property_id:
+            vector_score_map[property_id] = max(score, vector_score_map.get(property_id, 0.0))
+
+    property_docs = fetch_active_property_docs(property_ids)
+    if not property_docs:
+        return {"properties": []}
+
+    scored_results = []
+    for property_data in property_docs:
+        property_id = str(property_data.get("_id"))
+        score = compute_property_score(property_id, vector_score_map)
+        formatted = format_search_property(property_data)
+        formatted["score"] = round(score, 4)
+        scored_results.append((score, formatted))
+
+    scored_results.sort(key=lambda item: item[0], reverse=True)
+    top_properties = [item[1] for item in scored_results[:5]]
+
+    result = {
+        "properties": top_properties
+    }
     return result
+
+
