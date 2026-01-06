@@ -1,4 +1,7 @@
 import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 BACKEND_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -18,6 +21,8 @@ MAX_SEARCH_DISTANCE_KM = 25
 
 ADMIN_PASSWORD = os.getenv('ADMIN_PASSWORD')
 JWT_SECRET_KEY = os.getenv('JWT_SECRET_KEY')
+OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
+VECTOR_STORE_ID = os.getenv('VECTOR_STORE_ID')
 
 RAZORPAY_KEY_ID = os.getenv('RAZORPAY_KEY_ID')
 RAZORPAY_KEY_SECRET = os.getenv('RAZORPAY_KEY_SECRET')
