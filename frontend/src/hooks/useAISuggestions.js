@@ -11,19 +11,19 @@ export const useAISuggestions = () => {
     setError(null)
     
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/ai_suggestion`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/ai-search`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          userQuery: userQuery || '',
-          propertyType: propertyType
+          query: userQuery || '',
+          propertyType: propertyType || 'both'
         })
       })
 
       const data = await response.json()
       
       if (data.success) {
-        setSuggestions(data.suggestions || [])
+        setSuggestions(data.properties || [])
       } else {
         setError('Failed to get suggestions')
         setSuggestions([])
