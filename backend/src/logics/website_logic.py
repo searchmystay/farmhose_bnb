@@ -4,6 +4,7 @@ from src.utils.exception_handler import handle_exceptions, AppException
 from src.logics.cloudfare_bucket import upload_farmhouse_image_to_r2, upload_farmhouse_document_to_r2
 from src.config import LEAD_COST_RUPEES, MINIMUM_BALANCE_THRESHOLD, OTP_EXPIRY_MINUTES, TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_PHONE_NUMBER, AUTO_PAYMENT_THRESHOLD
 from bson import ObjectId
+from bson.errors import InvalidId
 from datetime import datetime, timedelta
 import pytz
 import re
@@ -631,28 +632,43 @@ def prepare_owner_details_update(step_data, property_id=None):
 
 @handle_exceptions
 def save_partial_property_registration(step_data, property_id=None):
-    if not property_id:
+    needs_new_property = False
+
+    if property_id:
+        try:
+            property_object_id = ObjectId(property_id)
+        except (InvalidId, TypeError):
+            needs_new_property = True
+        else:
+            farmhouse_exists = db_exists("farmhouses", {"_id": property_object_id})
+            if not farmhouse_exists:
+                needs_new_property = True
+    else:
+        needs_new_property = True
+
+    if needs_new_property:
         property_id = create_incomplete_property()
-    
+        property_object_id = ObjectId(property_id)
+
     ist_timezone = pytz.timezone('Asia/Kolkata')
     current_time = datetime.now(ist_timezone).replace(tzinfo=None)
     update_data = {"updated_at": current_time}
-    
+
     if "name" in step_data:
         basic_info_data = prepare_basic_info_update(step_data)
         update_data.update(basic_info_data)
-    
+
     if "essential_amenities" in step_data or "experience_amenities" in step_data or "additional_amenities" in step_data:
         amenities_data = prepare_amenities_update(step_data, property_id)
         update_data.update(amenities_data)
-    
+
     if "owner_name" in step_data:
         owner_data = prepare_owner_details_update(step_data, property_id)
         update_data.update(owner_data)
-    
-    query_filter = {"_id": ObjectId(property_id)}
+
+    query_filter = {"_id": property_object_id}
     db_update_one("farmhouses", query_filter, {"$set": update_data})
-    
+
     return property_id
 
 
