@@ -9,20 +9,6 @@ const scrollbarHideStyles = `
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
   }
-  
-  @keyframes scroll-slow {
-    0% {
-      transform: translateX(0);
-    }
-    100% {
-      transform: translateX(-50%);
-    }
-  }
-  
-  .animate-scroll-slow {
-    animation: scroll-slow 30s linear infinite;
-    width: 200%;
-  }
 `
 
 const SkeletonCard = () => (
@@ -42,7 +28,7 @@ const SkeletonCard = () => (
 const SuggestionCard = ({ property, onClick }) => (
   <div 
     onClick={() => onClick?.(property._id)}
-    className="bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-300 w-80 h-96 flex-shrink-0 overflow-hidden cursor-pointer group flex flex-col"
+    className="bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-300 h-96 flex-shrink-0 overflow-hidden cursor-pointer group flex flex-col w-full"
   >
     <div className="relative h-48 overflow-hidden">
       <img 
@@ -102,6 +88,19 @@ const AISuggestions = ({ onPropertyClick, propertyType = 'both' }) => {
   const [userQuery, setUserQuery] = useState('')
   const [searchQuery, setSearchQuery] = useState('')
   const [hasSubmitted, setHasSubmitted] = useState(false)
+  const [currentIndex, setCurrentIndex] = useState(0)
+  const [isTransitioning, setIsTransitioning] = useState(true)
+
+  const getVisibleCards = () => {
+    if (typeof window === 'undefined') {
+      return 1
+    }
+    if (window.innerWidth >= 1024) return 4
+    if (window.innerWidth >= 768) return 2
+    return 1
+  }
+
+  const [visibleCards, setVisibleCards] = useState(getVisibleCards)
 
   const countWords = (text) => {
     const matches = text.trim().match(/\b\S+\b/g)
@@ -154,6 +153,62 @@ const AISuggestions = ({ onPropertyClick, propertyType = 'both' }) => {
     </div>
   )
 
+  const shouldEnableCarousel = suggestions.length > visibleCards
+  const extendedSuggestions = shouldEnableCarousel ? [...suggestions, ...suggestions, ...suggestions] : suggestions
+  const startIndex = shouldEnableCarousel ? suggestions.length : 0
+  const cardWidthPercent = visibleCards > 0 ? 100 / visibleCards : 100
+
+  useEffect(() => {
+    if (!shouldEnableCarousel) {
+      return undefined
+    }
+
+    const interval = setInterval(() => {
+      setCurrentIndex(prev => prev + 1)
+    }, 4000)
+
+    return () => clearInterval(interval)
+  }, [shouldEnableCarousel])
+
+  useEffect(() => {
+    if (!shouldEnableCarousel) {
+      return undefined
+    }
+
+    if (currentIndex < startIndex + suggestions.length) {
+      return undefined
+    }
+
+    let enableTimeout
+    const resetTimeout = setTimeout(() => {
+      setIsTransitioning(false)
+      setCurrentIndex(startIndex)
+      enableTimeout = setTimeout(() => setIsTransitioning(true), 50)
+    }, 700)
+
+    return () => {
+      clearTimeout(resetTimeout)
+      if (enableTimeout) clearTimeout(enableTimeout)
+    }
+  }, [currentIndex, shouldEnableCarousel, startIndex, suggestions.length])
+
+  useEffect(() => {
+    if (shouldEnableCarousel) {
+      setCurrentIndex(startIndex)
+    } else {
+      setCurrentIndex(0)
+    }
+  }, [shouldEnableCarousel, startIndex])
+
+  useEffect(() => {
+    const handleResize = () => {
+      setVisibleCards(getVisibleCards())
+    }
+
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
+
   const renderContent = () => {
     if (!hasSubmitted) {
       return null
@@ -178,16 +233,63 @@ const AISuggestions = ({ onPropertyClick, propertyType = 'both' }) => {
     }
 
     return (
-      <div className="overflow-hidden">
-        <div className="flex gap-6 animate-scroll-slow">
-          {suggestions.concat(suggestions).map((property, index) => (
-            <SuggestionCard 
-              key={`${property._id || index}-${Math.floor(index / suggestions.length)}`} 
-              property={property} 
-              onClick={onPropertyClick}
-            />
-          ))}
-        </div>
+      <div>
+        {shouldEnableCarousel ? (
+          <>
+            <div className="relative overflow-hidden">
+              <div
+                className={`flex gap-6 ${isTransitioning ? 'transition-transform duration-700 ease-in-out' : ''}`}
+                style={{
+                  transform: `translateX(-${currentIndex * cardWidthPercent}%)`,
+                  width: `${extendedSuggestions.length * cardWidthPercent}%`
+                }}
+              >
+                {extendedSuggestions.map((property, index) => (
+                  <div
+                    key={`${property._id || index}-${index}`}
+                    className="flex-shrink-0"
+                    style={{ width: `${cardWidthPercent}%` }}
+                  >
+                    <SuggestionCard
+                      property={property}
+                      onClick={onPropertyClick}
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="flex justify-center mt-8 space-x-2">
+              {suggestions.map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => setCurrentIndex(startIndex + index)}
+                  className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                    (currentIndex - startIndex) % suggestions.length === index
+                      ? 'bg-gray-900 scale-125'
+                      : 'bg-gray-300 hover:bg-gray-400'
+                  }`}
+                />
+              ))}
+            </div>
+          </>
+        ) : (
+          <div className={`grid gap-6 ${
+            suggestions.length === 1
+              ? 'max-w-md mx-auto'
+              : suggestions.length === 2
+                ? 'md:grid-cols-2'
+                : 'md:grid-cols-2 lg:grid-cols-3'
+          }`}>
+            {suggestions.map((property, index) => (
+              <SuggestionCard
+                key={`${property._id || index}`}
+                property={property}
+                onClick={onPropertyClick}
+              />
+            ))}
+          </div>
+        )}
       </div>
     )
   }
