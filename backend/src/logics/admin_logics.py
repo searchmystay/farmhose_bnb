@@ -3,6 +3,8 @@ from src.utils.exception_handler import handle_exceptions, AppException
 from src.database.db_common_operations import db_find_many, db_find_one, db_update_one, db_delete_one, db_insert_one
 from src.logics.website_logic import process_property_for_detail, extract_all_amenities, build_complete_address
 from src.logics.cloudfare_bucket import delete_farmhouse_folder_from_r2
+from src.logics.ai_logics import add_property_to_vector_store
+
 from bson import ObjectId
 from datetime import datetime
 import pytz
@@ -184,32 +186,46 @@ def initialize_farmhouse_analysis(property_id):
     return True
 
 
+def build_pending_property_filter(property_id):
+    filter_data = {"_id": ObjectId(property_id), "status": "pending_approval"}
+    return filter_data
+
+
 @handle_exceptions
-def approve_pending_property(property_id):
-    query_filter = {"_id": ObjectId(property_id), "status": "pending_approval"}
-    property_data = db_find_one("farmhouses", query_filter, {
-        "_id": 1, 
-        "owner_details": 1
-    })
+def get_pending_property(property_id):
+    query_filter = build_pending_property_filter(property_id)
+    projection = {"_id": 1, "owner_details": 1}
+    property_data = db_find_one("farmhouses", query_filter, projection)
     
     if not property_data:
         raise AppException("Pending property not found")
     
-    owner_details = property_data.get("owner_details", {})
+    return property_data
+
+
+def ensure_owner_dashboard_credentials(owner_details):
     dashboard_id = owner_details.get("owner_dashboard_id", "")
     dashboard_password = owner_details.get("owner_dashboard_password", "")
     
     if not dashboard_id or not dashboard_password:
         raise AppException("Property cannot be approved: Owner dashboard credentials are missing. Please ensure the property owner completed all registration steps.")
     
-    update_data = {
-        "status": "active"
-    }
-    
-    db_update_one("farmhouses", query_filter, {"$set": update_data})
+    result = True
+    return result
+
+
+@handle_exceptions
+def approve_pending_property(property_id):
+    property_data = get_pending_property(property_id)
+    owner_details = property_data.get("owner_details", {})
+    ensure_owner_dashboard_credentials(owner_details)
+    update_filter = build_pending_property_filter(property_id)
+    update_data = {"status": "active"}
+    db_update_one("farmhouses", update_filter, {"$set": update_data})
     initialize_farmhouse_analysis(property_id)
-    
-    return True
+    add_property_to_vector_store(property_id)
+    result = True
+    return result
 
 
 @handle_exceptions
