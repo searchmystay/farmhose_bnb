@@ -274,19 +274,15 @@ const AISuggestions = ({ onPropertyClick, propertyType = 'both' }) => {
             </div>
           </>
         ) : (
-          <div className={`grid gap-6 ${
-            suggestions.length === 1
-              ? 'max-w-md mx-auto'
-              : suggestions.length === 2
-                ? 'md:grid-cols-2'
-                : 'md:grid-cols-2 lg:grid-cols-3'
-          }`}>
+          <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {suggestions.map((property, index) => (
-              <SuggestionCard
-                key={`${property._id || index}`}
-                property={property}
-                onClick={onPropertyClick}
-              />
+              <div className="w-full max-w-sm mx-auto">
+                <SuggestionCard
+                  key={`${property._id || index}`}
+                  property={property}
+                  onClick={onPropertyClick}
+                />
+              </div>
             ))}
           </div>
         )}
