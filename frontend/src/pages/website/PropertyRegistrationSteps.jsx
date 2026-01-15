@@ -10,6 +10,7 @@ import {
   StepNavigation,
   PasswordInput
 } from '../../components/common/FormComponents';
+import { CreditCard } from 'phosphor-react';
 import GooglePlacesAutocomplete from '../../components/common/GooglePlacesAutocomplete';
 
 // Helper Components
@@ -25,7 +26,7 @@ export const ProcessExplanation = () => (
   </div>
 );
 
-export const ProgressIndicator = ({ currentStep, totalSteps = 7 }) => {
+export const ProgressIndicator = ({ currentStep, totalSteps = 8 }) => {
   const progressPercent = (currentStep / totalSteps) * 100;
   return (
     <div className="mb-8">
@@ -625,10 +626,77 @@ export const Step7DocumentUpload = ({
 
       <StepNavigation 
         onPrevious={onPrevious} 
-        nextLabel="Register" 
+        nextLabel="Continue to Payment" 
         loading={loading}
-        nextButtonColor="blue"
+        nextButtonColor="green"
       />
     </form>
   );
 };
+
+// Step 8: Credit Recharge (NEW)
+export const Step8CreditRecharge = ({ 
+  rechargeAmount,
+  onRechargeAmountChange,
+  onSubmit, 
+  onPrevious,
+  loading,
+  currentBalance = 0
+}) => (
+  <form onSubmit={onSubmit} className="space-y-8">
+    <div className="space-y-6">
+      <SectionHeader title="Recharge Credits" subtitle="Add credits to activate your property listing" />
+      
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="bg-white rounded-2xl shadow-md p-6 sm:p-10 w-full max-w-3xl">
+          <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-3">
+            <CreditCard size={32} weight="duotone" className="text-green-600" />
+            Enter Amount to Activate Your Property
+          </h2>
+          
+          <div className="mb-6">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Enter Amount (₹)
+            </label>
+            <input
+              type="number"
+              value={rechargeAmount}
+              onChange={onRechargeAmountChange}
+              placeholder="Enter amount"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-lg"
+              disabled={loading}
+              min="3000"
+              step="1"
+              required
+            />
+            <p className="text-sm text-red-500 mt-2">
+              Minimum ₹3000 required to activate your property listing and start receiving bookings.
+            </p>
+          </div>
+
+          <div className="bg-green-50 border border-green-200 p-6 rounded-lg mb-6">
+            <div className="text-center">
+              <p className="text-sm text-green-600 font-medium mb-1">Total Balance</p>
+              <p className="text-3xl font-bold text-green-900">
+                ₹{rechargeAmount && parseFloat(rechargeAmount) > 0 ? parseFloat(rechargeAmount) : 0}
+              </p>
+            </div>
+          </div>
+
+          <button
+            type="submit"
+            className="w-full px-6 py-4 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-lg font-semibold hover:from-green-700 hover:to-green-800 transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed text-lg"
+            disabled={loading || !rechargeAmount || parseFloat(rechargeAmount) < 3000}
+          >
+            {loading ? 'Processing Payment...' : 'Proceed to Payment & Complete Registration'}
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <StepNavigation 
+      onPrevious={onPrevious} 
+      showNext={false}
+    />
+  </form>
+);

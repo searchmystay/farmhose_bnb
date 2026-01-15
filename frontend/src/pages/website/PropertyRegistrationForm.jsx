@@ -21,8 +21,10 @@ import {
   Step4ExperienceAmenities,
   Step5AdditionalAmenities,
   Step6OwnerDetails,
-  Step7DocumentUpload
+  Step7DocumentUpload,
+  Step8CreditRecharge
 } from './PropertyRegistrationSteps';
+import useRazorpay from '../../hooks/owner/useRazorpay';
 
 const PropertyRegistrationForm = () => {
   const [currentStep, setCurrentStep] = useState(1);
@@ -139,6 +141,23 @@ const PropertyRegistrationForm = () => {
   
   const [otpCode, setOtpCode] = useState('');
   const [isVerifying, setIsVerifying] = useState(false);
+
+  // Credit recharge states
+  const [rechargeAmount, setRechargeAmount] = useState('');
+  const [documentsUploaded, setDocumentsUploaded] = useState(false);
+
+  // Payment success callback
+  const handlePaymentSuccess = () => {
+    toast.success('Payment successful! Your property is now active.');
+    setRechargeAmount('');
+    clearAllStates();
+    setPropertyId(null);
+    sessionStorage.removeItem('currentPropertyId');
+    setIsRegistrationComplete(true);
+  };
+
+  // Initialize Razorpay hook
+  const { initiatePayment, loading: paymentLoading } = useRazorpay(propertyId, handlePaymentSuccess);
 
   useEffect(() => {
     const savedPropertyId = sessionStorage.getItem('currentPropertyId');
@@ -670,7 +689,7 @@ const PropertyRegistrationForm = () => {
     setValidationErrors({});
   };
 
-  const handleFinalSubmit = async (e) => {
+  const handleStep7Next = async (e) => {
     e.preventDefault();
     
     const errors = validateFileUploads();
@@ -692,16 +711,30 @@ const PropertyRegistrationForm = () => {
         uploadData.panCard
       );
       
-      toast.success('Property registration completed successfully!');
-      clearAllStates();
-      setPropertyId(null);
-      sessionStorage.removeItem('currentPropertyId');
-      setIsRegistrationComplete(true);
+      toast.success('Documents uploaded successfully! Now add credits to activate your property.');
+      setDocumentsUploaded(true);
+      setCurrentStep(8);
     } catch (error) {
-      toast.error(error.message || 'Failed to complete registration. Please try again.');
+      toast.error(error.message || 'Failed to upload documents. Please try again.');
     } finally {
       setStepLoading(false);
     }
+  };
+
+  const handleRechargeAmountChange = (e) => {
+    setRechargeAmount(e.target.value);
+  };
+
+  const handleStep8Next = async (e) => {
+    e.preventDefault();
+    const amount = parseFloat(rechargeAmount);
+    
+    if (!amount || amount < 3000) {
+      toast.error('Minimum amount is ₹3000 to activate your property');
+      return;
+    }
+
+    initiatePayment(amount);
   };
 
   const handleGoToHome = () => {
@@ -793,10 +826,21 @@ const PropertyRegistrationForm = () => {
                   uploadData={uploadData}
                   validationErrors={validationErrors}
                   success={success}
-                  loading={loading}
+                  loading={stepLoading}
                   onFileUpload={handleFileUpload}
-                  onSubmit={handleFinalSubmit}
+                  onSubmit={handleStep7Next}
                   onPrevious={handlePrevious}
+                />
+              )}
+
+              {currentStep === 8 && (
+                <Step8CreditRecharge
+                  rechargeAmount={rechargeAmount}
+                  onRechargeAmountChange={handleRechargeAmountChange}
+                  onSubmit={handleStep8Next}
+                  onPrevious={handlePrevious}
+                  loading={paymentLoading}
+                  currentBalance={0}
                 />
               )}
             </div>
