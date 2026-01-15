@@ -94,7 +94,40 @@ const GooglePlacesAutocomplete = ({ value, onChange, onPlaceSelected, onInputCha
     }
   };
 
+  // Inject CSS to override Google's styles globally
+  const injectOverrideCSS = () => {
+    const existingStyle = document.getElementById('google-autocomplete-override');
+    if (!existingStyle) {
+      const style = document.createElement('style');
+      style.id = 'google-autocomplete-override';
+      style.textContent = `
+        /* Override Google Places Autocomplete text color */
+        gmp-place-autocomplete input,
+        gmp-place-autocomplete input[type="text"],
+        .gm-style input,
+        .pac-container input {
+          color: #000000 !important;
+          -webkit-text-fill-color: #000000 !important;
+          background-color: #ffffff !important;
+          opacity: 1 !important;
+          caret-color: #000000 !important;
+        }
+        
+        /* Target shadow DOM elements */
+        gmp-place-autocomplete::part(input) {
+          color: #000000 !important;
+          -webkit-text-fill-color: #000000 !important;
+          background-color: #ffffff !important;
+        }
+      `;
+      document.head.appendChild(style);
+    }
+  };
+
   const applyCustomStyles = (autocomplete) => {
+    // Inject CSS override first
+    injectOverrideCSS();
+    
     autocomplete.style.width = '100%';
     autocomplete.style.fontSize = '16px';
     autocomplete.style.backgroundColor = '#ffffff';
@@ -103,17 +136,94 @@ const GooglePlacesAutocomplete = ({ value, onChange, onPlaceSelected, onInputCha
     autocomplete.style.boxShadow = 'none';
     autocomplete.style.padding = '0';
 
-    const inputElement = autocomplete.shadowRoot?.querySelector('input');
-    if (inputElement) {
-      inputElement.style.backgroundColor = '#ffffff';
-      inputElement.style.color = '#111827';
-      inputElement.style.fontSize = '16px';
-      inputElement.style.padding = '12px 16px';
-      inputElement.style.borderRadius = '12px';
-      inputElement.style.border = 'none';
-      inputElement.style.boxShadow = 'none';
-    }
+    // Function to aggressively apply input styles
+    const forceInputStyles = (inputElement) => {
+      if (inputElement) {
+        console.log('Forcing input styles...');
+        // Remove any existing style attributes that might conflict
+        inputElement.style.cssText = '';
+        
+        // Apply all necessary styles
+        const styles = {
+          'background-color': '#ffffff',
+          'color': '#000000',
+          'font-size': '16px',
+          'padding': '12px 16px',
+          'border-radius': '12px',
+          'border': 'none',
+          'box-shadow': 'none',
+          '-webkit-text-fill-color': '#000000',
+          'caret-color': '#000000',
+          'opacity': '1'
+        };
+        
+        Object.entries(styles).forEach(([property, value]) => {
+          inputElement.style.setProperty(property, value, 'important');
+        });
+      }
+    };
 
+    // Use MutationObserver to catch any changes Google makes
+    const observeAndStyle = () => {
+      const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+          if (mutation.type === 'childList' || mutation.type === 'attributes') {
+            const inputElement = autocomplete.shadowRoot?.querySelector('input') || 
+                               autocomplete.querySelector('input');
+            if (inputElement) {
+              forceInputStyles(inputElement);
+            }
+          }
+        });
+      });
+
+      // Observe the autocomplete element and its shadow DOM
+      if (autocomplete.shadowRoot) {
+        observer.observe(autocomplete.shadowRoot, {
+          childList: true,
+          subtree: true,
+          attributes: true,
+          attributeFilter: ['style', 'class']
+        });
+      }
+      observer.observe(autocomplete, {
+        childList: true,
+        subtree: true,
+        attributes: true,
+        attributeFilter: ['style', 'class']
+      });
+
+      return observer;
+    };
+
+    // Apply styles with multiple strategies
+    const applyWithRetries = (retryCount = 0) => {
+      const maxRetries = 20;
+      const inputElement = autocomplete.shadowRoot?.querySelector('input') || 
+                         autocomplete.querySelector('input');
+      
+      if (inputElement) {
+        forceInputStyles(inputElement);
+        
+        // Add event listeners to re-apply styles
+        ['focus', 'input', 'change', 'keyup', 'keydown'].forEach(event => {
+          inputElement.addEventListener(event, () => {
+            setTimeout(() => forceInputStyles(inputElement), 0);
+          });
+        });
+        
+        // Start observing for changes
+        observeAndStyle();
+      } else if (retryCount < maxRetries) {
+        setTimeout(() => applyWithRetries(retryCount + 1), 200);
+      }
+    };
+
+    // Apply styles immediately and with intervals
+    applyWithRetries();
+    setTimeout(() => applyWithRetries(), 500);
+    setTimeout(() => applyWithRetries(), 1000);
+    
     const trailingIcon = autocomplete.shadowRoot?.querySelector('button');
     if (trailingIcon) {
       trailingIcon.style.paddingRight = '12px';
@@ -126,7 +236,12 @@ const GooglePlacesAutocomplete = ({ value, onChange, onPlaceSelected, onInputCha
     if (placeholder) {
       setTimeout(() => {
         const inputElement = autocomplete.shadowRoot?.querySelector('input') || autocomplete.querySelector('input');
-        if (inputElement) inputElement.placeholder = placeholder;
+        if (inputElement) {
+          inputElement.placeholder = placeholder;
+          // Ensure text color is set even when setting placeholder
+          inputElement.style.setProperty('color', '#000000', 'important');
+          inputElement.style.setProperty('-webkit-text-fill-color', '#000000', 'important');
+        }
       }, 0);
     }
     
