@@ -12,6 +12,7 @@ import {
 } from '../../components/common/FormComponents';
 import { CreditCard } from 'phosphor-react';
 import GooglePlacesAutocomplete from '../../components/common/GooglePlacesAutocomplete';
+import { MINIMUM_PROPERTY_ACTIVATION_AMOUNT } from '../../config/constants';
 
 // Helper Components
 export const ProcessExplanation = () => (
@@ -665,12 +666,12 @@ export const Step8CreditRecharge = ({
               placeholder="Enter amount"
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-lg"
               disabled={loading}
-              min="3000"
+              min={MINIMUM_PROPERTY_ACTIVATION_AMOUNT}
               step="1"
               required
             />
             <p className="text-sm text-red-500 mt-2">
-              Minimum ₹3000 required to activate your property listing and start receiving bookings.
+              Minimum ₹{MINIMUM_PROPERTY_ACTIVATION_AMOUNT} required to activate your property listing and start receiving bookings.
             </p>
           </div>
 
@@ -686,7 +687,7 @@ export const Step8CreditRecharge = ({
           <button
             type="submit"
             className="w-full px-6 py-4 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-lg font-semibold hover:from-green-700 hover:to-green-800 transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed text-lg"
-            disabled={loading || !rechargeAmount || parseFloat(rechargeAmount) < 3000}
+            disabled={loading || !rechargeAmount || parseFloat(rechargeAmount) < MINIMUM_PROPERTY_ACTIVATION_AMOUNT}
           >
             {loading ? 'Processing Payment...' : 'Proceed to Payment & Complete Registration'}
           </button>

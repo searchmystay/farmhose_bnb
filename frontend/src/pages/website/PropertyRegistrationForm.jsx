@@ -25,6 +25,7 @@ import {
   Step8CreditRecharge
 } from './PropertyRegistrationSteps';
 import useRazorpay from '../../hooks/owner/useRazorpay';
+import { MINIMUM_PROPERTY_ACTIVATION_AMOUNT } from '../../config/constants';
 
 const PropertyRegistrationForm = () => {
   const [currentStep, setCurrentStep] = useState(1);
@@ -729,8 +730,8 @@ const PropertyRegistrationForm = () => {
     e.preventDefault();
     const amount = parseFloat(rechargeAmount);
     
-    if (!amount || amount < 3000) {
-      toast.error('Minimum amount is ₹3000 to activate your property');
+    if (!amount || amount < MINIMUM_PROPERTY_ACTIVATION_AMOUNT) {
+      toast.error(`Minimum amount is ₹${MINIMUM_PROPERTY_ACTIVATION_AMOUNT} to activate your property`);
       return;
     }
 
