@@ -951,11 +951,13 @@ def generate_and_save_otp(phone_number):
         "phone_number_verified": False
     }
     
-    farmhouse_exists = db_exists("farmhouses", {"phone_number": phone_number})
+    # Match against phone_number AND status: incomplete
+    query_filter = {"phone_number": phone_number, "status": "incomplete"}
+    farmhouse_exists = db_exists("farmhouses", query_filter)
     if not farmhouse_exists:
-        raise AppException("Phone number not found in farmhouse records")
+        raise AppException("Phone number not found in incomplete property records")
     
-    db_update_one("farmhouses", {"phone_number": phone_number}, {"$set": otp_data})
+    db_update_one("farmhouses", query_filter, {"$set": otp_data})
     
     return otp_code
 
@@ -1001,10 +1003,21 @@ def process_otp_request(phone_number):
 
 @handle_exceptions
 def verify_otp_and_update_phone(property_id, entered_otp):
-    farmhouse_data = db_find_one("farmhouses", {"_id": ObjectId(property_id)}, {"otp_code": 1, "otp_last_sent_at": 1})
+    # First get the phone number from the property
+    property_data = db_find_one("farmhouses", {"_id": ObjectId(property_id)}, {"phone_number": 1})
+    if not property_data:
+        raise AppException("Property not found")
+    
+    phone_number = property_data.get("phone_number")
+    if not phone_number:
+        raise AppException("Phone number not found for this property")
+    
+    # Now find the farmhouse with phone_number AND status: incomplete
+    query_filter = {"phone_number": phone_number, "status": "incomplete"}
+    farmhouse_data = db_find_one("farmhouses", query_filter, {"otp_code": 1, "otp_last_sent_at": 1})
     
     if not farmhouse_data:
-        raise AppException("Property not found")
+        raise AppException("No incomplete property found with this phone number")
     
     stored_otp = farmhouse_data.get("otp_code")
     otp_last_sent_at = farmhouse_data.get("otp_last_sent_at")
@@ -1028,5 +1041,6 @@ def verify_otp_and_update_phone(property_id, entered_otp):
         "$unset": {"otp_code": "", "otp_last_sent_at": ""}
     }
     
-    db_update_one("farmhouses", {"_id": ObjectId(property_id)}, update_data)
+    # Update using the same query filter (phone_number + status: incomplete)
+    db_update_one("farmhouses", query_filter, update_data)
     return True
