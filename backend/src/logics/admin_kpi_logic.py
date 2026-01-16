@@ -93,3 +93,4 @@ def get_admin_dashboard_kpis():
     kpis = build_kpis_response(counts_data, revenue_data, engagement_data, top_properties, current_month, graph_data, total_money)
     
     return kpis
+
