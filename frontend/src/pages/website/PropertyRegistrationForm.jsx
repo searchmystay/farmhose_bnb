@@ -204,6 +204,10 @@ const PropertyRegistrationForm = () => {
 
   // Load form data on component mount
   useEffect(() => {
+    // Clear localStorage for new registration (when no propertyId)
+    if (!propertyId) {
+      localStorage.removeItem('propertyFormData');
+    }
     loadFormFromLocalStorage();
   }, []);
 
