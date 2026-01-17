@@ -1,6 +1,7 @@
-from src.database.db_common_operations import db_find_many, db_find_one, db_insert_one, db_update_one, db_append_to_array, db_remove_from_array, db_exists
+from src.database.db_common_operations import db_find_many, db_find_one, db_insert_one, db_update_one, db_append_to_array, db_remove_from_array, db_exists, db_update_by_id
 from src.database.db_owner_analysis_operations import record_visit, record_contact
 from src.utils.exception_handler import handle_exceptions, AppException
+from src.utils.logger import logger
 from src.logics.cloudfare_bucket import upload_farmhouse_image_to_r2, upload_farmhouse_document_to_r2
 from src.config import LEAD_COST_RUPEES, MINIMUM_BALANCE_THRESHOLD, OTP_EXPIRY_MINUTES, TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_PHONE_NUMBER, AUTO_PAYMENT_THRESHOLD
 from bson import ObjectId
@@ -389,70 +390,100 @@ def update_farmhouse_db_with_file_urls(farmhouse_id, image_urls, documents_data)
 
 
 @handle_exceptions
-def process_amenities_data(essential_amenities, experience_amenities, additional_amenities):
+def combine_all_amenities_data(essential_amenities, experience_amenities, additional_amenities):
+    print(f"🔍 DEBUG: Combining amenities data")
+    print(f"📥 Essential amenities input: {essential_amenities}")
+    print(f"📥 Experience amenities input: {experience_amenities}")
+    print(f"📥 Additional amenities input: {additional_amenities}")
+    
+    combined_amenities = {}
+    combined_amenities.update(essential_amenities or {})
+    combined_amenities.update(experience_amenities or {})
+    combined_amenities.update(additional_amenities or {})
+    
+    print(f"📦 Combined amenities result: {combined_amenities}")
+    return combined_amenities
+
+@handle_exceptions
+def get_amenities_category_mappings():
     category_mappings = {
-        "core_amenities": {
-            "source": essential_amenities,
-            "fields": ["air_conditioning", "wifi_internet", "power_backup", "parking", 
-                      "refrigerator", "microwave", "cooking_basics", "drinking_water", 
-                      "washing_machine", "iron", "geyser_hot_water", "television", 
-                      "smart_tv_ott", "wardrobe", "extra_mattress_bedding", "cleaning_supplies"]
-        },
-        "bedroom_bathroom": {
-            "source": essential_amenities,
-            "fields": ["bedrooms", "bathrooms", "beds", "bed_linens", "towels", 
-                      "toiletries", "mirror", "hair_dryer", "attached_bathrooms", "bathtub"]
-        },
-        "outdoor_garden": {
-            "source": experience_amenities,
-            "fields": ["private_lawn_garden", "swimming_pool", "outdoor_seating_area", 
-                      "bonfire_setup", "barbecue_setup", "terrace_balcony"]
-        },
-        "food_dining": {
-            "source": experience_amenities,
-            "fields": ["kitchen_access_self_cooking", "in_house_meals_available", "dining_table"]
-        },
-        "entertainment_activities": {
-            "source": experience_amenities,
-            "fields": ["indoor_games", "outdoor_games", "pool_table", "music_system", 
-                      "board_games", "bicycle_access", "movie_projector"]
-        },
-        "experience_luxury_addons": {
-            "source": experience_amenities,
-            "fields": ["jacuzzi", "private_bar_setup", "farm_view_nature_view", 
-                      "open_shower_outdoor_bath", "gazebo_cabana_seating", "hammock", 
-                      "high_tea_setup", "event_space_small_gatherings", "private_chef_on_request"]
-        },
-        "pet_family_friendly": {
-            "source": additional_amenities,
-            "fields": ["pet_friendly", "child_friendly", "kids_play_area", "fenced_property"]
-        },
-        "safety_security": {
-            "source": additional_amenities,
-            "fields": ["cctv_cameras", "first_aid_kit", "fire_extinguisher", 
-                      "security_guard", "private_gate_compound_wall"]
-        },
-        "house_rules_services": {
-            "source": additional_amenities,
-            "fields": ["daily_cleaning_available", "long_stays_allowed", 
-                      "early_check_in_late_check_out", "staff_quarters_available", "caretaker_on_site"]
-        }
+        "core_amenities": ["air_conditioning", "wifi_internet", "power_backup", "parking", 
+                          "refrigerator", "microwave", "cooking_basics", "drinking_water", 
+                          "washing_machine", "iron", "geyser_hot_water", "television", 
+                          "smart_tv_ott", "wardrobe", "extra_mattress_bedding", "cleaning_supplies"],
+        "bedroom_bathroom": ["bedrooms", "bathrooms", "beds", "bed_linens", "towels", 
+                            "toiletries", "mirror", "hair_dryer", "attached_bathrooms", "bathtub"],
+        "outdoor_garden": ["private_lawn_garden", "swimming_pool", "outdoor_seating_area", 
+                          "bonfire_setup", "barbecue_setup", "terrace_balcony"],
+        "food_dining": ["kitchen_access_self_cooking", "in_house_meals_available", "dining_table"],
+        "entertainment_activities": ["indoor_games", "outdoor_games", "pool_table", "music_system", 
+                                   "board_games", "bicycle_access", "movie_projector"],
+        "experience_luxury_addons": ["jacuzzi", "private_bar_setup", "farm_view_nature_view", 
+                                   "open_shower_outdoor_bath", "gazebo_cabana_seating", "hammock", 
+                                   "high_tea_setup", "event_space_small_gatherings", "private_chef_on_request"],
+        "pet_family_friendly": ["pet_friendly", "child_friendly", "kids_play_area", "fenced_property"],
+        "safety_security": ["cctv_cameras", "first_aid_kit", "fire_extinguisher", 
+                           "security_guard", "private_gate_compound_wall"],
+        "house_rules_services": ["daily_cleaning_available", "long_stays_allowed", 
+                               "early_check_in_late_check_out", "staff_quarters_available", "caretaker_on_site"]
     }
-    
-    processed_amenities = {}
+    return category_mappings
+
+@handle_exceptions
+def process_category_amenities(all_amenities, fields):
     numeric_fields = ["bedrooms", "bathrooms", "beds"]
+    category_data = {}
     
-    for category_name, config in category_mappings.items():
-        source_data = config["source"]
-        fields = config["fields"]
+    for field in fields:
+        if field in numeric_fields:
+            value = all_amenities.get(field, 0)
+            processed_value = safe_int_conversion(value, 0)
+            print(f"🔢 Processing numeric field '{field}': {value} → {processed_value}")
+        else:
+            value = all_amenities.get(field, False)
+            processed_value = bool(value)
+            if value:  # Only print non-false values to reduce noise
+                print(f"✅ Processing boolean field '{field}': {value} → {processed_value}")
         
-        category_data = {}
-        for field in fields:
-            default_value = 0 if field in numeric_fields else False
-            category_data[field] = source_data.get(field, default_value)
+        category_data[field] = processed_value
+    
+    return category_data
+
+@handle_exceptions
+def save_targeted_amenities_update(property_id, update_data):
+    """
+    Update specific amenity fields without reprocessing entire structure
+    """
+    if not property_id or not update_data:
+        raise ValueError("Property ID and update data are required")
+    
+    try:
+        result = db_update_by_id("farmhouses", property_id, {"$set": update_data})
         
+        if result.matched_count == 0:
+            raise ValueError(f"Property with ID {property_id} not found")
+            
+        return property_id
+        
+    except Exception as e:
+        logger.error(f"Error updating targeted amenities: {e}")
+        raise e
+
+@handle_exceptions
+def process_amenities_data(essential_amenities, experience_amenities, additional_amenities):
+    print(f"🚀 Starting process_amenities_data")
+    
+    all_amenities = combine_all_amenities_data(essential_amenities, experience_amenities, additional_amenities)
+    category_mappings = get_amenities_category_mappings()
+    processed_amenities = {}
+    
+    for category_name, fields in category_mappings.items():
+        print(f"📂 Processing category: {category_name} with fields: {fields}")
+        category_data = process_category_amenities(all_amenities, fields)
         processed_amenities[category_name] = category_data
+        print(f"✅ Category {category_name} result: {category_data}")
     
+    print(f"🎉 Final processed amenities: {processed_amenities}")
     return processed_amenities
 
 
