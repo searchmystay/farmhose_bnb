@@ -295,10 +295,29 @@ function OwnerDashboard() {
           <main className="flex-1 bg-gray-50">
             {activeTab === 'dashboard' && (
               <div className="px-2 py-3 sm:p-10">
-                <div className="mb-6">
+                <div className="mb-6 flex justify-between items-center">
                   <h2 className="text-2xl font-semibold text-gray-900">
                     Dashboard
                   </h2>
+                  <div className="flex flex-col sm:flex-row items-end sm:items-center gap-2 sm:gap-4 text-sm">
+                    <div className="text-right">
+                      <span className="text-gray-600 font-medium">Farmhouse: </span>
+                      <span className="font-semibold text-blue-600">{dashboardData?.farmhouse_name || 'N/A'}</span>
+                    </div>
+                    <div className="text-right">
+                      <span className="text-gray-600 font-medium">Status: </span>
+                      <span className={`font-semibold ${
+                        dashboardData?.farmhouse_status === 'active' || dashboardData?.farmhouse_status === 'complete' ? 'text-green-600' :
+                        dashboardData?.farmhouse_status === 'pending' || dashboardData?.farmhouse_status === 'incomplete' ? 'text-yellow-600' :
+                        'text-red-600'
+                      }`}>
+                        {dashboardData?.farmhouse_status === 'active' || dashboardData?.farmhouse_status === 'complete' ? 'Active' :
+                         dashboardData?.farmhouse_status === 'pending' || dashboardData?.farmhouse_status === 'incomplete' ? 'Pending' :
+                         dashboardData?.farmhouse_status === 'inactive' ? 'Inactive' :
+                         dashboardData?.farmhouse_status || 'Unknown'}
+                      </span>
+                    </div>
+                  </div>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2 mb-6 sm:mb-8">
                   {renderKpiCard(
