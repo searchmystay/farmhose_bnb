@@ -29,7 +29,8 @@ def owner_login_route():
         httponly=True,
         secure=True,
         samesite='None',
-        max_age=24 * 60 * 60
+        max_age=24 * 60 * 60,
+        path='/'
     )
     
     return response
@@ -49,7 +50,8 @@ def owner_logout_route():
         expires=0,
         httponly=True,
         secure=True,
-        samesite='None'
+        samesite='None',
+        path='/'
     )
     return response
 
