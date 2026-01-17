@@ -28,7 +28,7 @@ def owner_login_route():
         auth_result['token'],
         httponly=True,
         secure=True,
-        samesite='Lax',
+        samesite='None',
         max_age=24 * 60 * 60
     )
     
@@ -49,7 +49,7 @@ def owner_logout_route():
         expires=0,
         httponly=True,
         secure=True,
-        samesite='Lax'
+        samesite='None'
     )
     return response
 
