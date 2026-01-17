@@ -358,6 +358,16 @@ const PropertyRegistrationForm = () => {
         }));
         return;
       }
+      
+      // Validate file size (800KB = 800 * 1024 bytes)
+      const maxSizeInBytes = 800 * 1024;
+      if (file.size > maxSizeInBytes) {
+        setValidationErrors(prev => ({
+          ...prev,
+          ownerPhoto: 'Image file must be 800KB or smaller'
+        }));
+        return;
+      }
     }
     
     setOwnerDetails(prev => ({ ...prev, ownerPhoto: file }));
@@ -379,6 +389,18 @@ const PropertyRegistrationForm = () => {
         setValidationErrors(prev => ({
           ...prev,
           [fileType]: 'Only JPG, JPEG, and PNG files are allowed for images'
+        }));
+        return;
+      }
+      
+      // Validate file size (800KB = 800 * 1024 bytes)
+      const maxSizeInBytes = 800 * 1024;
+      const oversizedFiles = files.filter(file => file.size > maxSizeInBytes);
+      
+      if (oversizedFiles.length > 0) {
+        setValidationErrors(prev => ({
+          ...prev,
+          [fileType]: 'Image files must be 800KB or smaller'
         }));
         return;
       }

@@ -307,7 +307,7 @@ export const FileUploadBox = ({
 }) => {
   const getFileTypeHint = () => {
     if (accept.includes('image')) {
-      return 'PNG, JPG, JPEG up to 2MB each';
+      return 'PNG, JPG, JPEG up to 800KB each';
     } else if (accept.includes('.pdf,.doc,.docx')) {
       return 'PDF, DOC, DOCX up to 10MB each';
     } else {
