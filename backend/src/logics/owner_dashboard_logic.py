@@ -143,12 +143,18 @@ def get_owner_dashboard_data(farmhouse_id):
     daily_views = get_daily_views_last_7_days(farmhouse_id)
     day_labels = get_day_labels_last_7_days()
     
+    farmhouse_doc = db_find_one("farmhouses", {"_id": ObjectId(farmhouse_id)})
+    farmhouse_name = farmhouse_doc.get("name", "N/A") if farmhouse_doc else "N/A"
+    farmhouse_status = farmhouse_doc.get("status", "unknown") if farmhouse_doc else "unknown"
+    
     dashboard_data = {
         "kpis": kpis,
         "leads_vs_views_graph": graph,
         "daily_leads_last_7_days": daily_leads,
         "daily_views_last_7_days": daily_views,
-        "day_labels": day_labels
+        "day_labels": day_labels,
+        "farmhouse_name": farmhouse_name,
+        "farmhouse_status": farmhouse_status
     }
     
     return dashboard_data
