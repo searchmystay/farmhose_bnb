@@ -552,7 +552,7 @@ export const Step6OwnerDetails = ({
               <p className="pl-1">or drag and drop</p>
             </div>
             <p className="text-xs text-gray-500">
-              PNG, JPG, JPEG up to 2MB (passport size preferred)
+              PNG, JPG, JPEG up to 800KB (passport size preferred)
             </p>
           </div>
         </div>
