@@ -43,7 +43,14 @@ def owner_logout_route():
         "message": "Logged out successfully"
     }), 200)
     
-    response.set_cookie('owner_token', '', expires=0)
+    response.set_cookie(
+        'owner_token', 
+        '', 
+        expires=0,
+        httponly=True,
+        secure=True,
+        samesite='Lax'
+    )
     return response
 
 
