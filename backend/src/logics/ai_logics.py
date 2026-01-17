@@ -51,11 +51,16 @@ def add_file_to_vector_store(vector_store_id, file_id):
 
 
 @handle_exceptions
+def ensure_valid_vector_store():
+    if not VECTOR_STORE_ID:
+        raise AppException("Vector store ID not configured in environment variables")
+    return VECTOR_STORE_ID
+
+
+@handle_exceptions
 def get_vector_store_id():
-    if VECTOR_STORE_ID:
-        return VECTOR_STORE_ID
-    
-    return None
+    result = ensure_valid_vector_store()
+    return result
 
 
 @handle_exceptions
@@ -89,10 +94,9 @@ def upload_file_in_openai(file_path):
 @handle_exceptions
 def ensure_vector_store_with_file(file_id):
     existing_vector_store_id = get_vector_store_id()
-    if not existing_vector_store_id:
-        raise AppException("Vector store not configured. Set VECTOR_STORE_ID in config.")
     add_file_to_vector_store(existing_vector_store_id, file_id)
-    return existing_vector_store_id
+    result = existing_vector_store_id
+    return result
 
 
 @handle_exceptions
@@ -217,8 +221,6 @@ def add_property_to_vector_store(property_id):
 @handle_exceptions
 def search_vector_store_for_files(query_string, top_k=20, rewrite_query=True):
     vector_store_id = get_vector_store_id()
-    if not vector_store_id:
-        raise AppException("Vector store not configured")
     
     url = "https://api.openai.com/v1/vector_stores/{}/search".format(vector_store_id)
     headers = get_openai_headers({"Content-Type": "application/json"})

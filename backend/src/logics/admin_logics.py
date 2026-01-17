@@ -67,8 +67,10 @@ def process_admin_property_details(property_data):
         "address": build_complete_address(property_data.get("location", {})),
         "opening_time": property_data.get("opening_time", ""),
         "closing_time": property_data.get("closing_time", ""),
-        "per_day_price": property_data.get("per_day_price", 0),
+        "per_day_cost": property_data.get("per_day_price", 0),
         "max_people_allowed": property_data.get("max_people_allowed", 0),
+        "max_children_allowed": property_data.get("max_children_allowed", 0),
+        "max_pets_allowed": property_data.get("max_pets_allowed", 0),
         "amenities": property_data.get("amenities", {}),
         "credit_balance": property_data.get("credit_balance", 0)
     }
@@ -132,6 +134,8 @@ def get_admin_property_details(property_id):
         "closing_time": 1,
         "per_day_price": 1,
         "max_people_allowed": 1,
+        "max_children_allowed": 1,
+        "max_pets_allowed": 1,
         "amenities": 1,
         "owner_details": 1,
         "documents": 1,

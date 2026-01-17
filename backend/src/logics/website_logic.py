@@ -509,12 +509,86 @@ def safe_int_conversion(value, default=0):
 
 
 @handle_exceptions
-def prepare_basic_info_update(step_data):
+def validate_description_length(description):
+    if not description or not description.strip():
+        raise AppException("Description is required")
+    
+    word_count = len(description.strip().split())
+    if word_count < 10:
+        raise AppException(f"Description must have at least 10 words. Currently has {word_count} words")
+    elif word_count > 150:
+        raise AppException(f"Description cannot exceed 150 words. Currently has {word_count} words")
+    
+    return True
+
+
+@handle_exceptions
+def validate_basic_info_fields(step_data):
     property_name = step_data.get("name", "")
+    if not property_name or not property_name.strip():
+        raise AppException("Property name is required")
+    
     validate_name_max_words(property_name, 3, "Property name")
     
     if len(property_name.strip()) < 3:
         raise AppException("Property name must be at least 3 characters")
+    
+    property_description = step_data.get("description", "")
+    validate_description_length(property_description)
+   
+    phone_number = step_data.get("phone_number", "")
+    if not phone_number or not phone_number.strip():
+        raise AppException("Phone number is required")
+    
+    if not phone_number.isdigit() or len(phone_number) != 10:
+        raise AppException("Phone number must be exactly 10 digits")
+    
+    per_day_price = step_data.get("per_day_price")
+    if not per_day_price:
+        raise AppException("Per day price is required")
+    
+    try:
+        price_int = int(per_day_price)
+        if price_int <= 0:
+            raise AppException("Per day price must be greater than 0")
+    except (ValueError, TypeError):
+        raise AppException("Per day price must be a valid number")
+    
+    opening_time = step_data.get("opening_time", "")
+    closing_time = step_data.get("closing_time", "")
+    
+    if not opening_time:
+        raise AppException("Check-in time is required")
+    
+    if not closing_time:
+        raise AppException("Check-out time is required")
+
+    location_data = step_data.get("location", {})
+    address = location_data.get("address", "") if location_data else step_data.get("address", "")
+    pin_code = location_data.get("pin_code", "") if location_data else step_data.get("pin_code", "")
+    
+    if not address:
+        raise AppException("Property address is required")
+    
+    if not pin_code:
+        raise AppException("Pin code is required")
+   
+    pin_code_cleaned = str(pin_code).strip() if pin_code else ""
+    
+    if not pin_code_cleaned:
+        raise AppException("Pin code is required")
+    
+    if not pin_code_cleaned.isdigit() or len(pin_code_cleaned) != 6:
+        raise AppException(f"Pin code must be exactly 6 digits. Received: '{pin_code_cleaned}' (length: {len(pin_code_cleaned)})")
+    
+    return True
+
+
+@handle_exceptions
+def prepare_basic_info_update(step_data):
+    validate_basic_info_fields(step_data)
+    
+    property_name = step_data.get("name", "")
     
     opening_time = step_data.get("opening_time", "")
     closing_time = step_data.get("closing_time", "")
@@ -525,10 +599,15 @@ def prepare_basic_info_update(step_data):
     
     location_data = step_data.get("location")
     if not location_data:
+        raw_pin_code = step_data.get("pin_code", "")
+        cleaned_pin_code = str(raw_pin_code).strip() if raw_pin_code else ""
         location_data = {
             "address": step_data.get("address", ""),
-            "pin_code": step_data.get("pin_code", "")
+            "pin_code": cleaned_pin_code
         }
+    else:
+        if "pin_code" in location_data:
+            location_data["pin_code"] = str(location_data["pin_code"]).strip()
     
     update_data = {
         "name": property_name,
@@ -538,7 +617,9 @@ def prepare_basic_info_update(step_data):
         "phone_number": step_data.get("phone_number", ""),
         "opening_time": opening_time_formatted,
         "closing_time": closing_time_formatted,
-        "location": location_data
+        "location": location_data,
+        "address": location_data.get("address", ""),
+        "pin_code": location_data.get("pin_code", "")
     }
     return update_data
 
@@ -640,11 +721,27 @@ def save_partial_property_registration(step_data, property_id=None):
         except (InvalidId, TypeError):
             needs_new_property = True
         else:
-            farmhouse_exists = db_exists("farmhouses", {"_id": property_object_id})
-            if not farmhouse_exists:
+            existing_property = db_find_one("farmhouses", {"_id": property_object_id}, {"status": 1})
+            if not existing_property:
                 needs_new_property = True
+            elif existing_property.get("status") != "incomplete":
+                raise AppException("Property registration already completed or in progress")
     else:
-        needs_new_property = True
+        phone_number = step_data.get("phone_number")
+        if phone_number and "name" in step_data:  
+            existing_incomplete = db_find_one("farmhouses", {
+                "phone_number": phone_number, 
+                "status": "incomplete"
+            }, {"_id": 1})
+            
+            if existing_incomplete:
+                property_id = str(existing_incomplete["_id"])
+                property_object_id = ObjectId(property_id)
+                needs_new_property = False
+            else:
+                needs_new_property = True
+        else:
+            needs_new_property = True
 
     if needs_new_property:
         property_id = create_incomplete_property()

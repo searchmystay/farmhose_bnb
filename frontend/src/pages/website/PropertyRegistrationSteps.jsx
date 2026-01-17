@@ -87,7 +87,8 @@ export const Step1BasicInfo = ({
   validationErrors, 
   onBasicInfoChange,
   onLocationSelected,
-  onSubmit 
+  onSubmit,
+  stepLoading = false 
 }) => (
   <form onSubmit={onSubmit} className="space-y-6">
     <TextInput
@@ -104,7 +105,7 @@ export const Step1BasicInfo = ({
       value={basicInfo.description}
       onChange={onBasicInfoChange}
       label="Description"
-      placeholder="Describe your property in detail (minimum 10 words)..."
+      placeholder="Describe your property in detail (minimum 10 words, maximum 150 words)..."
       error={validationErrors.description}
       rows={4}
     />
@@ -210,7 +211,11 @@ export const Step1BasicInfo = ({
       error={validationErrors.pin_code}
     />
 
-    <StepNavigation showPrevious={false} />
+    <StepNavigation 
+      showPrevious={false} 
+      isSubmitting={stepLoading}
+      submitText={stepLoading ? "Saving..." : "Next Step"}
+    />
   </form>
 );
 

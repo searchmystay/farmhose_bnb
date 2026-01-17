@@ -84,12 +84,31 @@ const RecommendationHeader = ({ searchQuery }) => {
 }
 
 const AISuggestions = ({ onPropertyClick, propertyType = 'both' }) => {
-  const { suggestions, loading, error, fetchSuggestions } = useAISuggestions()
+  const { 
+    suggestions, 
+    loading, 
+    error, 
+    fetchSuggestions, 
+    getCachedQuery,
+    hasCachedSuggestions 
+  } = useAISuggestions()
+  
   const [userQuery, setUserQuery] = useState('')
   const [searchQuery, setSearchQuery] = useState('')
   const [hasSubmitted, setHasSubmitted] = useState(false)
   const [currentIndex, setCurrentIndex] = useState(0)
   const [isTransitioning, setIsTransitioning] = useState(true)
+
+  // Restore cached state on component mount
+  useEffect(() => {
+    const cachedQuery = getCachedQuery()
+    if (cachedQuery && hasCachedSuggestions) {
+      setUserQuery(cachedQuery)
+      setSearchQuery(cachedQuery)
+      setHasSubmitted(true)
+      console.log('Restored AI suggestions state from cache')
+    }
+  }, [hasCachedSuggestions, getCachedQuery])
 
   const getVisibleCards = () => {
     if (typeof window === 'undefined') {
@@ -210,7 +229,8 @@ const AISuggestions = ({ onPropertyClick, propertyType = 'both' }) => {
   }, [])
 
   const renderContent = () => {
-    if (!hasSubmitted) {
+    // Show suggestions if we have them (either fresh or cached)
+    if (!hasSubmitted && !hasCachedSuggestions) {
       return null
     }
 
@@ -297,8 +317,23 @@ const AISuggestions = ({ onPropertyClick, propertyType = 'both' }) => {
         <RecommendationHeader 
           searchQuery={searchQuery}
         />
-        {!hasSubmitted && renderInputForm()}
+        {(!hasSubmitted && !hasCachedSuggestions) && renderInputForm()}
         {renderContent()}
+        {(hasSubmitted || hasCachedSuggestions) && suggestions.length > 0 && (
+          <div className="mt-8 text-center">
+            <button
+              onClick={() => {
+                setHasSubmitted(false)
+                setUserQuery('')
+                setSearchQuery('')
+                // Don't clear suggestions here - let user see them while typing new query
+              }}
+              className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+            >
+              Search Again
+            </button>
+          </div>
+        )}
       </div>
     </section>
   )
