@@ -27,7 +27,7 @@ def owner_login_route():
         'owner_token',
         auth_result['token'],
         httponly=True,
-        secure=False,
+        secure=True,
         samesite='Lax',
         max_age=24 * 60 * 60
     )
