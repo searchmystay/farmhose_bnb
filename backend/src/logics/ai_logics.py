@@ -51,6 +51,13 @@ def add_file_to_vector_store(vector_store_id, file_id):
 
 
 @handle_exceptions
+def ensure_valid_vector_store():
+    if not VECTOR_STORE_ID:
+        raise AppException("Vector store ID not configured in environment variables")
+    return VECTOR_STORE_ID
+
+
+@handle_exceptions
 def get_vector_store_id():
     result = ensure_valid_vector_store()
     return result
