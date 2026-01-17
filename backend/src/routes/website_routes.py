@@ -199,11 +199,11 @@ def save_essential_amenities_route():
             else:
                 update_data[f"amenities.bedroom_bathroom.{field}"] = bool(essential_amenities[field])
     
-    # Guest capacity fields (if included in essential amenities)
+    # Guest capacity fields - save to property root level (not in amenities)
     guest_fields = ["max_people_allowed", "max_children_allowed", "max_pets_allowed"]
     for field in guest_fields:
         if field in essential_amenities:
-            update_data[f"amenities.house_rules_services.{field}"] = safe_int_conversion(essential_amenities[field], 0)
+            update_data[field] = safe_int_conversion(essential_amenities[field], 0)
     
     if update_data:
         saved_property_id = save_targeted_amenities_update(property_id, update_data)
@@ -302,13 +302,19 @@ def save_additional_amenities_route():
         if field in additional_amenities:
             update_data[f"amenities.safety_security.{field}"] = bool(additional_amenities[field])
     
-    # House rules & services fields
+    # House rules & services fields (exclude guest capacity fields)
     house_fields = ["daily_cleaning_available", "long_stays_allowed", 
                    "early_check_in_late_check_out", "staff_quarters_available", "caretaker_on_site"]
     
     for field in house_fields:
         if field in additional_amenities:
             update_data[f"amenities.house_rules_services.{field}"] = bool(additional_amenities[field])
+    
+    # Guest capacity fields - save to property root level (not in amenities)
+    guest_fields = ["max_people_allowed", "max_children_allowed", "max_pets_allowed"]
+    for field in guest_fields:
+        if field in additional_amenities:
+            update_data[field] = safe_int_conversion(additional_amenities[field], 0)
     
     if update_data:
         saved_property_id = save_targeted_amenities_update(property_id, update_data)
