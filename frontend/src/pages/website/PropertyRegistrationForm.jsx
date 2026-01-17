@@ -153,7 +153,7 @@ const PropertyRegistrationForm = () => {
     setRechargeAmount('');
     clearAllStates();
     setPropertyId(null);
-    clearSessionData();
+    clearFormData();
     setIsRegistrationComplete(true);
   };
 
@@ -161,55 +161,55 @@ const PropertyRegistrationForm = () => {
   const { initiatePayment, loading: paymentLoading } = useRazorpay(propertyId, handlePaymentSuccess);
 
   // Session storage management
-  const saveFormDataToSession = () => {
+  // localStorage for form persistence only during registration
+  const saveFormToLocalStorage = () => {
     const formData = {
       basicInfo,
-      currentStep,
-      propertyId
+      timestamp: Date.now()
     };
-    sessionStorage.setItem('propertyRegistrationDraft', JSON.stringify(formData));
+    localStorage.setItem('propertyFormData', JSON.stringify(formData));
   };
 
-  const loadFormDataFromSession = () => {
-    // Only load session data if current form is empty (first load)
-    const isFormEmpty = !basicInfo.name && !basicInfo.description && !basicInfo.phone_number;
+  const loadFormFromLocalStorage = () => {
+    // Only restore data on page refresh, clear on navigation
+    const navigationEntry = performance.getEntriesByType('navigation')[0];
+    const isPageRefresh = navigationEntry?.type === 'reload';
     
-    if (!isFormEmpty) {
-      return; // Don't override current form data
+    if (!isPageRefresh) {
+      // Coming from navigation - clear old data
+      clearFormData();
+      return;
     }
     
-    const savedData = sessionStorage.getItem('propertyRegistrationDraft');
+    // Page refresh - restore form data
+    const savedData = localStorage.getItem('propertyFormData');
     if (savedData) {
       try {
         const parsedData = JSON.parse(savedData);
         if (parsedData.basicInfo) {
           setBasicInfo(parsedData.basicInfo);
-        }
-        if (parsedData.propertyId) {
-          setPropertyId(parsedData.propertyId);
+          console.log('📋 Form data restored');
         }
       } catch (error) {
-        console.error('Failed to load session data:', error);
+        console.error('Error loading form data:', error);
+        clearFormData();
       }
     }
   };
 
-  const clearSessionData = () => {
-    sessionStorage.removeItem('propertyRegistrationDraft');
-    sessionStorage.removeItem('currentPropertyId');
+  const clearFormData = () => {
+    localStorage.removeItem('propertyFormData');
+    localStorage.removeItem('currentPropertyId');
   };
 
-  // Load session data only once on mount and only if form is empty
+  // Load form data on component mount
   useEffect(() => {
-    const hasExistingFormData = basicInfo.name || basicInfo.description || basicInfo.phone_number;
-    if (!hasExistingFormData) {
-      loadFormDataFromSession();
-    }
+    loadFormFromLocalStorage();
   }, []);
 
   useEffect(() => {
     if (propertyId) {
-      sessionStorage.setItem('currentPropertyId', propertyId);
+      localStorage.setItem('currentPropertyId', propertyId);
     }
   }, [propertyId]);
 
@@ -234,14 +234,13 @@ const PropertyRegistrationForm = () => {
     const { name, value } = e.target;
     setBasicInfo(prev => {
       const updatedInfo = { ...prev, [name]: value };
-      // Save to session storage after a brief delay to batch changes
+      // Save to localStorage while user is typing
       setTimeout(() => {
         const formData = {
           basicInfo: updatedInfo,
-          currentStep,
-          propertyId
+          timestamp: Date.now()
         };
-        sessionStorage.setItem('propertyRegistrationDraft', JSON.stringify(formData));
+        localStorage.setItem('propertyFormData', JSON.stringify(formData));
       }, 300);
       return updatedInfo;
     });
@@ -282,32 +281,60 @@ const PropertyRegistrationForm = () => {
   };
 
   const handleEssentialToggleChange = (name) => {
-    setEssentialAmenities(prev => ({
-      ...prev,
-      [name]: !prev[name]
-    }));
+    setEssentialAmenities(prev => {
+      const updated = {
+        ...prev,
+        [name]: !prev[name]
+      };
+      // Save to localStorage immediately (not MongoDB)
+      const currentData = JSON.parse(localStorage.getItem('propertyFormData') || '{}');
+      currentData.essentialAmenities = updated;
+      localStorage.setItem('propertyFormData', JSON.stringify(currentData));
+      return updated;
+    });
   };
 
   const handleExperienceToggleChange = (name) => {
-    setExperienceAmenities(prev => ({
-      ...prev,
-      [name]: !prev[name]
-    }));
+    setExperienceAmenities(prev => {
+      const updated = {
+        ...prev,
+        [name]: !prev[name]
+      };
+      // Save to localStorage immediately (not MongoDB)
+      const currentData = JSON.parse(localStorage.getItem('propertyFormData') || '{}');
+      currentData.experienceAmenities = updated;
+      localStorage.setItem('propertyFormData', JSON.stringify(currentData));
+      return updated;
+    });
   };
 
   const handleAdditionalToggleChange = (name) => {
-    setAdditionalAmenities(prev => ({
-      ...prev,
-      [name]: !prev[name]
-    }));
+    setAdditionalAmenities(prev => {
+      const updated = {
+        ...prev,
+        [name]: !prev[name]
+      };
+      // Save to localStorage immediately (not MongoDB)
+      const currentData = JSON.parse(localStorage.getItem('propertyFormData') || '{}');
+      currentData.additionalAmenities = updated;
+      localStorage.setItem('propertyFormData', JSON.stringify(currentData));
+      return updated;
+    });
   };
 
   const handleNumberChange = (e) => {
     const { name, value } = e.target;
-    setEssentialAmenities(prev => ({
-      ...prev,
-      [name]: parseInt(value) || 0
-    }));
+    setEssentialAmenities(prev => {
+      const updated = {
+        ...prev,
+        [name]: parseInt(value) || 0
+      };
+      // Save to localStorage immediately (not MongoDB)
+      const currentData = JSON.parse(localStorage.getItem('propertyFormData') || '{}');
+      currentData.essentialAmenities = updated;
+      localStorage.setItem('propertyFormData', JSON.stringify(currentData));
+      return updated;
+    });
   };
 
   const handleOwnerDetailsChange = (e) => {
@@ -528,8 +555,8 @@ const PropertyRegistrationForm = () => {
     try {
       const response = await saveBasicInfo(basicInfo, propertyId);
       setPropertyId(response.propertyId);
-      // Clear session data after successful save
-      clearSessionData();
+      // Clear form data after successful save
+      clearFormData();
       toast.success('Basic information saved! OTP sent to your phone number.');
       setCurrentStep(2);
     } catch (error) {
@@ -581,6 +608,7 @@ const PropertyRegistrationForm = () => {
     setStepLoading(true);
     
     try {
+      // Now save to MongoDB when Next is clicked
       await saveEssentialAmenities(propertyId, essentialAmenities);
       toast.success('Essential amenities saved successfully!');
       setCurrentStep(4);
@@ -596,6 +624,7 @@ const PropertyRegistrationForm = () => {
     setStepLoading(true);
     
     try {
+      // Now save to MongoDB when Next is clicked
       await saveExperienceAmenities(propertyId, experienceAmenities);
       toast.success('Experience amenities saved successfully!');
       setCurrentStep(5);
@@ -611,6 +640,7 @@ const PropertyRegistrationForm = () => {
     setStepLoading(true);
     
     try {
+      // Now save to MongoDB when Next is clicked
       await saveAdditionalAmenities(propertyId, additionalAmenities);
       toast.success('Additional amenities saved successfully!');
       setCurrentStep(6);

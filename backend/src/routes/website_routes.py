@@ -1,5 +1,6 @@
 from flask import Blueprint, jsonify, request
 from src.logics.website_logic import *
+from src.database.db_common_operations import db_update_by_id
 from src.utils.exception_handler import handle_route_exceptions, AppException
 from src.config import MAX_SEARCH_DISTANCE_KM
 from bson import ObjectId
@@ -173,16 +174,47 @@ def save_essential_amenities_route():
     if not property_id:
         raise AppException("Property ID is required")
     
-    step_data = {"essential_amenities": essential_amenities}
-    saved_property_id = save_partial_property_registration(step_data, property_id)
+    # Only update essential amenities fields, don't reprocess entire structure
+    update_data = {}
     
-    response_data = {
-        "success": True,
-        "message": "Essential amenities saved successfully",
-        "propertyId": saved_property_id
-    }
+    # Core amenities fields
+    core_fields = ["air_conditioning", "wifi_internet", "power_backup", "parking", 
+                  "refrigerator", "microwave", "cooking_basics", "drinking_water", 
+                  "washing_machine", "iron", "geyser_hot_water", "television", 
+                  "smart_tv_ott", "wardrobe", "extra_mattress_bedding", "cleaning_supplies"]
     
-    return jsonify(response_data), 200
+    for field in core_fields:
+        if field in essential_amenities:
+            update_data[f"amenities.core_amenities.{field}"] = bool(essential_amenities[field])
+    
+    # Bedroom & bathroom fields
+    bedroom_fields = ["bedrooms", "bathrooms", "beds", "bed_linens", "towels", 
+                     "toiletries", "mirror", "hair_dryer", "attached_bathrooms", "bathtub"]
+    
+    numeric_fields = ["bedrooms", "bathrooms", "beds"]
+    for field in bedroom_fields:
+        if field in essential_amenities:
+            if field in numeric_fields:
+                update_data[f"amenities.bedroom_bathroom.{field}"] = safe_int_conversion(essential_amenities[field], 0)
+            else:
+                update_data[f"amenities.bedroom_bathroom.{field}"] = bool(essential_amenities[field])
+    
+    # Guest capacity fields - save to property root level (not in amenities)
+    guest_fields = ["max_people_allowed", "max_children_allowed", "max_pets_allowed"]
+    for field in guest_fields:
+        if field in essential_amenities:
+            update_data[field] = safe_int_conversion(essential_amenities[field], 0)
+    
+    if update_data:
+        saved_property_id = save_targeted_amenities_update(property_id, update_data)
+        response_data = {
+            "success": True,
+            "message": "Essential amenities saved successfully",
+            "propertyId": saved_property_id
+        }
+        return jsonify(response_data), 200
+    else:
+        raise AppException("No valid amenities data provided")
 
 
 @website_bp.route('/save-experience-amenities', methods=['POST'])
@@ -195,16 +227,51 @@ def save_experience_amenities_route():
     if not property_id:
         raise AppException("Property ID is required")
     
-    step_data = {"experience_amenities": experience_amenities}
-    saved_property_id = save_partial_property_registration(step_data, property_id)
+    # Only update experience amenities fields, don't reprocess entire structure
+    update_data = {}
     
-    response_data = {
-        "success": True,
-        "message": "Experience amenities saved successfully",
-        "propertyId": saved_property_id
-    }
+    # Outdoor & garden fields
+    outdoor_fields = ["private_lawn_garden", "swimming_pool", "outdoor_seating_area", 
+                     "bonfire_setup", "barbecue_setup", "terrace_balcony"]
     
-    return jsonify(response_data), 200
+    for field in outdoor_fields:
+        if field in experience_amenities:
+            update_data[f"amenities.outdoor_garden.{field}"] = bool(experience_amenities[field])
+    
+    # Food & dining fields
+    food_fields = ["kitchen_access_self_cooking", "in_house_meals_available", "dining_table"]
+    
+    for field in food_fields:
+        if field in experience_amenities:
+            update_data[f"amenities.food_dining.{field}"] = bool(experience_amenities[field])
+    
+    # Entertainment & activities fields
+    entertainment_fields = ["indoor_games", "outdoor_games", "pool_table", "music_system", 
+                           "board_games", "bicycle_access", "movie_projector"]
+    
+    for field in entertainment_fields:
+        if field in experience_amenities:
+            update_data[f"amenities.entertainment_activities.{field}"] = bool(experience_amenities[field])
+    
+    # Experience & luxury addons fields
+    luxury_fields = ["jacuzzi", "private_bar_setup", "farm_view_nature_view", 
+                    "open_shower_outdoor_bath", "gazebo_cabana_seating", "hammock", 
+                    "high_tea_setup", "event_space_small_gatherings", "private_chef_on_request"]
+    
+    for field in luxury_fields:
+        if field in experience_amenities:
+            update_data[f"amenities.experience_luxury_addons.{field}"] = bool(experience_amenities[field])
+    
+    if update_data:
+        saved_property_id = save_targeted_amenities_update(property_id, update_data)
+        response_data = {
+            "success": True,
+            "message": "Experience amenities saved successfully",
+            "propertyId": saved_property_id
+        }
+        return jsonify(response_data), 200
+    else:
+        raise AppException("No valid amenities data provided")
 
 
 @website_bp.route('/save-additional-amenities', methods=['POST'])
@@ -217,16 +284,48 @@ def save_additional_amenities_route():
     if not property_id:
         raise AppException("Property ID is required")
     
-    step_data = {"additional_amenities": additional_amenities}
-    saved_property_id = save_partial_property_registration(step_data, property_id)
+    # Only update additional amenities fields, don't reprocess entire structure
+    update_data = {}
     
-    response_data = {
-        "success": True,
-        "message": "Additional amenities saved successfully",
-        "propertyId": saved_property_id
-    }
+    # Pet & family friendly fields
+    pet_fields = ["pet_friendly", "child_friendly", "kids_play_area", "fenced_property"]
     
-    return jsonify(response_data), 200
+    for field in pet_fields:
+        if field in additional_amenities:
+            update_data[f"amenities.pet_family_friendly.{field}"] = bool(additional_amenities[field])
+    
+    # Safety & security fields
+    safety_fields = ["cctv_cameras", "first_aid_kit", "fire_extinguisher", 
+                    "security_guard", "private_gate_compound_wall"]
+    
+    for field in safety_fields:
+        if field in additional_amenities:
+            update_data[f"amenities.safety_security.{field}"] = bool(additional_amenities[field])
+    
+    # House rules & services fields (exclude guest capacity fields)
+    house_fields = ["daily_cleaning_available", "long_stays_allowed", 
+                   "early_check_in_late_check_out", "staff_quarters_available", "caretaker_on_site"]
+    
+    for field in house_fields:
+        if field in additional_amenities:
+            update_data[f"amenities.house_rules_services.{field}"] = bool(additional_amenities[field])
+    
+    # Guest capacity fields - save to property root level (not in amenities)
+    guest_fields = ["max_people_allowed", "max_children_allowed", "max_pets_allowed"]
+    for field in guest_fields:
+        if field in additional_amenities:
+            update_data[field] = safe_int_conversion(additional_amenities[field], 0)
+    
+    if update_data:
+        saved_property_id = save_targeted_amenities_update(property_id, update_data)
+        response_data = {
+            "success": True,
+            "message": "Additional amenities saved successfully",
+            "propertyId": saved_property_id
+        }
+        return jsonify(response_data), 200
+    else:
+        raise AppException("No valid amenities data provided")
 
 
 @website_bp.route('/save-owner-details', methods=['POST'])
