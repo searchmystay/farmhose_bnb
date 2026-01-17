@@ -153,17 +153,57 @@ const PropertyRegistrationForm = () => {
     setRechargeAmount('');
     clearAllStates();
     setPropertyId(null);
-    sessionStorage.removeItem('currentPropertyId');
+    clearSessionData();
     setIsRegistrationComplete(true);
   };
 
   // Initialize Razorpay hook
   const { initiatePayment, loading: paymentLoading } = useRazorpay(propertyId, handlePaymentSuccess);
 
+  // Session storage management
+  const saveFormDataToSession = () => {
+    const formData = {
+      basicInfo,
+      currentStep,
+      propertyId
+    };
+    sessionStorage.setItem('propertyRegistrationDraft', JSON.stringify(formData));
+  };
+
+  const loadFormDataFromSession = () => {
+    // Only load session data if current form is empty (first load)
+    const isFormEmpty = !basicInfo.name && !basicInfo.description && !basicInfo.phone_number;
+    
+    if (!isFormEmpty) {
+      return; // Don't override current form data
+    }
+    
+    const savedData = sessionStorage.getItem('propertyRegistrationDraft');
+    if (savedData) {
+      try {
+        const parsedData = JSON.parse(savedData);
+        if (parsedData.basicInfo) {
+          setBasicInfo(parsedData.basicInfo);
+        }
+        if (parsedData.propertyId) {
+          setPropertyId(parsedData.propertyId);
+        }
+      } catch (error) {
+        console.error('Failed to load session data:', error);
+      }
+    }
+  };
+
+  const clearSessionData = () => {
+    sessionStorage.removeItem('propertyRegistrationDraft');
+    sessionStorage.removeItem('currentPropertyId');
+  };
+
+  // Load session data only once on mount and only if form is empty
   useEffect(() => {
-    const savedPropertyId = sessionStorage.getItem('currentPropertyId');
-    if (savedPropertyId) {
-      setPropertyId(savedPropertyId);
+    const hasExistingFormData = basicInfo.name || basicInfo.description || basicInfo.phone_number;
+    if (!hasExistingFormData) {
+      loadFormDataFromSession();
     }
   }, []);
 
@@ -192,7 +232,19 @@ const PropertyRegistrationForm = () => {
 
   const handleBasicInfoChange = (e) => {
     const { name, value } = e.target;
-    setBasicInfo(prev => ({ ...prev, [name]: value }));
+    setBasicInfo(prev => {
+      const updatedInfo = { ...prev, [name]: value };
+      // Save to session storage after a brief delay to batch changes
+      setTimeout(() => {
+        const formData = {
+          basicInfo: updatedInfo,
+          currentStep,
+          propertyId
+        };
+        sessionStorage.setItem('propertyRegistrationDraft', JSON.stringify(formData));
+      }, 300);
+      return updatedInfo;
+    });
     
     if (validationErrors[name]) {
       setValidationErrors(prev => ({ ...prev, [name]: '' }));
@@ -337,8 +389,13 @@ const PropertyRegistrationForm = () => {
     
     if (!basicInfo.description.trim()) {
       errors.description = 'Description is required';
-    } else if (basicInfo.description.trim().split(/\s+/).length < 10) {
-      errors.description = 'Description must have at least 10 words';
+    } else {
+      const wordCount = basicInfo.description.trim().split(/\s+/).length;
+      if (wordCount < 10) {
+        errors.description = 'Description must have at least 10 words';
+      } else if (wordCount > 150) {
+        errors.description = 'Description cannot exceed 150 words';
+      }
     }
     
     if (!basicInfo.type) {
@@ -452,6 +509,12 @@ const PropertyRegistrationForm = () => {
 
   const handleStep1Next = async (e) => {
     e.preventDefault();
+    
+    // Prevent multiple submissions
+    if (stepLoading) {
+      return;
+    }
+    
     const errors = validateBasicInfo();
     
     if (Object.keys(errors).length > 0) {
@@ -465,10 +528,14 @@ const PropertyRegistrationForm = () => {
     try {
       const response = await saveBasicInfo(basicInfo, propertyId);
       setPropertyId(response.propertyId);
+      // Clear session data after successful save
+      clearSessionData();
       toast.success('Basic information saved! OTP sent to your phone number.');
       setCurrentStep(2);
     } catch (error) {
-      toast.error(error.message || 'Failed to save basic information');
+      const errorMessage = error.message || 'Failed to save basic information';
+      toast.error(errorMessage);
+      console.error('Step 1 submission error:', error);
     } finally {
       setStepLoading(false);
     }
@@ -770,6 +837,7 @@ const PropertyRegistrationForm = () => {
                   onLocationSelected={handleLocationSelected}
                   onAddressInputChange={handleAddressInputChange}
                   onSubmit={handleStep1Next}
+                  stepLoading={stepLoading}
                 />
               )}
               
