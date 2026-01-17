@@ -281,32 +281,60 @@ const PropertyRegistrationForm = () => {
   };
 
   const handleEssentialToggleChange = (name) => {
-    setEssentialAmenities(prev => ({
-      ...prev,
-      [name]: !prev[name]
-    }));
+    setEssentialAmenities(prev => {
+      const updated = {
+        ...prev,
+        [name]: !prev[name]
+      };
+      // Save to localStorage immediately (not MongoDB)
+      const currentData = JSON.parse(localStorage.getItem('propertyFormData') || '{}');
+      currentData.essentialAmenities = updated;
+      localStorage.setItem('propertyFormData', JSON.stringify(currentData));
+      return updated;
+    });
   };
 
   const handleExperienceToggleChange = (name) => {
-    setExperienceAmenities(prev => ({
-      ...prev,
-      [name]: !prev[name]
-    }));
+    setExperienceAmenities(prev => {
+      const updated = {
+        ...prev,
+        [name]: !prev[name]
+      };
+      // Save to localStorage immediately (not MongoDB)
+      const currentData = JSON.parse(localStorage.getItem('propertyFormData') || '{}');
+      currentData.experienceAmenities = updated;
+      localStorage.setItem('propertyFormData', JSON.stringify(currentData));
+      return updated;
+    });
   };
 
   const handleAdditionalToggleChange = (name) => {
-    setAdditionalAmenities(prev => ({
-      ...prev,
-      [name]: !prev[name]
-    }));
+    setAdditionalAmenities(prev => {
+      const updated = {
+        ...prev,
+        [name]: !prev[name]
+      };
+      // Save to localStorage immediately (not MongoDB)
+      const currentData = JSON.parse(localStorage.getItem('propertyFormData') || '{}');
+      currentData.additionalAmenities = updated;
+      localStorage.setItem('propertyFormData', JSON.stringify(currentData));
+      return updated;
+    });
   };
 
   const handleNumberChange = (e) => {
     const { name, value } = e.target;
-    setEssentialAmenities(prev => ({
-      ...prev,
-      [name]: parseInt(value) || 0
-    }));
+    setEssentialAmenities(prev => {
+      const updated = {
+        ...prev,
+        [name]: parseInt(value) || 0
+      };
+      // Save to localStorage immediately (not MongoDB)
+      const currentData = JSON.parse(localStorage.getItem('propertyFormData') || '{}');
+      currentData.essentialAmenities = updated;
+      localStorage.setItem('propertyFormData', JSON.stringify(currentData));
+      return updated;
+    });
   };
 
   const handleOwnerDetailsChange = (e) => {
@@ -580,6 +608,7 @@ const PropertyRegistrationForm = () => {
     setStepLoading(true);
     
     try {
+      // Now save to MongoDB when Next is clicked
       await saveEssentialAmenities(propertyId, essentialAmenities);
       toast.success('Essential amenities saved successfully!');
       setCurrentStep(4);
@@ -595,6 +624,7 @@ const PropertyRegistrationForm = () => {
     setStepLoading(true);
     
     try {
+      // Now save to MongoDB when Next is clicked
       await saveExperienceAmenities(propertyId, experienceAmenities);
       toast.success('Experience amenities saved successfully!');
       setCurrentStep(5);
@@ -610,6 +640,7 @@ const PropertyRegistrationForm = () => {
     setStepLoading(true);
     
     try {
+      // Now save to MongoDB when Next is clicked
       await saveAdditionalAmenities(propertyId, additionalAmenities);
       toast.success('Additional amenities saved successfully!');
       setCurrentStep(6);
