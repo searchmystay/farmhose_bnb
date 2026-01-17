@@ -59,6 +59,9 @@ def get_pending_properties():
 def process_admin_property_details(property_data):
     property_id = str(property_data.get("_id"))
     
+    amenities_data = property_data.get("amenities", {})
+    bedroom_bathroom = amenities_data.get("bedroom_bathroom", {})
+    
     basic_details = {
         "id": property_id,
         "name": property_data.get("name", ""),
@@ -71,7 +74,10 @@ def process_admin_property_details(property_data):
         "max_people_allowed": property_data.get("max_people_allowed", 0),
         "max_children_allowed": property_data.get("max_children_allowed", 0),
         "max_pets_allowed": property_data.get("max_pets_allowed", 0),
-        "amenities": property_data.get("amenities", {}),
+        "bedrooms": bedroom_bathroom.get("bedrooms", 0),
+        "bathrooms": bedroom_bathroom.get("bathrooms", 0),
+        "beds": bedroom_bathroom.get("beds", 0),
+        "amenities": amenities_data,
         "credit_balance": property_data.get("credit_balance", 0)
     }
     
