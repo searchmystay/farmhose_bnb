@@ -29,6 +29,24 @@ def setup_farmhouses_collection():
 
 
 @handle_exceptions
+def setup_geospatial_indexes():
+    existing_indexes = list(farmhouses_collection.list_indexes())
+    
+    geo_index_exists = any(
+        index.get('key', {}).get('location.coordinates') == '2dsphere' 
+        for index in existing_indexes
+    )
+    
+    if not geo_index_exists:
+        index_result = farmhouses_collection.create_index([("location.coordinates", "2dsphere")])
+        creation_success = True
+    else:
+        creation_success = True
+    
+    return creation_success
+
+
+@handle_exceptions
 def setup_payments_collection():
     payment_schema = get_payment_schema()
     existing_collections = db.list_collection_names()
@@ -103,6 +121,7 @@ def initialize_database():
     farmhouse_analysis_setup = setup_farmhouse_analysis_collection()
     leads_setup = setup_leads_collection()
     pending_reviews_setup = setup_pending_reviews_collection()
+    geospatial_indexes_setup = setup_geospatial_indexes()
     
     if not farmhouses_setup:
         raise AppException("Failed to setup farmhouses collection")
@@ -118,6 +137,9 @@ def initialize_database():
     
     if not pending_reviews_setup:
         raise AppException("Failed to setup pending_reviews collection")
+    
+    if not geospatial_indexes_setup:
+        raise AppException("Failed to setup geospatial indexes")
     
     initialization_complete = True
     return initialization_complete
