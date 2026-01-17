@@ -258,10 +258,10 @@ const PropertyRegistrationForm = () => {
     setBasicInfo(prev => ({
       ...prev,
       address: locationData.address,
-      pin_code: locationData.pin_code || prev.pin_code,
+      // DON'T auto-fill pin_code from Google Places - keep manual entry
       location: {
         address: locationData.address,
-        pin_code: locationData.pin_code || prev.pin_code,
+        pin_code: prev.pin_code, // Keep manually entered pin_code
         city: locationData.city,
         state: locationData.state,
         country: locationData.country,
@@ -275,13 +275,8 @@ const PropertyRegistrationForm = () => {
       setValidationErrors(prev => ({ ...prev, address: '' }));
     }
     
-    if (locationData.pin_code && validationErrors.pin_code) {
-      setValidationErrors(prev => ({ ...prev, pin_code: '' }));
-    }
-    
-    if (!locationData.pin_code) {
-      toast.info('Pin code not found for this location. Please enter it manually.');
-    }
+    // Always show message to enter pin code manually
+    toast.info('Please enter the pin code manually for accurate delivery.');
   };
 
   const handleEssentialToggleChange = (name) => {
