@@ -144,7 +144,6 @@ def save_basic_info_route():
         "description": data.get('description'),
         "type": data.get('type'),
         "per_day_price": data.get('per_day_price'),
-        "max_people_allowed": data.get('max_people_allowed'),
         "opening_time": data.get('opening_time'),
         "closing_time": data.get('closing_time'),
         "phone_number": data.get('phone_number'),
