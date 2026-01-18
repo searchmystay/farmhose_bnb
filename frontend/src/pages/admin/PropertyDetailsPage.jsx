@@ -212,7 +212,7 @@ function PropertyDetailsPage({ propertyId, onBack }) {
           <p className="text-sm text-gray-600 mb-4">Maximum allowed guests, children, and pets</p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-              <label className="block text-sm font-medium text-blue-900 mb-2">Max People</label>
+              <label className="block text-sm font-medium text-blue-900 mb-2">Max Adults</label>
               <p className="text-2xl font-bold text-blue-700">
                 {basic.max_people_allowed !== null && basic.max_people_allowed !== undefined && !isNaN(basic.max_people_allowed)
                   ? basic.max_people_allowed
