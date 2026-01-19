@@ -18,7 +18,7 @@ function Footer() {
         
         {/* Legal Links */}
         <div className="border-t border-gray-800 mt-6 pt-4">
-          <div className="flex flex-col sm:flex-row justify-center items-center space-y-2 sm:space-y-0 sm:space-x-6 mb-3">
+          <div className="flex flex-col sm:flex-row justify-center items-center space-y-2 sm:space-y-0 sm:space-x-4 mb-3">
             <Link 
               to="/privacy-policy" 
               className="text-gray-400 hover:text-white text-sm transition-colors duration-200"
@@ -30,6 +30,12 @@ function Footer() {
               className="text-gray-400 hover:text-white text-sm transition-colors duration-200"
             >
               Terms & Conditions
+            </Link>
+            <Link 
+              to="/cancellation-policy" 
+              className="text-gray-400 hover:text-white text-sm transition-colors duration-200"
+            >
+              Cancellation Policy
             </Link>
             <Link 
               to="/refund-policy" 

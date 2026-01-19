@@ -16,6 +16,7 @@ import WishlistPage from './pages/website/WishlistPage'
 import PrivacyPolicyPage from './pages/website/PrivacyPolicyPage'
 import TermsConditionsPage from './pages/website/TermsConditionsPage'
 import RefundPolicyPage from './pages/website/RefundPolicyPage'
+import CancellationPolicyPage from './pages/website/CancellationPolicyPage'
 import ContactUsPage from './pages/website/ContactUsPage'
 import AdminLogin from './pages/admin/AdminLogin'
 import MainAdminPage from './pages/admin/MainAdminPage'
@@ -124,6 +125,7 @@ function App() {
             <Route path="/wishlist" element={<WishlistPage />} />
             <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
             <Route path="/terms-conditions" element={<TermsConditionsPage />} />
+            <Route path="/cancellation-policy" element={<CancellationPolicyPage />} />
             <Route path="/refund-policy" element={<RefundPolicyPage />} />
             <Route path="/contact-us" element={<ContactUsPage />} />
             <Route path="/reviews/:farmhouseId" element={<ReviewSubmissionPage />} />
