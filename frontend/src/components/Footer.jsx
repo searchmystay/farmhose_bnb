@@ -1,3 +1,5 @@
+import { Link } from 'react-router-dom'
+
 function Footer() {
   return (
     <footer className="bg-gray-900 text-white py-8">
@@ -13,8 +15,38 @@ function Footer() {
             <p className="text-gray-400 text-sm">+91 820 966 5356</p>
           </div>
         </div>
-        <div className="border-t border-gray-800 mt-6 pt-4 text-center text-gray-400 text-xs">
-          <p>&copy; 2025 SearchMyStay. All rights reserved.</p>
+        
+        {/* Legal Links */}
+        <div className="border-t border-gray-800 mt-6 pt-4">
+          <div className="flex flex-col sm:flex-row justify-center items-center space-y-2 sm:space-y-0 sm:space-x-6 mb-3">
+            <Link 
+              to="/privacy-policy" 
+              className="text-gray-400 hover:text-white text-sm transition-colors duration-200"
+            >
+              Privacy Policy
+            </Link>
+            <Link 
+              to="/terms-conditions" 
+              className="text-gray-400 hover:text-white text-sm transition-colors duration-200"
+            >
+              Terms & Conditions
+            </Link>
+            <Link 
+              to="/refund-policy" 
+              className="text-gray-400 hover:text-white text-sm transition-colors duration-200"
+            >
+              Refund Policy
+            </Link>
+            <Link 
+              to="/contact-us" 
+              className="text-gray-400 hover:text-white text-sm transition-colors duration-200"
+            >
+              Contact Us
+            </Link>
+          </div>
+          <div className="text-center text-gray-400 text-xs">
+            <p>&copy; 2025 SearchMyStay. All rights reserved.</p>
+          </div>
         </div>
       </div>
     </footer>
