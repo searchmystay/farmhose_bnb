@@ -13,6 +13,10 @@ import PropertiesPage from './pages/website/PropertiesPage'
 import PropertyDetailPage from './pages/website/PropertyDetailPage'
 import PropertyRegistrationForm from './pages/website/PropertyRegistrationForm'
 import WishlistPage from './pages/website/WishlistPage'
+import PrivacyPolicyPage from './pages/website/PrivacyPolicyPage'
+import TermsConditionsPage from './pages/website/TermsConditionsPage'
+import RefundPolicyPage from './pages/website/RefundPolicyPage'
+import ContactUsPage from './pages/website/ContactUsPage'
 import AdminLogin from './pages/admin/AdminLogin'
 import MainAdminPage from './pages/admin/MainAdminPage'
 import OwnerLogin from './pages/owner/OwnerLogin'
@@ -118,6 +122,10 @@ function App() {
             <Route path="/property/:propertyId" element={<PropertyDetailPage />} />
             <Route path="/register-property" element={<PropertyRegistrationForm />} />
             <Route path="/wishlist" element={<WishlistPage />} />
+            <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
+            <Route path="/terms-conditions" element={<TermsConditionsPage />} />
+            <Route path="/refund-policy" element={<RefundPolicyPage />} />
+            <Route path="/contact-us" element={<ContactUsPage />} />
             <Route path="/reviews/:farmhouseId" element={<ReviewSubmissionPage />} />
             <Route path="/admin" element={
               <ProtectedRoute>
