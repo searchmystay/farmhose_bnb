@@ -207,6 +207,7 @@ function PropertyDetailPage() {
   const [showVisitorPopup, setShowVisitorPopup] = useState(false)
   const [showOwnerDetailsPopup, setShowOwnerDetailsPopup] = useState(false)
   const [isInWishlist, setIsInWishlist] = useState(false)
+  const [autoSlideActive, setAutoSlideActive] = useState(true)
 
   const handleWishlistClick = () => {
     const visitorInfo = getLeadInfo()
@@ -266,6 +267,28 @@ function PropertyDetailPage() {
     setShowVisitorPopup(false)
   }
 
+  const nextImage = () => {
+    if (property?.images?.length > 1) {
+      setCurrentImageIndex((prev) => (prev + 1) % property.images.length)
+      setAutoSlideActive(false)
+      setTimeout(() => setAutoSlideActive(true), 5000) // Resume auto-slide after 5s
+    }
+  }
+
+  const previousImage = () => {
+    if (property?.images?.length > 1) {
+      setCurrentImageIndex((prev) => (prev - 1 + property.images.length) % property.images.length)
+      setAutoSlideActive(false)
+      setTimeout(() => setAutoSlideActive(true), 5000) // Resume auto-slide after 5s
+    }
+  }
+
+  const goToImage = (index) => {
+    setCurrentImageIndex(index)
+    setAutoSlideActive(false)
+    setTimeout(() => setAutoSlideActive(true), 5000) // Resume auto-slide after 5s
+  }
+
   const renderImageGallery = () => {
     if (!property?.images?.length) {
       return (
@@ -277,12 +300,14 @@ function PropertyDetailPage() {
 
     return (
       <div className="w-full">
-        <div className="relative mb-4">
+        <div className="relative mb-4 group">
           <img
             src={property.images[currentImageIndex]}
             alt={`${property.name} - Image ${currentImageIndex + 1}`}
             className="w-full h-64 md:h-96 object-cover rounded-lg shadow-lg"
           />
+          
+          {/* Wishlist Button */}
           <button
             onClick={handleAddToWishlist}
             disabled={wishlistLoading}
@@ -292,7 +317,7 @@ function PropertyDetailPage() {
                 : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
             } ${
               wishlistLoading ? 'opacity-50 cursor-not-allowed' : ''
-            } p-2 rounded-full border-2 transition-all duration-200 shadow-lg`}
+            } p-2 rounded-full border-2 transition-all duration-200 shadow-lg z-10`}
           >
             {wishlistLoading ? (
               <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
@@ -302,23 +327,56 @@ function PropertyDetailPage() {
               </svg>
             )}
           </button>
+
+          {/* Navigation Arrows */}
+          {property.images.length > 1 && (
+            <>
+              <button
+                onClick={previousImage}
+                className="absolute left-3 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full transition-all duration-200 opacity-0 group-hover:opacity-100"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+              </button>
+              
+              <button
+                onClick={nextImage}
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full transition-all duration-200 opacity-0 group-hover:opacity-100"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+            </>
+          )}
+
+          {/* Dots Indicator */}
           <div className="absolute bottom-3 left-1/2 transform -translate-x-1/2 flex space-x-2">
             {property.images.map((_, index) => (
-              <div
+              <button
                 key={index}
+                onClick={() => goToImage(index)}
                 className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                  index === currentImageIndex ? 'bg-white scale-125' : 'bg-white/50'
+                  index === currentImageIndex ? 'bg-white scale-125' : 'bg-white/50 hover:bg-white/75'
                 }`}
               />
             ))}
           </div>
+
+          {/* Auto-slide indicator */}
+          {autoSlideActive && property.images.length > 1 && (
+            <div className="absolute top-3 left-3 bg-black/50 text-white text-xs px-2 py-1 rounded">
+              Auto
+            </div>
+          )}
         </div>
         <div className="hidden lg:grid grid-cols-4 md:grid-cols-6 gap-2">
           {property.images.map((image, index) => (
             <button
               key={index}
-              onClick={() => setCurrentImageIndex(index)}
-              className={`relative overflow-hidden rounded-md aspect-square ${
+              onClick={() => goToImage(index)}
+              className={`relative overflow-hidden rounded-md aspect-square transition-all duration-200 ${
                 index === currentImageIndex ? 'ring-2 ring-green-500' : 'opacity-70 hover:opacity-100'
               }`}
             >
@@ -608,13 +666,19 @@ function PropertyDetailPage() {
             </div>
           )}
           
-          <div className="flex items-center text-gray-700">
-            <svg className="w-4 h-4 md:w-5 md:h-5 mr-3 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="flex items-start text-gray-700">
+            <svg className="w-4 h-4 md:w-5 md:h-5 mr-3 text-green-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
             </svg>
-            <span className="text-sm md:text-base">{property.location.address}</span>
-            <span className="ml-2 text-gray-500 text-sm md:text-base">- {property.location.pin_code}</span>
+            <div className="flex-1">
+              <div className="text-sm md:text-base leading-relaxed">
+                {property.location.address}
+              </div>
+              <div className="text-gray-500 text-sm md:text-base mt-1">
+                Pincode: {property.location.pin_code}
+              </div>
+            </div>
           </div>
 
           {renderOperatingHours()}
@@ -654,14 +718,14 @@ function PropertyDetailPage() {
   }
 
   useEffect(() => {
-    if (property?.images?.length > 1) {
+    if (property?.images?.length > 1 && autoSlideActive) {
       const interval = setInterval(() => {
         setCurrentImageIndex((prev) => (prev + 1) % property.images.length)
       }, 3000)
 
       return () => clearInterval(interval)
     }
-  }, [property?.images])
+  }, [property?.images, autoSlideActive])
 
   useEffect(() => {
     if (property) {
