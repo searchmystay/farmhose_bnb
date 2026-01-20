@@ -900,10 +900,8 @@ def deduct_lead_cost_from_farmhouse(farmhouse_id):
     
     current_balance, whatsapp_link = check_farmhouse_credit_balance(farmhouse_id)
     
-    if current_balance < MINIMUM_BALANCE_THRESHOLD:
-        deactivate_data = {"$set": {"status": "inactive"}}
-        query_filter = {"_id": ObjectId(farmhouse_id)}
-        db_update_one("farmhouses", query_filter, deactivate_data)
+    # Check if owner has sufficient credits for a lead (₹40)
+    if current_balance < LEAD_COST_RUPEES:
         raise AppException("Contact information is currently unavailable for this farmhouse")
     
     new_balance = current_balance - LEAD_COST_RUPEES
