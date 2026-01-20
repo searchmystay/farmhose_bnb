@@ -38,6 +38,31 @@ function SearchPage() {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target
+    
+    // Date validation for manual input
+    if (name === 'checkIn' || name === 'checkOut') {
+      const today = getTodayDate()
+      
+      // Prevent past dates for check-in
+      if (name === 'checkIn' && value && value < today) {
+        toast.error('Check-in date cannot be in the past')
+        return
+      }
+      
+      // Prevent checkout before checkin
+      if (name === 'checkOut' && value && formData.checkIn && value <= formData.checkIn) {
+        toast.error('Check-out date must be after check-in date')
+        return
+      }
+      
+      // If updating check-in and checkout is already set, validate checkout
+      if (name === 'checkIn' && value && formData.checkOut && formData.checkOut <= value) {
+        setFormData(prev => ({ ...prev, [name]: value, checkOut: '' }))
+        toast.info('Check-out date cleared. Please select a new check-out date.')
+        return
+      }
+    }
+    
     setFormData(prev => ({ ...prev, [name]: value }))
   }
 
@@ -57,6 +82,18 @@ function SearchPage() {
 
   const handleSubmit = (e) => {
     e.preventDefault()
+    
+    // Date validation on submit
+    const today = getTodayDate()
+    if (formData.checkIn && formData.checkIn < today) {
+      toast.error('Check-in date cannot be in the past')
+      return
+    }
+    
+    if (formData.checkOut && formData.checkIn && formData.checkOut <= formData.checkIn) {
+      toast.error('Check-out date must be after check-in date')
+      return
+    }
     
     if (formData.address && !isAddressSelectedFromGoogle) {
       toast.error('Please select an address from the Google Places dropdown suggestions')
