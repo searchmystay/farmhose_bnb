@@ -90,7 +90,8 @@ const AISuggestions = ({ onPropertyClick, propertyType = 'both' }) => {
     error, 
     fetchSuggestions, 
     getCachedQuery,
-    hasCachedSuggestions 
+    hasCachedSuggestions,
+    clearSuggestions
   } = useAISuggestions()
   
   const [userQuery, setUserQuery] = useState('')
