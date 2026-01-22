@@ -208,6 +208,8 @@ function PropertyDetailPage() {
   const [showOwnerDetailsPopup, setShowOwnerDetailsPopup] = useState(false)
   const [isInWishlist, setIsInWishlist] = useState(false)
   const [autoSlideActive, setAutoSlideActive] = useState(true)
+  const [touchStart, setTouchStart] = useState(null)
+  const [touchEnd, setTouchEnd] = useState(null)
 
   const handleWishlistClick = () => {
     const visitorInfo = getLeadInfo()
@@ -289,6 +291,31 @@ function PropertyDetailPage() {
     setTimeout(() => setAutoSlideActive(true), 5000) // Resume auto-slide after 5s
   }
 
+  // Touch handlers for swipe functionality
+  const handleTouchStart = (e) => {
+    setTouchEnd(null)
+    setTouchStart(e.targetTouches[0].clientX)
+  }
+
+  const handleTouchMove = (e) => {
+    setTouchEnd(e.targetTouches[0].clientX)
+  }
+
+  const handleTouchEnd = () => {
+    if (!touchStart || !touchEnd) return
+    
+    const distance = touchStart - touchEnd
+    const isLeftSwipe = distance > 50
+    const isRightSwipe = distance < -50
+
+    if (isLeftSwipe && property?.images?.length > 1) {
+      nextImage()
+    }
+    if (isRightSwipe && property?.images?.length > 1) {
+      previousImage()
+    }
+  }
+
   const renderImageGallery = () => {
     if (!property?.images?.length) {
       return (
@@ -305,6 +332,9 @@ function PropertyDetailPage() {
             src={property.images[currentImageIndex]}
             alt={`${property.name} - Image ${currentImageIndex + 1}`}
             className="w-full h-64 md:h-96 object-cover rounded-lg shadow-lg"
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
           />
           
           {/* Wishlist Button */}
@@ -364,12 +394,6 @@ function PropertyDetailPage() {
             ))}
           </div>
 
-          {/* Auto-slide indicator */}
-          {autoSlideActive && property.images.length > 1 && (
-            <div className="absolute top-3 left-3 bg-black/50 text-white text-xs px-2 py-1 rounded">
-              Auto
-            </div>
-          )}
         </div>
         <div className="hidden lg:grid grid-cols-4 md:grid-cols-6 gap-2">
           {property.images.map((image, index) => (
