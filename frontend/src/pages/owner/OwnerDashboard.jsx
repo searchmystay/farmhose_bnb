@@ -1,7 +1,7 @@
 import { Helmet } from 'react-helmet-async'
 import { useParams } from 'react-router-dom'
 import { useState } from 'react'
-import { CurrencyCircleDollar, TrendUp, Eye, Users, CalendarBlank, ChartBar, House, CreditCard, Gear, Copy, Check } from '@phosphor-icons/react'
+import { CurrencyCircleDollar, TrendUp, Eye, Users, CalendarBlank, ChartBar, House, CreditCard, Copy, Check } from '@phosphor-icons/react'
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
 import FullCalendar from '@fullcalendar/react'
 import dayGridPlugin from '@fullcalendar/daygrid'
@@ -275,18 +275,18 @@ function OwnerDashboard() {
                 
                 <button
                   onClick={() => {
-                    setActiveTab('settings')
+                    setActiveTab('calendar')
                     setMobileMenuOpen(false)
                   }}
                   className={`w-full flex items-center gap-4 px-4 py-3 rounded-lg font-medium transition-all ${
-                    activeTab === 'settings' 
+                    activeTab === 'calendar' 
                       ? 'bg-blue-50 text-blue-600 shadow-sm' 
                       : 'text-gray-600 hover:bg-gray-50'
                   }`}
-                  title="Settings"
+                  title="Calendar"
                 >
-                  <Gear size={24} weight={activeTab === 'settings' ? 'fill' : 'regular'} />
-                  <span className="md:hidden lg:inline">{mobileMenuOpen || sidebarExpanded ? 'Settings' : ''}</span>
+                  <CalendarBlank size={24} weight={activeTab === 'calendar' ? 'fill' : 'regular'} />
+                  <span className="md:hidden lg:inline">{mobileMenuOpen || sidebarExpanded ? 'Calendar' : ''}</span>
                 </button>
               </nav>
             </div>
@@ -452,11 +452,11 @@ function OwnerDashboard() {
               </div>
             )}
 
-            {activeTab === 'settings' && (
+            {activeTab === 'calendar' && (
               <div className="px-2 py-3 sm:p-6 md:p-8 lg:p-10">
                 <div className="mb-6">
                   <h2 className="text-2xl font-semibold text-gray-900">
-                    Settings
+                    Calendar
                   </h2>
                 </div>
                 <div className="bg-white rounded-2xl shadow-md p-4 sm:p-6 md:p-6 lg:p-8">

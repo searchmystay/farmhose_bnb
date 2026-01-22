@@ -291,7 +291,7 @@ export const useWhatsappContact = () => {
       const whatsappLink = response.backend_data?.whatsapp_link
       
       if (whatsappLink) {
-        window.open(whatsappLink, '_blank')
+        window.location.href = whatsappLink
       }
       
       return response.backend_data
