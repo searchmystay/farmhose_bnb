@@ -1,9 +1,15 @@
 import { useState } from 'react'
+import { Pencil, X, Check } from 'phosphor-react'
 import { useAdminPropertyDetails } from '../../hooks/useAdmin'
 
 function PropertyDetailsPage({ propertyId, onBack }) {
-  const { propertyDetails, isLoading, error, refetch } = useAdminPropertyDetails(propertyId)
+  const { propertyDetails, isLoading, error, refetch, updateField } = useAdminPropertyDetails(propertyId)
   const [activeTab, setActiveTab] = useState('basic')
+  const [editingField, setEditingField] = useState(null)
+  const [editValue, setEditValue] = useState('')
+  const [isSaving, setIsSaving] = useState(false)
+  const [selectedPhoto, setSelectedPhoto] = useState(null)
+  const [photoPreview, setPhotoPreview] = useState(null)
 
   const renderLoadingState = () => (
     <div className="flex items-center justify-center min-h-[50vh] px-4">
@@ -246,6 +252,120 @@ function PropertyDetailsPage({ propertyId, onBack }) {
     )
   }
 
+  const handleEditClick = (fieldName, currentValue) => {
+    setEditingField(fieldName)
+    setEditValue(currentValue || '')
+  }
+
+  const handleCancelEdit = () => {
+    setEditingField(null)
+    setEditValue('')
+  }
+
+  const handleSaveEdit = async () => {
+    setIsSaving(true)
+    try {
+      await updateField(editingField, editValue)
+      setEditingField(null)
+      setEditValue('')
+    } catch (error) {
+      console.error('Error saving field:', error)
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  const handlePhotoUpload = (event) => {
+    const file = event.target.files[0]
+    if (!file) return
+
+    if (!file.type.startsWith('image/jpeg') && !file.type.startsWith('image/jpg')) {
+      alert('Please select a JPG/JPEG image file only')
+      event.target.value = ''
+      return
+    }
+
+    const maxSize = 1 * 1024 * 1024
+    if (file.size > maxSize) {
+      alert('Image size must be less than 1 MB')
+      event.target.value = ''
+      return
+    }
+
+    setSelectedPhoto(file)
+    const reader = new FileReader()
+    reader.onloadend = () => {
+      setPhotoPreview(reader.result)
+    }
+    reader.readAsDataURL(file)
+    console.log('Photo selected:', file.name, 'Size:', (file.size / 1024).toFixed(2), 'KB')
+  }
+
+  const handleSavePhoto = async () => {
+    setIsSaving(true)
+    try {
+      const reader = new FileReader()
+      reader.onloadend = async () => {
+        const base64String = reader.result
+        await updateField('owner_photo', base64String)
+        setSelectedPhoto(null)
+        setPhotoPreview(null)
+        setIsSaving(false)
+      }
+      reader.onerror = () => {
+        console.error('Error reading file')
+        setIsSaving(false)
+      }
+      reader.readAsDataURL(selectedPhoto)
+    } catch (error) {
+      console.error('Error saving photo:', error)
+      setIsSaving(false)
+    }
+  }
+
+  const handleCancelPhoto = () => {
+    setSelectedPhoto(null)
+    setPhotoPreview(null)
+  }
+
+  const renderEditableField = (label, fieldName, currentValue, isTextarea = false) => {
+    const isEditing = editingField === fieldName
+    
+    return (
+      <div>
+        <div className="flex items-center justify-between mb-1">
+          <label className="block text-sm font-medium text-gray-700">{label}</label>
+          {!isEditing && (
+            <button onClick={() => handleEditClick(fieldName, currentValue)} className="text-blue-600 hover:text-blue-800 p-1 rounded transition-colors" title="Edit">
+              <Pencil size={16} weight="bold" />
+            </button>
+          )}
+        </div>
+        {isEditing ? (
+          <div className="space-y-2">
+            {isTextarea ? (
+              <textarea value={editValue} onChange={(e) => setEditValue(e.target.value)} className="w-full p-3 border border-blue-500 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[100px] resize-none" placeholder={`Enter ${label.toLowerCase()}`} disabled={isSaving} />
+            ) : (
+              <input type="text" value={editValue} onChange={(e) => setEditValue(e.target.value)} className="w-full p-3 border border-blue-500 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder={`Enter ${label.toLowerCase()}`} disabled={isSaving} />
+            )}
+            <div className="flex gap-2">
+              <button onClick={handleSaveEdit} disabled={isSaving} className="flex items-center gap-1 bg-green-600 text-white px-3 py-1.5 rounded-md hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm">
+                <Check size={16} weight="bold" />
+                {isSaving ? 'Saving...' : 'Save'}
+              </button>
+              <button onClick={handleCancelEdit} disabled={isSaving} className="flex items-center gap-1 bg-gray-500 text-white px-3 py-1.5 rounded-md hover:bg-gray-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm">
+                <X size={16} weight="bold" />
+                Cancel
+              </button>
+            </div>
+          </div>
+        ) : (
+          <p className="text-gray-900 bg-gray-50 p-3 rounded-md font-mono text-sm">{currentValue || 'Not provided'}</p>
+        )}
+      </div>
+    )
+  }
+
   const renderOwnerDetails = () => {
     const owner = propertyDetails?.owner_details
     if (!owner) return null
@@ -255,40 +375,44 @@ function PropertyDetailsPage({ propertyId, onBack }) {
         <h3 className="text-lg font-semibold text-gray-900 mb-4">Owner Information</h3>
         <div className="flex flex-col lg:flex-row gap-6">
           <div className="flex-1 space-y-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Owner Name</label>
-              <p className="text-gray-900 bg-gray-50 p-3 rounded-md">{owner.owner_name || 'Not provided'}</p>
-            </div>
+            {renderEditableField('Owner Name', 'owner_name', owner.owner_name)}
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Dashboard ID</label>
-                <p className="text-gray-900 bg-gray-50 p-3 rounded-md font-mono text-sm">{owner.owner_dashboard_id || 'Not provided'}</p>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Dashboard Password</label>
-                <p className="text-gray-900 bg-gray-50 p-3 rounded-md font-mono text-sm">{owner.owner_dashboard_password || 'Not provided'}</p>
-              </div>
+              {renderEditableField('Dashboard ID', 'owner_dashboard_id', owner.owner_dashboard_id)}
+              {renderEditableField('Dashboard Password', 'owner_dashboard_password', owner.owner_dashboard_password)}
             </div>
             
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Owner Description</label>
-              <p className="text-gray-900 bg-gray-50 p-3 rounded-md min-h-[100px] whitespace-pre-wrap">{owner.owner_description || 'No description provided'}</p>
-            </div>
+            {renderEditableField('Owner Description', 'owner_description', owner.owner_description, true)}
           </div>
           
           {owner.owner_photo && (
             <div className="flex-shrink-0 lg:w-48">
-              <label className="block text-sm font-medium text-gray-700 mb-3">Owner Photo</label>
+              <div className="flex items-center justify-between mb-3">
+                <label className="block text-sm font-medium text-gray-700">Owner Photo</label>
+                {!selectedPhoto && (
+                  <label htmlFor="owner-photo-upload" className="text-blue-600 hover:text-blue-800 cursor-pointer p-1 rounded transition-colors" title="Replace Photo">
+                    <Pencil size={16} weight="bold" />
+                  </label>
+                )}
+                <input id="owner-photo-upload" type="file" accept="image/jpeg" onChange={handlePhotoUpload} className="hidden" />
+              </div>
               <div className="flex justify-center lg:justify-end">
                 <div className="bg-gray-50 p-4 rounded-md">
-                  <img 
-                    src={owner.owner_photo} 
-                    alt="Owner" 
-                    className="w-32 h-32 lg:w-40 lg:h-40 rounded-full object-cover border-4 border-gray-200 shadow-md"
-                  />
+                  <img src={photoPreview || owner.owner_photo} alt="Owner" className="w-32 h-32 lg:w-40 lg:h-40 rounded-full object-cover border-4 border-gray-200 shadow-md" />
                 </div>
               </div>
+              {selectedPhoto && (
+                <div className="flex gap-2 mt-3">
+                  <button onClick={handleSavePhoto} disabled={isSaving} className="flex items-center gap-1 bg-green-600 text-white px-3 py-1.5 rounded-md hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm w-full justify-center">
+                    <Check size={16} weight="bold" />
+                    {isSaving ? 'Saving...' : 'Save'}
+                  </button>
+                  <button onClick={handleCancelPhoto} disabled={isSaving} className="flex items-center gap-1 bg-gray-500 text-white px-3 py-1.5 rounded-md hover:bg-gray-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm w-full justify-center">
+                    <X size={16} weight="bold" />
+                    Cancel
+                  </button>
+                </div>
+              )}
             </div>
           )}
         </div>

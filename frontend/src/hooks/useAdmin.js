@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
-import { adminLogin, fetchPendingReviews, acceptReview, rejectReview, fetchPendingProperties, approveProperty, rejectProperty, fetchAdminPropertyDetails, fetchAllProperties, markPropertyAsFavourite, togglePropertyStatus, adminLogout } from '../services/adminApi'
+import { adminLogin, fetchPendingReviews, acceptReview, rejectReview, fetchPendingProperties, approveProperty, rejectProperty, fetchAdminPropertyDetails, fetchAllProperties, markPropertyAsFavourite, togglePropertyStatus, adminLogout, updatePropertyField } from '../services/adminApi'
 
 export const useAdminAuth = () => {
   const [isLoading, setIsLoading] = useState(false)
@@ -208,7 +208,21 @@ export const useAdminPropertyDetails = (propertyId) => {
     }
   }, [propertyId])
 
-  return {propertyDetails, isLoading, error, refetch: fetchPropertyDetails}
+  const updateField = async (fieldName, value) => {
+    try {
+      const result = await updatePropertyField(propertyId, {field: fieldName, value: value})
+      if (result.success) {
+        toast.success('Field updated successfully')
+        await fetchPropertyDetails()
+      }
+      return result
+    } catch (error) {
+      toast.error(error.message || 'Failed to update field')
+      throw error
+    }
+  }
+
+  return {propertyDetails, isLoading, error, refetch: fetchPropertyDetails, updateField}
 }
 
 export const useAllProperties = () => {

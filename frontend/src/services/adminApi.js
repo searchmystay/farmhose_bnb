@@ -25,6 +25,20 @@ export const adminLogin = async (loginData) => {
   }
 }
 
+export const updatePropertyField = async (propertyId, fieldData) => {
+  try {
+    const response = await adminApiClient.put(`/edit_property_field/${propertyId}`, fieldData)
+    const result = response.data
+    return result
+  } catch (error) {
+    if (error.response && error.response.data) {
+      const backendError = error.response.data
+      throw new Error(backendError.message || 'Failed to update field')
+    }
+    throw new Error('Failed to update field, Network error')
+  }
+}
+
 export const fetchPendingProperties = async () => {
   try {
     const response = await adminApiClient.get('/pending_properties')
