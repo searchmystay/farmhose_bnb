@@ -547,8 +547,8 @@ def validate_description_length(description):
     word_count = len(description.strip().split())
     if word_count < 10:
         raise AppException(f"Description must have at least 10 words. Currently has {word_count} words")
-    elif word_count > 150:
-        raise AppException(f"Description cannot exceed 150 words. Currently has {word_count} words")
+    elif word_count > 200:
+        raise AppException(f"Description cannot exceed 200 words. Currently has {word_count} words")
     
     return True
 

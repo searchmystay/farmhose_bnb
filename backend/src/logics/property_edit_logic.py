@@ -3,6 +3,7 @@ from datetime import datetime
 from src.database.db_common_operations import db_update_one, db_find_one
 from src.utils.exception_handler import handle_exceptions, AppException
 from src.logics.cloudfare_bucket import overwrite_image_in_r2
+from src.logics.website_logic import *
 
 
 FIELD_MAPPING = {
@@ -14,20 +15,6 @@ FIELD_MAPPING = {
 }
 
 
-@handle_exceptions
-def validate_owner_name(value):
-    if not value or not isinstance(value, str):
-        raise AppException("Owner name is required and must be a string", 400)
-    
-    cleaned_value = value.strip()
-    
-    if len(cleaned_value) < 3:
-        raise AppException("Owner name must be at least 3 characters long", 400)
-    
-    if len(cleaned_value) > 100:
-        raise AppException("Owner name cannot exceed 100 characters", 400)
-    
-    return cleaned_value
 
 
 @handle_exceptions
@@ -42,16 +29,35 @@ def validate_owner_photo(value):
 
 
 @handle_exceptions
-def validate_field_value(field_name, value):
-    if field_name == "owner_name":
-        validated_value = validate_owner_name(value)
-        return validated_value
-    
-    if field_name == "owner_photo":
-        validated_value = validate_owner_photo(value)
-        return validated_value
-    
-    raise AppException(f"Field '{field_name}' is not supported for editing", 400)
+def validate_field_value(field_name, value, property_id=None):
+    match field_name:
+        case "owner_name":
+            validate_name_max_words(value, 3, "Owner name")
+            return value 
+        
+        case "owner_photo":
+            validated_value = validate_owner_photo(value)
+            return validated_value
+        
+        case "owner_description":
+            validate_description_length(value)
+            return value 
+        
+        case "owner_dashboard_password":
+            validate_strong_password(value)
+            return value
+        
+        case "owner_dashboard_id":
+            existing_property = db_find_one("farmhouses", {"_id": ObjectId(property_id)})
+            current_dashboard_id = existing_property.get("owner_details", {}).get("owner_dashboard_id")
+            
+            if value != current_dashboard_id:
+                check_dashboard_id_unique(value)
+            
+            return value
+        
+        case _:
+            raise AppException(f"Field '{field_name}' is not supported for editing", 400)
 
 
 @handle_exceptions
@@ -117,7 +123,7 @@ def update_property_field(property_id, field_name, value):
         raise AppException("Invalid property ID format", 400)
     
     check_property_exists(property_id)
-    validated_value = validate_field_value(field_name, value)
+    validated_value = validate_field_value(field_name, value, property_id)
     
     if field_name == "owner_photo":
         photo_url = handle_owner_photo_upload(property_id, validated_value)
