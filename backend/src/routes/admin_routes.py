@@ -3,6 +3,7 @@ from src.logics.admin_logics import *
 from src.logics.admin_auth import admin_required
 from src.logics.admin_kpi_logic import get_admin_dashboard_kpis
 from src.utils.exception_handler import handle_route_exceptions, AppException
+from src.logics.property_edit_logic import update_property_field
 
 
 admin_bp = Blueprint('admin', __name__)
@@ -269,4 +270,23 @@ def get_admin_kpis_route():
         "backend_data": kpis
     }
     
+    return jsonify(response_data), 200
+
+
+@admin_bp.route('/edit_property_field/<property_id>', methods=['PUT'])
+@admin_required
+@handle_route_exceptions
+def edit_property_field_route(property_id):
+    request_data = request.get_json()
+    field_name = request_data.get('field')
+    value = request_data.get('value')
+    
+    if not field_name:
+        raise AppException("Field name is required", 400)
+    
+    update_property_field(property_id, field_name, value)
+    response_data = {
+        "success": True,
+        "message": "Field updated successfully"
+    }
     return jsonify(response_data), 200
