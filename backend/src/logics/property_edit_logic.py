@@ -2,6 +2,7 @@ from bson import ObjectId
 from datetime import datetime
 from src.database.db_common_operations import db_update_one, db_find_one
 from src.utils.exception_handler import handle_exceptions, AppException
+from src.logics.cloudfare_bucket import overwrite_image_in_r2
 
 
 FIELD_MAPPING = {
@@ -30,9 +31,24 @@ def validate_owner_name(value):
 
 
 @handle_exceptions
+def validate_owner_photo(value):
+    if not value or not isinstance(value, str):
+        raise AppException("Owner photo data is required and must be a string", 400)
+    
+    if not value.startswith('data:image/jpeg'):
+        raise AppException("Owner photo must be a valid JPEG base64 string", 400)
+    
+    return value
+
+
+@handle_exceptions
 def validate_field_value(field_name, value):
     if field_name == "owner_name":
         validated_value = validate_owner_name(value)
+        return validated_value
+    
+    if field_name == "owner_photo":
+        validated_value = validate_owner_photo(value)
         return validated_value
     
     raise AppException(f"Field '{field_name}' is not supported for editing", 400)
@@ -47,6 +63,29 @@ def check_property_exists(property_id):
         raise AppException("Property not found", 404)
     
     return True
+
+
+@handle_exceptions
+def get_current_photo_url(property_id):
+    filter_dict = {"_id": ObjectId(property_id)}
+    property_data = db_find_one("farmhouses", filter_dict)
+    
+    if not property_data:
+        raise AppException("Property not found", 404)
+    
+    owner_photo_url = property_data.get("owner_details", {}).get("owner_photo")
+    
+    if not owner_photo_url:
+        raise AppException("Owner photo URL not found in database", 404)
+    
+    return owner_photo_url
+
+
+@handle_exceptions
+def handle_owner_photo_upload(property_id, base64_string):
+    existing_photo_url = get_current_photo_url(property_id)
+    updated_url = overwrite_image_in_r2(base64_string, existing_photo_url)
+    return updated_url
 
 
 @handle_exceptions
@@ -78,8 +117,12 @@ def update_property_field(property_id, field_name, value):
         raise AppException("Invalid property ID format", 400)
     
     check_property_exists(property_id)
-    
     validated_value = validate_field_value(field_name, value)
+    
+    if field_name == "owner_photo":
+        photo_url = handle_owner_photo_upload(property_id, validated_value)
+        validated_value = photo_url
+    
     db_field_path = FIELD_MAPPING[field_name]
     update_property_field_in_db(property_id, db_field_path, validated_value)
     
