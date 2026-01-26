@@ -107,7 +107,7 @@ def process_property_for_detail(property_data):
     owner_details = property_data.get("owner_details", {})
     opening_time = property_data.get("opening_time", "")
     closing_time = property_data.get("closing_time", "")
-    per_day_cost = property_data.get("per_day_cost", 0)
+    per_day_price = property_data.get("per_day_price", 0)
     
     formatted_amenities = format_amenities_for_display(raw_amenities_data)
     
@@ -122,7 +122,7 @@ def process_property_for_detail(property_data):
         "owner_details": owner_details,
         "opening_time": opening_time,
         "closing_time": closing_time,
-        "per_day_cost": per_day_cost
+        "per_day_price": per_day_price
     }
     
     return processed_data
@@ -264,7 +264,7 @@ def get_property_details(property_id, lead_email=None, check_in_date=None, check
         "owner_details": 1,
         "opening_time": 1,
         "closing_time": 1,
-        "per_day_cost": 1,
+        "per_day_price": 1,
         "booked_dates": 1,
         "max_people": 1
     }
@@ -391,17 +391,11 @@ def update_farmhouse_db_with_file_urls(farmhouse_id, image_urls, documents_data)
 
 @handle_exceptions
 def combine_all_amenities_data(essential_amenities, experience_amenities, additional_amenities):
-    print(f"🔍 DEBUG: Combining amenities data")
-    print(f"📥 Essential amenities input: {essential_amenities}")
-    print(f"📥 Experience amenities input: {experience_amenities}")
-    print(f"📥 Additional amenities input: {additional_amenities}")
-    
     combined_amenities = {}
     combined_amenities.update(essential_amenities or {})
     combined_amenities.update(experience_amenities or {})
     combined_amenities.update(additional_amenities or {})
     
-    print(f"📦 Combined amenities result: {combined_amenities}")
     return combined_amenities
 
 @handle_exceptions
@@ -438,7 +432,6 @@ def process_category_amenities(all_amenities, fields):
         if field in numeric_fields:
             value = all_amenities.get(field, 0)
             processed_value = safe_int_conversion(value, 0)
-            print(f"🔢 Processing numeric field '{field}': {value} → {processed_value}")
         else:
             value = all_amenities.get(field, False)
             processed_value = bool(value)
@@ -451,9 +444,6 @@ def process_category_amenities(all_amenities, fields):
 
 @handle_exceptions
 def save_targeted_amenities_update(property_id, update_data):
-    """
-    Update specific amenity fields without reprocessing entire structure
-    """
     if not property_id or not update_data:
         raise ValueError("Property ID and update data are required")
     
@@ -470,20 +460,15 @@ def save_targeted_amenities_update(property_id, update_data):
         raise e
 
 @handle_exceptions
-def process_amenities_data(essential_amenities, experience_amenities, additional_amenities):
-    print(f"🚀 Starting process_amenities_data")
-    
+def process_amenities_data(essential_amenities, experience_amenities, additional_amenities):  
     all_amenities = combine_all_amenities_data(essential_amenities, experience_amenities, additional_amenities)
     category_mappings = get_amenities_category_mappings()
     processed_amenities = {}
     
     for category_name, fields in category_mappings.items():
-        print(f"📂 Processing category: {category_name} with fields: {fields}")
         category_data = process_category_amenities(all_amenities, fields)
         processed_amenities[category_name] = category_data
-        print(f"✅ Category {category_name} result: {category_data}")
     
-    print(f"🎉 Final processed amenities: {processed_amenities}")
     return processed_amenities
 
 

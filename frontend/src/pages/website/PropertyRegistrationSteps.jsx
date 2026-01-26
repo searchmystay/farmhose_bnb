@@ -619,6 +619,11 @@ export const Step7DocumentUpload = ({
 
       <div className="space-y-6">
         <SectionHeader title="Property Documents" subtitle="Upload property-related legal documents" />
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+          <p className="text-sm text-blue-700">
+            <strong>You can upload property-related documents such as:</strong> Electricity Bill, Water Bill, Property Tax Receipt etc.
+          </p>
+        </div>
         {renderFileUploadSection('propertyDocuments', 'Property Documents (Multiple)', '.pdf,.doc,.docx', true)}
       </div>
 
