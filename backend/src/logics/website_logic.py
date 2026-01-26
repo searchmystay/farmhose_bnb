@@ -554,6 +554,58 @@ def validate_description_length(description):
 
 
 @handle_exceptions
+def validate_time_format(time_value, field_name="Time"):
+    if not time_value or not isinstance(time_value, str):
+        raise AppException(f"{field_name} is required")
+    
+    cleaned_time = time_value.strip()
+    time_pattern = re.compile(r'^(0?[1-9]|1[0-2]):[0-5][0-9]\s?(AM|PM|am|pm)$')
+    
+    if not time_pattern.match(cleaned_time):
+        raise AppException(f"{field_name} must be in format HH:MM AM/PM (e.g., 10:00 AM)")
+    
+    return cleaned_time
+
+
+@handle_exceptions
+def validate_per_day_cost(cost):
+    if cost is None or cost == "":
+        raise AppException("Per day cost is required")
+    
+    try:
+        cost_int = int(cost)
+    except (ValueError, TypeError):
+        raise AppException("Per day cost must be a valid number")
+    
+    if cost_int <= 0:
+        raise AppException("Per day cost must be greater than 0")
+    
+    if cost_int > 99999:
+        raise AppException("Per day cost cannot exceed 5 digits (99999)")
+    
+    return cost_int
+
+
+@handle_exceptions
+def validate_max_capacity(value, field_name="Capacity", min_value=0, max_value=50):
+    if value is None or value == "":
+        raise AppException(f"{field_name} is required")
+    
+    try:
+        value_int = int(value)
+    except (ValueError, TypeError):
+        raise AppException(f"{field_name} must be a valid number")
+    
+    if value_int < min_value:
+        raise AppException(f"{field_name} cannot be less than {min_value}")
+    
+    if value_int > max_value:
+        raise AppException(f"{field_name} cannot exceed {max_value}")
+    
+    return value_int
+
+
+@handle_exceptions
 def validate_basic_info_fields(step_data):
     property_name = step_data.get("name", "")
     if not property_name or not property_name.strip():

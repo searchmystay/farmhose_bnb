@@ -157,6 +157,40 @@ function PropertyDetailsPage({ propertyId, onBack }) {
     </div>
   )
 
+  const renderEditableNumberField = (label, fieldName, currentValue, prefix = '') => {
+    const isEditing = editingField === fieldName
+    
+    return (
+      <div>
+        <div className="flex items-center justify-between mb-1">
+          <label className="block text-sm font-medium text-gray-700">{label}</label>
+          {!isEditing && (
+            <button onClick={() => handleEditClick(fieldName, currentValue)} className="text-blue-600 hover:text-blue-800 p-1 rounded transition-colors" title="Edit">
+              <Pencil size={16} weight="bold" />
+            </button>
+          )}
+        </div>
+        {isEditing ? (
+          <div className="space-y-2">
+            <input type="number" value={editValue} onChange={(e) => setEditValue(e.target.value)} className="w-full p-3 border border-blue-500 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder={`Enter ${label.toLowerCase()}`} disabled={isSaving} />
+            <div className="flex gap-2">
+              <button onClick={handleSaveEdit} disabled={isSaving} className="flex items-center gap-1 bg-green-600 text-white px-3 py-1.5 rounded-md hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm">
+                <Check size={16} weight="bold" />
+                {isSaving ? 'Saving...' : 'Save'}
+              </button>
+              <button onClick={handleCancelEdit} disabled={isSaving} className="flex items-center gap-1 bg-gray-500 text-white px-3 py-1.5 rounded-md hover:bg-gray-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm">
+                <X size={16} weight="bold" />
+                Cancel
+              </button>
+            </div>
+          </div>
+        ) : (
+          <p className="text-gray-900 bg-gray-50 p-3 rounded-md">{prefix}{currentValue || 'Not provided'}</p>
+        )}
+      </div>
+    )
+  }
+
   const renderBasicDetails = () => {
     const basic = propertyDetails?.basic_details
     if (!basic) return null
@@ -165,30 +199,14 @@ function PropertyDetailsPage({ propertyId, onBack }) {
       <div className="bg-white rounded-lg border border-gray-200 p-6">
         <h3 className="text-lg font-semibold text-gray-900 mb-4">Basic Property Information</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Property Name</label>
-            <p className="text-gray-900 bg-gray-50 p-3 rounded-md">{basic.name || 'Not provided'}</p>
-          </div>
+          {renderEditableField('Property Name', 'property_name', basic.name)}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Property Type</label>
             <p className="text-gray-900 bg-gray-50 p-3 rounded-md capitalize">{basic.type || 'Not specified'}</p>
           </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Opening Time</label>
-            <p className="text-gray-900 bg-gray-50 p-3 rounded-md">{basic.opening_time || 'Not specified'}</p>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Closing Time</label>
-            <p className="text-gray-900 bg-gray-50 p-3 rounded-md">{basic.closing_time || 'Not specified'}</p>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Per Day Cost</label>
-            <p className="text-gray-900 bg-gray-50 p-3 rounded-md">
-              {basic.per_day_cost !== null && basic.per_day_cost !== undefined && !isNaN(basic.per_day_cost) 
-                ? `₹${basic.per_day_cost.toLocaleString('en-IN')}` 
-                : 'Not Available'}
-            </p>
-          </div>
+          {renderEditableField('Opening Time', 'opening_time', basic.opening_time)}
+          {renderEditableField('Closing Time', 'closing_time', basic.closing_time)}
+          {renderEditableNumberField('Per Day Cost', 'per_day_cost', basic.per_day_cost, '₹')}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Credit Balance</label>
             <p className={`font-semibold bg-gray-50 p-3 rounded-md ${
@@ -208,8 +226,7 @@ function PropertyDetailsPage({ propertyId, onBack }) {
             <p className="text-gray-900 bg-gray-50 p-3 rounded-md">{basic.address || 'Not provided'}</p>
           </div>
           <div className="md:col-span-2">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
-            <p className="text-gray-900 bg-gray-50 p-3 rounded-md min-h-[100px] whitespace-pre-wrap">{basic.description || 'No description provided'}</p>
+            {renderEditableField('Description', 'description', basic.description, true)}
           </div>
         </div>
         
@@ -218,28 +235,97 @@ function PropertyDetailsPage({ propertyId, onBack }) {
           <p className="text-sm text-gray-600 mb-4">Maximum allowed guests, children, and pets</p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-              <label className="block text-sm font-medium text-blue-900 mb-2">Max Adults</label>
-              <p className="text-2xl font-bold text-blue-700">
-                {basic.max_people_allowed !== null && basic.max_people_allowed !== undefined && !isNaN(basic.max_people_allowed)
-                  ? basic.max_people_allowed
-                  : 'N/A'}
-              </p>
+              <div className="flex items-center justify-between mb-2">
+                <label className="block text-sm font-medium text-blue-900">Max Adults</label>
+                {editingField !== 'max_people_allowed' && (
+                  <button onClick={() => handleEditClick('max_people_allowed', basic.max_people_allowed)} className="text-blue-600 hover:text-blue-800 p-1 rounded transition-colors" title="Edit">
+                    <Pencil size={16} weight="bold" />
+                  </button>
+                )}
+              </div>
+              {editingField === 'max_people_allowed' ? (
+                <div className="space-y-2">
+                  <input type="number" value={editValue} onChange={(e) => setEditValue(e.target.value)} className="w-full p-2 border border-blue-500 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" disabled={isSaving} />
+                  <div className="flex gap-2">
+                    <button onClick={handleSaveEdit} disabled={isSaving} className="flex items-center gap-1 bg-green-600 text-white px-2 py-1 rounded-md hover:bg-green-700 transition-colors disabled:opacity-50 text-xs">
+                      <Check size={14} weight="bold" />
+                      {isSaving ? 'Saving...' : 'Save'}
+                    </button>
+                    <button onClick={handleCancelEdit} disabled={isSaving} className="flex items-center gap-1 bg-gray-500 text-white px-2 py-1 rounded-md hover:bg-gray-600 transition-colors disabled:opacity-50 text-xs">
+                      <X size={14} weight="bold" />
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <p className="text-2xl font-bold text-blue-700">
+                  {basic.max_people_allowed !== null && basic.max_people_allowed !== undefined && !isNaN(basic.max_people_allowed)
+                    ? basic.max_people_allowed
+                    : 'N/A'}
+                </p>
+              )}
             </div>
             <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-              <label className="block text-sm font-medium text-green-900 mb-2">Max Children</label>
-              <p className="text-2xl font-bold text-green-700">
-                {basic.max_children_allowed !== null && basic.max_children_allowed !== undefined && !isNaN(basic.max_children_allowed)
-                  ? basic.max_children_allowed
-                  : 'N/A'}
-              </p>
+              <div className="flex items-center justify-between mb-2">
+                <label className="block text-sm font-medium text-green-900">Max Children</label>
+                {editingField !== 'max_children_allowed' && (
+                  <button onClick={() => handleEditClick('max_children_allowed', basic.max_children_allowed)} className="text-green-600 hover:text-green-800 p-1 rounded transition-colors" title="Edit">
+                    <Pencil size={16} weight="bold" />
+                  </button>
+                )}
+              </div>
+              {editingField === 'max_children_allowed' ? (
+                <div className="space-y-2">
+                  <input type="number" value={editValue} onChange={(e) => setEditValue(e.target.value)} className="w-full p-2 border border-green-500 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500" disabled={isSaving} />
+                  <div className="flex gap-2">
+                    <button onClick={handleSaveEdit} disabled={isSaving} className="flex items-center gap-1 bg-green-600 text-white px-2 py-1 rounded-md hover:bg-green-700 transition-colors disabled:opacity-50 text-xs">
+                      <Check size={14} weight="bold" />
+                      {isSaving ? 'Saving...' : 'Save'}
+                    </button>
+                    <button onClick={handleCancelEdit} disabled={isSaving} className="flex items-center gap-1 bg-gray-500 text-white px-2 py-1 rounded-md hover:bg-gray-600 transition-colors disabled:opacity-50 text-xs">
+                      <X size={14} weight="bold" />
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <p className="text-2xl font-bold text-green-700">
+                  {basic.max_children_allowed !== null && basic.max_children_allowed !== undefined && !isNaN(basic.max_children_allowed)
+                    ? basic.max_children_allowed
+                    : 'N/A'}
+                </p>
+              )}
             </div>
             <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
-              <label className="block text-sm font-medium text-purple-900 mb-2">Max Pets</label>
-              <p className="text-2xl font-bold text-purple-700">
-                {basic.max_pets_allowed !== null && basic.max_pets_allowed !== undefined && !isNaN(basic.max_pets_allowed)
-                  ? basic.max_pets_allowed
-                  : 'N/A'}
-              </p>
+              <div className="flex items-center justify-between mb-2">
+                <label className="block text-sm font-medium text-purple-900">Max Pets</label>
+                {editingField !== 'max_pets_allowed' && (
+                  <button onClick={() => handleEditClick('max_pets_allowed', basic.max_pets_allowed)} className="text-purple-600 hover:text-purple-800 p-1 rounded transition-colors" title="Edit">
+                    <Pencil size={16} weight="bold" />
+                  </button>
+                )}
+              </div>
+              {editingField === 'max_pets_allowed' ? (
+                <div className="space-y-2">
+                  <input type="number" value={editValue} onChange={(e) => setEditValue(e.target.value)} className="w-full p-2 border border-purple-500 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500" disabled={isSaving} />
+                  <div className="flex gap-2">
+                    <button onClick={handleSaveEdit} disabled={isSaving} className="flex items-center gap-1 bg-green-600 text-white px-2 py-1 rounded-md hover:bg-green-700 transition-colors disabled:opacity-50 text-xs">
+                      <Check size={14} weight="bold" />
+                      {isSaving ? 'Saving...' : 'Save'}
+                    </button>
+                    <button onClick={handleCancelEdit} disabled={isSaving} className="flex items-center gap-1 bg-gray-500 text-white px-2 py-1 rounded-md hover:bg-gray-600 transition-colors disabled:opacity-50 text-xs">
+                      <X size={14} weight="bold" />
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <p className="text-2xl font-bold text-purple-700">
+                  {basic.max_pets_allowed !== null && basic.max_pets_allowed !== undefined && !isNaN(basic.max_pets_allowed)
+                    ? basic.max_pets_allowed
+                    : 'N/A'}
+                </p>
+              )}
             </div>
           </div>
         </div>

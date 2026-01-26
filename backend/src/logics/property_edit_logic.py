@@ -11,10 +11,16 @@ FIELD_MAPPING = {
     "owner_photo": "owner_details.owner_photo",
     "owner_dashboard_id": "owner_details.owner_dashboard_id",
     "owner_dashboard_password": "owner_details.owner_dashboard_password",
-    "owner_description": "owner_details.owner_description"
+    "owner_description": "owner_details.owner_description",
+    "property_name": "name",
+    "opening_time": "opening_time",
+    "closing_time": "closing_time",
+    "per_day_cost": "per_day_price",
+    "description": "description",
+    "max_people_allowed": "max_people_allowed",
+    "max_children_allowed": "max_children_allowed",
+    "max_pets_allowed": "max_pets_allowed"
 }
-
-
 
 
 @handle_exceptions
@@ -55,6 +61,38 @@ def validate_field_value(field_name, value, property_id=None):
                 check_dashboard_id_unique(value)
             
             return value
+        
+        case "property_name":
+            validate_name_max_words(value, 3, "Property name")
+            return value
+        
+        case "opening_time":
+            validated_time = validate_time_format(value, "Opening time")
+            return validated_time
+        
+        case "closing_time":
+            validated_time = validate_time_format(value, "Closing time")
+            return validated_time
+        
+        case "per_day_cost":
+            validated_cost = validate_per_day_cost(value)
+            return validated_cost
+        
+        case "description":
+            validate_description_length(value)
+            return value
+        
+        case "max_people_allowed":
+            validated_capacity = validate_max_capacity(value, "Max adults", 1, 50)
+            return validated_capacity
+        
+        case "max_children_allowed":
+            validated_capacity = validate_max_capacity(value, "Max children", 0, 20)
+            return validated_capacity
+        
+        case "max_pets_allowed":
+            validated_capacity = validate_max_capacity(value, "Max pets", 0, 10)
+            return validated_capacity
         
         case _:
             raise AppException(f"Field '{field_name}' is not supported for editing", 400)
