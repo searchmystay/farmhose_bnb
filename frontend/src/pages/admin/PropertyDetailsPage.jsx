@@ -1,6 +1,7 @@
 import { useState } from 'react'
-import { Pencil, X, Check } from 'phosphor-react'
+import { Pencil, X, Check, Trash, Plus } from 'phosphor-react'
 import { useAdminPropertyDetails } from '../../hooks/useAdmin'
+import { toast } from 'sonner'
 
 function PropertyDetailsPage({ propertyId, onBack }) {
   const { propertyDetails, isLoading, error, refetch, updateField } = useAdminPropertyDetails(propertyId)
@@ -10,6 +11,7 @@ function PropertyDetailsPage({ propertyId, onBack }) {
   const [isSaving, setIsSaving] = useState(false)
   const [selectedPhoto, setSelectedPhoto] = useState(null)
   const [photoPreview, setPhotoPreview] = useState(null)
+  const [editingDocument, setEditingDocument] = useState(null)
 
   const renderLoadingState = () => (
     <div className="flex items-center justify-center min-h-[50vh] px-4">
@@ -414,6 +416,75 @@ function PropertyDetailsPage({ propertyId, onBack }) {
     setPhotoPreview(null)
   }
 
+  const handleDocumentUpload = async (event, docType) => {
+    const file = event.target.files[0]
+    if (!file) return
+
+    if (file.type !== 'application/pdf') {
+      alert('Please select a PDF file only')
+      event.target.value = ''
+      return
+    }
+
+    const maxSize = 1 * 1024 * 1024
+    if (file.size > maxSize) {
+      alert('File size must be less than 1 MB')
+      event.target.value = ''
+      return
+    }
+
+    toast.loading('Uploading document...', { id: 'doc-upload' })
+    setIsSaving(true)
+    
+    const reader = new FileReader()
+    reader.onloadend = async () => {
+      try {
+        const base64String = reader.result
+        await updateField(docType, base64String)
+        toast.dismiss('doc-upload')
+      } catch (error) {
+        console.error('Error uploading document:', error)
+        toast.dismiss('doc-upload')
+      } finally {
+        setIsSaving(false)
+      }
+    }
+    reader.onerror = () => {
+      console.error('Error reading file')
+      toast.dismiss('doc-upload')
+      setIsSaving(false)
+    }
+    reader.readAsDataURL(file)
+    event.target.value = ''
+  }
+
+  const handleImageUpload = (event) => {
+    const file = event.target.files[0]
+    if (!file) return
+
+    if (!file.type.startsWith('image/jpeg') && !file.type.startsWith('image/jpg')) {
+      alert('Please select a JPG/JPEG image file only')
+      event.target.value = ''
+      return
+    }
+
+    const maxSize = 1 * 1024 * 1024
+    if (file.size > maxSize) {
+      alert('Image size must be less than 1 MB')
+      event.target.value = ''
+      return
+    }
+
+    console.log('Image selected:', file.name, 'Size:', (file.size / 1024).toFixed(2), 'KB')
+    event.target.value = ''
+  }
+
+  const handleDeleteImage = (imageUrl) => {
+    if (window.confirm('Are you sure you want to delete this image?')) {
+      console.log('Delete image:', imageUrl)
+    }
+  }
+
   const renderEditableField = (label, fieldName, currentValue, isTextarea = false) => {
     const isEditing = editingField === fieldName
     
@@ -512,27 +583,27 @@ function PropertyDetailsPage({ propertyId, onBack }) {
 
     return (
       <div className="space-y-6">
-        {/* Documents Section */}
         <div className="bg-white rounded-lg border border-gray-200 p-6">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Documents</h3>
           {documentsImages.documents && documentsImages.documents.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {documentsImages.documents.map((doc, index) => (
                 <div key={index} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
-                  <div className="flex items-center mb-2">
-                    <svg className="w-5 h-5 text-blue-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                    </svg>
-                    <span className="font-medium text-gray-900 capitalize text-sm">
-                      {doc.type.replace('_', ' ')}
-                    </span>
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center">
+                      <svg className="w-5 h-5 text-blue-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      </svg>
+                      <span className="font-medium text-gray-900 capitalize text-sm">
+                        {doc.type.replace('_', ' ')}
+                      </span>
+                    </div>
+                    <label htmlFor={`doc-upload-${doc.type}`} className="text-blue-600 hover:text-blue-800 cursor-pointer p-1 rounded transition-colors" title="Replace Document">
+                      <Pencil size={16} weight="bold" />
+                    </label>
+                    <input id={`doc-upload-${doc.type}`} type="file" accept=".pdf" onChange={(e) => handleDocumentUpload(e, doc.type)} className="hidden" />
                   </div>
-                  <a 
-                    href={doc.url} 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="text-blue-600 hover:text-blue-800 text-sm break-all"
-                  >
+                  <a href={doc.url} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 text-sm break-all">
                     View Document
                   </a>
                 </div>
@@ -543,21 +614,25 @@ function PropertyDetailsPage({ propertyId, onBack }) {
           )}
         </div>
 
-        {/* Images Section */}
         <div className="bg-white rounded-lg border border-gray-200 p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Property Images</h3>
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold text-gray-900">Property Images</h3>
+            <label htmlFor="add-image-upload" className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors cursor-pointer text-sm">
+              <Plus size={18} weight="bold" />
+              Add Image
+            </label>
+            <input id="add-image-upload" type="file" accept="image/jpeg" onChange={handleImageUpload} className="hidden" />
+          </div>
           {documentsImages.images && documentsImages.images.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
               {documentsImages.images.map((image, index) => (
-                <div key={index} className="border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow">
-                  <img 
-                    src={image} 
-                    alt={`Property ${index + 1}`}
-                    className="w-full h-48 object-cover"
-                    onError={(e) => {
+                <div key={index} className="relative border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow group">
+                  <img src={image} alt={`Property ${index + 1}`} className="w-full h-48 object-cover" onError={(e) => {
                       e.target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZGRkIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkltYWdlIG5vdCBmb3VuZDwvdGV4dD48L3N2Zz4='
-                    }}
-                  />
+                    }} />
+                  <button onClick={() => handleDeleteImage(image)} className="absolute top-2 right-2 bg-red-600 text-white p-2 rounded-md hover:bg-red-700 transition-colors opacity-0 group-hover:opacity-100" title="Delete Image">
+                    <Trash size={18} weight="bold" />
+                  </button>
                 </div>
               ))}
             </div>

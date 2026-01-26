@@ -87,6 +87,26 @@ def overwrite_image_in_r2(base64_string, existing_url):
 
 
 @handle_exceptions
+def overwrite_document_in_r2(base64_string, existing_url):
+    file_key = extract_key_from_r2_url(existing_url)
+    header_and_data = base64_string.split(',')
+    base64_data = header_and_data[1] if len(header_and_data) > 1 else header_and_data[0]
+    
+    document_bytes = base64.b64decode(base64_data)
+    document_file = BytesIO(document_bytes)
+    
+    s3_client = create_s3_client()
+    s3_client.upload_fileobj(
+        document_file,
+        R2_BUCKET_NAME,
+        file_key,
+        ExtraArgs={"ContentType": "application/pdf"}
+    )
+    
+    return existing_url
+
+
+@handle_exceptions
 def delete_farmhouse_folder_from_r2(farmhouse_id):
     s3_client = create_s3_client()
     folder_prefix = f"farmhouse/{farmhouse_id}/"
