@@ -113,9 +113,16 @@ def process_admin_property_details(property_data):
                 "url": doc_url
             })
     
+    documents_images_data = property_data.get("documents_images", {})
+    admin_uploaded_images = documents_images_data.get("images", [])
+    
+    property_images = property_data.get("images", [])
+    
+    all_images = admin_uploaded_images + property_images
+    
     documents_images = {
         "documents": documents_list,
-        "images": property_data.get("images", [])
+        "images": all_images
     }
     
     processed_data = {
@@ -146,6 +153,7 @@ def get_admin_property_details(property_id):
         "owner_details": 1,
         "documents": 1,
         "images": 1,
+        "documents_images": 1,
         "credit_balance": 1
     }
     
@@ -498,3 +506,40 @@ def get_all_properties():
         processed_properties.append(processed_property)
     
     return processed_properties
+
+
+@handle_exceptions
+def validate_uploaded_image_file(file):
+    if file.content_type not in ['image/jpeg', 'image/jpg']:
+        raise AppException("File must be a JPEG/JPG image", 400)
+    
+    file.seek(0, 2)
+    file_size = file.tell()
+    file.seek(0)
+    
+    if file_size > 1024 * 1024:
+        raise AppException("File size must be less than 1MB", 400)
+    
+    return True
+
+
+@handle_exceptions
+def upload_admin_property_image(property_id, file):
+    from src.logics.cloudfare_bucket import upload_admin_property_image_to_r2
+    from src.database.db_common_operations import add_admin_image_to_property
+    
+    image_url = upload_admin_property_image_to_r2(file, property_id)
+    add_admin_image_to_property(property_id, image_url)
+    
+    return True
+
+
+@handle_exceptions
+def delete_admin_property_image(property_id, image_url):
+    from src.database.db_common_operations import remove_admin_image_from_property
+    from src.logics.cloudfare_bucket import delete_file_from_r2
+    
+    remove_admin_image_from_property(property_id, image_url)
+    delete_file_from_r2(image_url)
+    
+    return True

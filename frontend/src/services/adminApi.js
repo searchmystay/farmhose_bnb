@@ -243,3 +243,40 @@ export const adminLogout = async () => {
     throw new Error('Failed to logout, Network error')
   }
 }
+
+export const uploadPropertyAdminImage = async (propertyId, file) => {
+  try {
+    const formData = new FormData()
+    formData.append('image', file)
+    
+    const response = await adminApiClient.post(`/upload_property_admin_image/${propertyId}`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      }
+    })
+    const result = response.data
+    return result
+  } catch (error) {
+    if (error.response && error.response.data) {
+      const backendError = error.response.data
+      throw new Error(backendError.message || 'Failed to upload image')
+    }
+    throw new Error('Failed to upload image, Network error')
+  }
+}
+
+export const deletePropertyAdminImage = async (propertyId, imageUrl) => {
+  try {
+    const response = await adminApiClient.delete(`/delete_property_admin_image/${propertyId}`, {
+      data: { image_url: imageUrl }
+    })
+    const result = response.data
+    return result
+  } catch (error) {
+    if (error.response && error.response.data) {
+      const backendError = error.response.data
+      throw new Error(backendError.message || 'Failed to delete image')
+    }
+    throw new Error('Failed to delete image, Network error')
+  }
+}

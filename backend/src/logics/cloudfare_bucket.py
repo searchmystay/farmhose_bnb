@@ -125,3 +125,29 @@ def delete_farmhouse_folder_from_r2(farmhouse_id):
         )
     
     return True
+
+
+@handle_exceptions
+def upload_admin_property_image_to_r2(file_storage, property_id):
+    filename = secure_filename(file_storage.filename)
+    file_extension = get_file_extension(filename)
+    file_key = f"farmhouse/{property_id}/admin_images/{filename}"
+    
+    public_url = upload_file_to_r2(file_storage, file_key)
+    return public_url
+
+
+@handle_exceptions
+def delete_file_from_r2(image_url):
+    if not image_url:
+        raise AppException("Image URL is required", 400)
+    
+    file_key = extract_key_from_r2_url(image_url)
+    s3_client = create_s3_client()
+    
+    s3_client.delete_object(
+        Bucket=R2_BUCKET_NAME,
+        Key=file_key
+    )
+    
+    return True

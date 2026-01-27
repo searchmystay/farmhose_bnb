@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Pencil, X, Check, Trash, Plus } from 'phosphor-react'
 import { useAdminPropertyDetails } from '../../hooks/useAdmin'
+import { uploadPropertyAdminImage, deletePropertyAdminImage } from '../../services/adminApi'
 import { toast } from 'sonner'
 
 function PropertyDetailsPage({ propertyId, onBack }) {
@@ -12,6 +13,7 @@ function PropertyDetailsPage({ propertyId, onBack }) {
   const [selectedPhoto, setSelectedPhoto] = useState(null)
   const [photoPreview, setPhotoPreview] = useState(null)
   const [editingDocument, setEditingDocument] = useState(null)
+  const [isUploading, setIsUploading] = useState(false)
 
   const renderLoadingState = () => (
     <div className="flex items-center justify-center min-h-[50vh] px-4">
@@ -458,7 +460,7 @@ function PropertyDetailsPage({ propertyId, onBack }) {
     event.target.value = ''
   }
 
-  const handleImageUpload = (event) => {
+  const handleImageUpload = async (event) => {
     const file = event.target.files[0]
     if (!file) return
 
@@ -470,18 +472,47 @@ function PropertyDetailsPage({ propertyId, onBack }) {
 
     const maxSize = 1 * 1024 * 1024
     if (file.size > maxSize) {
-      alert('Image size must be less than 1 MB')
+      alert('File size must be less than 1MB')
       event.target.value = ''
       return
     }
 
-    console.log('Image selected:', file.name, 'Size:', (file.size / 1024).toFixed(2), 'KB')
-    event.target.value = ''
+    setIsUploading(true)
+    toast.loading('Uploading image...', { id: 'image-upload' })
+
+    try {
+      const result = await uploadPropertyAdminImage(propertyId, file)
+      
+      toast.dismiss('image-upload')
+      toast.success('Image uploaded successfully!')
+      refetch()
+    } catch (error) {
+      console.error('Upload error:', error)
+      toast.dismiss('image-upload')
+      toast.error(error.message || 'Upload failed. Please try again.')
+    } finally {
+      setIsUploading(false)
+      event.target.value = ''
+    }
   }
 
-  const handleDeleteImage = (imageUrl) => {
-    if (window.confirm('Are you sure you want to delete this image?')) {
-      console.log('Delete image:', imageUrl)
+  const handleDeleteImage = async (imageUrl) => {
+    if (!window.confirm('Are you sure you want to delete this image?')) {
+      return
+    }
+
+    toast.loading('Deleting image...', { id: 'image-delete' })
+
+    try {
+      const result = await deletePropertyAdminImage(propertyId, imageUrl)
+      
+      toast.dismiss('image-delete')
+      toast.success('Image deleted successfully!')
+      refetch()
+    } catch (error) {
+      console.error('Delete error:', error)
+      toast.dismiss('image-delete')
+      toast.error(error.message || 'Delete failed. Please try again.')
     }
   }
 
@@ -617,11 +648,22 @@ function PropertyDetailsPage({ propertyId, onBack }) {
         <div className="bg-white rounded-lg border border-gray-200 p-6">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-semibold text-gray-900">Property Images</h3>
-            <label htmlFor="add-image-upload" className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors cursor-pointer text-sm">
+            <label htmlFor="add-image-upload" className={`flex items-center gap-2 px-4 py-2 rounded-md transition-colors cursor-pointer text-sm ${
+              isUploading 
+                ? 'bg-gray-400 text-gray-200 cursor-not-allowed' 
+                : 'bg-blue-600 text-white hover:bg-blue-700'
+            }`}>
               <Plus size={18} weight="bold" />
-              Add Image
+              {isUploading ? 'Uploading...' : 'Add Image'}
             </label>
-            <input id="add-image-upload" type="file" accept="image/jpeg" onChange={handleImageUpload} className="hidden" />
+            <input 
+              id="add-image-upload" 
+              type="file" 
+              accept="image/jpeg,image/jpg" 
+              onChange={handleImageUpload} 
+              className="hidden"
+              disabled={isUploading}
+            />
           </div>
           {documentsImages.images && documentsImages.images.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
@@ -630,8 +672,12 @@ function PropertyDetailsPage({ propertyId, onBack }) {
                   <img src={image} alt={`Property ${index + 1}`} className="w-full h-48 object-cover" onError={(e) => {
                       e.target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZGRkIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkltYWdlIG5vdCBmb3VuZDwvdGV4dD48L3N2Zz4='
                     }} />
-                  <button onClick={() => handleDeleteImage(image)} className="absolute top-2 right-2 bg-red-600 text-white p-2 rounded-md hover:bg-red-700 transition-colors opacity-0 group-hover:opacity-100" title="Delete Image">
-                    <Trash size={18} weight="bold" />
+                  <button 
+                    onClick={() => handleDeleteImage(image)} 
+                    className="absolute top-2 right-2 bg-red-500 text-white rounded-full w-8 h-8 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600" 
+                    title="Delete image"
+                  >
+                    ×
                   </button>
                 </div>
               ))}

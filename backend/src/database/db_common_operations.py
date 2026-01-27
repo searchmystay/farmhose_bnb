@@ -1,6 +1,6 @@
 from bson import ObjectId
 from . import db
-from ..utils.exception_handler import handle_exceptions
+from ..utils.exception_handler import handle_exceptions, AppException
 
 
 @handle_exceptions
@@ -176,3 +176,39 @@ def db_set_field_by_id(collection_name, id, field_name, value):
 def db_aggregate(collection_name, pipeline):
     collection = db[collection_name]
     return list(collection.aggregate(pipeline))
+
+
+@handle_exceptions
+def add_admin_image_to_property(property_id, image_url):
+    filter_dict = {"_id": ObjectId(property_id)}
+    
+    property_doc = db_find_one("farmhouses", filter_dict)
+    if not property_doc:
+        raise AppException("Property not found", 404)
+    
+    if "documents_images" not in property_doc or not isinstance(property_doc.get("documents_images"), dict):
+        update_dict = {"$set": {"documents_images": {"images": [image_url]}}}
+    else:
+        if "images" not in property_doc["documents_images"] or not isinstance(property_doc["documents_images"].get("images"), list):
+            update_dict = {"$set": {"documents_images.images": [image_url]}}
+        else:
+            update_dict = {"$push": {"documents_images.images": image_url}}
+    
+    result = db_update_one("farmhouses", filter_dict, update_dict)
+    
+    if result.matched_count == 0:
+        raise AppException("Failed to update property", 500)
+    
+    return True
+
+
+@handle_exceptions
+def remove_admin_image_from_property(property_id, image_url):
+    filter_dict = {"_id": ObjectId(property_id)}
+    update_dict = {"$pull": {"documents_images.images": image_url}}
+    result = db_update_one("farmhouses", filter_dict, update_dict)
+    
+    if result.matched_count == 0:
+        raise AppException("Property not found", 404)
+    
+    return True
