@@ -113,16 +113,9 @@ def process_admin_property_details(property_data):
                 "url": doc_url
             })
     
-    documents_images_data = property_data.get("documents_images", {})
-    admin_uploaded_images = documents_images_data.get("images", [])
-    
-    property_images = property_data.get("images", [])
-    
-    all_images = admin_uploaded_images + property_images
-    
     documents_images = {
         "documents": documents_list,
-        "images": all_images
+        "images": property_data.get("images", [])
     }
     
     processed_data = {
@@ -153,7 +146,6 @@ def get_admin_property_details(property_id):
         "owner_details": 1,
         "documents": 1,
         "images": 1,
-        "documents_images": 1,
         "credit_balance": 1
     }
     

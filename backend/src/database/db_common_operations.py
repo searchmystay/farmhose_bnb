@@ -186,13 +186,11 @@ def add_admin_image_to_property(property_id, image_url):
     if not property_doc:
         raise AppException("Property not found", 404)
     
-    if "documents_images" not in property_doc or not isinstance(property_doc.get("documents_images"), dict):
-        update_dict = {"$set": {"documents_images": {"images": [image_url]}}}
+    # Add to main images array instead of documents_images
+    if "images" not in property_doc or not isinstance(property_doc.get("images"), list):
+        update_dict = {"$set": {"images": [image_url]}}
     else:
-        if "images" not in property_doc["documents_images"] or not isinstance(property_doc["documents_images"].get("images"), list):
-            update_dict = {"$set": {"documents_images.images": [image_url]}}
-        else:
-            update_dict = {"$push": {"documents_images.images": image_url}}
+        update_dict = {"$push": {"images": image_url}}
     
     result = db_update_one("farmhouses", filter_dict, update_dict)
     
@@ -205,7 +203,7 @@ def add_admin_image_to_property(property_id, image_url):
 @handle_exceptions
 def remove_admin_image_from_property(property_id, image_url):
     filter_dict = {"_id": ObjectId(property_id)}
-    update_dict = {"$pull": {"documents_images.images": image_url}}
+    update_dict = {"$pull": {"images": image_url}}
     result = db_update_one("farmhouses", filter_dict, update_dict)
     
     if result.matched_count == 0:
