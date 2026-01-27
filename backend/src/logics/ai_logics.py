@@ -10,7 +10,6 @@ from src.config import OPENAI_API_KEY, VECTOR_STORE_ID
 from src.utils.exception_handler import handle_exceptions, AppException
 from src.database.db_common_operations import db_find_one, db_find_many, db_update_one
 
-
 @handle_exceptions
 def get_openai_headers(extra_headers=None):
     if not OPENAI_API_KEY:
@@ -51,10 +50,144 @@ def add_file_to_vector_store(vector_store_id, file_id):
 
 
 @handle_exceptions
+def remove_file_from_vector_store(vector_store_id, file_id):
+    url = f"https://api.openai.com/v1/vector_stores/{vector_store_id}/files/{file_id}"
+    headers = get_openai_headers()
+    response = requests.delete(url, headers=headers, timeout=60)
+    
+    logger.info(f"Removing file {file_id} from vector store - Status: {response.status_code}")
+    logger.info(f"Remove file response: {response.text}")
+    
+    if response.status_code == 200:
+        logger.info(f"Successfully removed file {file_id} from vector store")
+        result = True
+        return result
+    else:
+        logger.error(f"Failed to remove file {file_id}: {response.status_code} - {response.text}")
+        result = False
+        return result
+
+
+@handle_exceptions
+def validate_vector_store(vector_store_id):
+    if not vector_store_id:
+        result = False
+        return result
+    
+    url = f"https://api.openai.com/v1/vector_stores/{vector_store_id}"
+    headers = get_openai_headers()
+    response = requests.get(url, headers=headers, timeout=30)
+    
+    if response.status_code == 200:
+        result = True
+        return result
+    
+    result = False
+    return result
+
+
+@handle_exceptions
+def update_env_variable(key, value):
+    env_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), '.env')
+    
+    if not os.path.exists(env_path):
+        with open(env_path, 'w') as f:
+            f.write(f"{key}={value}\n")
+        result = True
+        return result
+    
+    with open(env_path, 'r') as f:
+        lines = f.readlines()
+    
+    key_found = False
+    for i, line in enumerate(lines):
+        if line.strip().startswith(f"{key}="):
+            lines[i] = f"{key}={value}\n"
+            key_found = True
+            break
+    
+    if not key_found:
+        lines.append(f"{key}={value}\n")
+    
+    with open(env_path, 'w') as f:
+        f.writelines(lines)
+    
+    result = True
+    return result
+
+
+@handle_exceptions
+def create_property_content_for_ai(property_data):
+    result = build_property_vector_text(property_data)
+    return result
+
+
+@handle_exceptions
 def ensure_valid_vector_store():
-    if not VECTOR_STORE_ID:
-        raise AppException("Vector store ID not configured in environment variables")
-    return VECTOR_STORE_ID
+    current_vector_store_id = VECTOR_STORE_ID
+    
+    if not current_vector_store_id:
+        logger.info("No vector store ID configured, creating new vector store")
+        new_vector_store_id = create_vector_store([])
+        update_env_variable("VECTOR_STORE_ID", new_vector_store_id)
+        result = new_vector_store_id
+        return result
+    
+    is_valid = validate_vector_store(current_vector_store_id)
+    if is_valid:
+        logger.info(f"Vector store {current_vector_store_id} is valid")
+        result = current_vector_store_id
+        return result
+    
+    logger.info(f"Vector store {current_vector_store_id} is invalid, creating new vector store")
+    new_vector_store_id = create_vector_store([])
+    update_env_variable("VECTOR_STORE_ID", new_vector_store_id)
+    
+    logger.info(f"Created new vector store: {new_vector_store_id}")
+    result = new_vector_store_id
+    return result
+
+
+@handle_exceptions
+def update_property_in_vector_store(property_id):
+    property_data = db_find_one("farmhouses", {"_id": ObjectId(property_id)})
+    if not property_data:
+        result = False
+        return result
+    
+    ai_field = property_data.get("ai", {})
+    existing_file_id = ai_field.get("file_id")
+    
+    if not existing_file_id:
+        result = False
+        return result
+    
+    vector_store_id = get_vector_store_id()
+    if not vector_store_id:
+        result = False
+        return result
+    
+    try:
+        remove_file_from_vector_store(vector_store_id, existing_file_id)
+    except:
+        pass
+    
+    property_content = create_property_content_for_ai(property_data)
+    new_file_id = upload_text_to_openai(property_content)
+    add_file_to_vector_store(vector_store_id, new_file_id)
+    
+    ai_metadata = {
+        "file_id": new_file_id,
+        "vector_store_id": vector_store_id,
+        "last_updated": datetime.utcnow().isoformat()
+    }
+    
+    update_data = {"$set": {"ai": ai_metadata}}
+    query_filter = {"_id": ObjectId(property_id)}
+    db_update_one("farmhouses", query_filter, update_data)
+    
+    result = True
+    return result
 
 
 @handle_exceptions
@@ -230,6 +363,11 @@ def search_vector_store_for_files(query_string, top_k=20, rewrite_query=True):
         "rewrite_query": rewrite_query
     }
     response = requests.post(url, headers=headers, json=payload, timeout=30)
+    
+    logger.info(f"Vector store search - URL: {url}")
+    logger.info(f"Vector store search - Status: {response.status_code}")
+    logger.info(f"Vector store search - Response: {response.text}")
+    
     if response.status_code >= 400:
         raise AppException("Vector store search failed")
     search_data = response.json()

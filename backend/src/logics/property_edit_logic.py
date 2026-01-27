@@ -1,9 +1,12 @@
+import logging
 from bson import ObjectId
 from datetime import datetime
 from src.database.db_common_operations import db_update_one, db_find_one
 from src.utils.exception_handler import handle_exceptions, AppException
 from src.logics.cloudfare_bucket import overwrite_image_in_r2, overwrite_document_in_r2
 from src.logics.website_logic import *
+
+logger = logging.getLogger(__name__)
 
 
 FIELD_MAPPING = {
@@ -226,5 +229,12 @@ def update_property_field(property_id, field_name, value):
     
     db_field_path = FIELD_MAPPING[field_name]
     update_property_field_in_db(property_id, db_field_path, validated_value)
+    
+    if field_name in ["property_name", "description"]:
+        from src.logics.ai_logics import update_property_in_vector_store
+        try:
+            update_property_in_vector_store(property_id)
+        except Exception as e:
+            logger.warning(f"Failed to update vector store for property {property_id}: {str(e)}")
     
     return True
