@@ -1,0 +1,23 @@
+User-agent: *
+Allow: /
+
+# Sitemap location (update with your actual sitemap URL when available)
+Sitemap: https://searchmystay.com/sitemap.xml
+
+# Allow crawling of important pages
+Allow: /
+Allow: /properties
+Allow: /search
+Allow: /property/*
+
+# Block crawling of admin and private areas
+Disallow: /admin
+Disallow: /owner
+Disallow: /api
+
+# Block crawling of temporary or test files
+Disallow: /tmp_*
+Disallow: /_*
+
+# Block crawling of development files
+Disallow: *.map$

@@ -431,11 +431,11 @@ function HomePage() {
   return (
     <>
       <Helmet>
-        <title>Best Farmhouses & BnB for Rent in Jaipur | FarmStay Bookings</title>
-        <meta name="description" content="Discover and book premium farmhouses and bed & breakfast accommodations in Jaipur. Perfect for weekend getaways, family vacations, and peaceful retreats." />
+        <title>Farmhouses & Private Homes in Jaipur</title>
+        <meta name="description" content="Find verified farmhouses and private homes in Jaipur. Talk directly with owners on WhatsApp. No agents, no commission." />
         <meta name="keywords" content="farmhouse rental Jaipur, BnB booking Jaipur, farm stay, weekend getaway, vacation rental" />
-        <meta property="og:title" content="Best Farmhouses & BnB for Rent in Jaipur | FarmStay Bookings" />
-        <meta property="og:description" content="Discover and book premium farmhouses and bed & breakfast accommodations in Jaipur." />
+        <meta property="og:title" content="Farmhouses in Jaipur | Talk Directly With Owners – SearchMyStay" />
+        <meta property="og:description" content="Find verified farmhouses and private homes in Jaipur. Talk directly with owners on WhatsApp. No agents, no commission." />
         <meta property="og:type" content="website" />
       </Helmet>
 
