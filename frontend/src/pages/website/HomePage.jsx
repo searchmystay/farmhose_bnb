@@ -434,8 +434,10 @@ function HomePage() {
         <title>Farmhouses & Private Homes in Jaipur</title>
         <meta name="description" content="Find verified farmhouses and private homes in Jaipur. Talk directly with owners on WhatsApp. No agents, no commission." />
         <meta name="keywords" content="farmhouse rental Jaipur, BnB booking Jaipur, farm stay, weekend getaway, vacation rental" />
+        <link rel="canonical" href="https://searchmystay.com/" />
         <meta property="og:title" content="Farmhouses in Jaipur | Talk Directly With Owners – SearchMyStay" />
         <meta property="og:description" content="Find verified farmhouses and private homes in Jaipur. Talk directly with owners on WhatsApp. No agents, no commission." />
+        <meta property="og:url" content="https://searchmystay.com/" />
         <meta property="og:type" content="website" />
       </Helmet>
 
