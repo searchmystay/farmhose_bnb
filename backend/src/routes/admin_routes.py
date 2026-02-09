@@ -4,7 +4,8 @@ from src.logics.admin_auth import admin_required
 from src.logics.admin_kpi_logic import get_admin_dashboard_kpis
 from src.utils.exception_handler import handle_route_exceptions, AppException
 from src.logics.property_edit_logic import update_property_field
-
+from src.logics.cloudfare_bucket import upload_property_document_image_to_r2,delete_image_from_r2
+from src.database.db_common_operations import update_property_documents_images
 
 admin_bp = Blueprint('admin', __name__)
 
@@ -292,37 +293,48 @@ def edit_property_field_route(property_id):
     return jsonify(response_data), 200
 
 
-@admin_bp.route('/upload_property_admin_image/<property_id>', methods=['POST'])
-@admin_required
-@handle_route_exceptions
-def upload_property_admin_image_route(property_id):
+@admin_routes.route('/upload_property_document_image', methods=['POST'])
+def upload_property_document_image():
+    property_id = request.form.get('property_id')
+    if not property_id:
+        raise AppException("Property ID is required", 400)
+    
     if 'image' not in request.files:
         raise AppException("No image file provided", 400)
     
     file = request.files['image']
     if file.filename == '':
         raise AppException("No file selected", 400)
+
+    allowed_extensions = {'jpg', 'jpeg'}
+    file_extension = file.filename.rsplit('.', 1)[1].lower() if '.' in file.filename else ''
+    if file_extension not in allowed_extensions:
+        raise AppException("Invalid file type. Only JPG/JPEG images are allowed", 400)
     
-    validate_uploaded_image_file(file)
-    upload_admin_property_image(property_id, file)
+    image_url = upload_property_document_image_to_r2(file, property_id)
+    
+    update_property_documents_images(property_id, image_url, action='add')
     
     response_data = {
         "success": True,
-        "message": "Image uploaded successfully"
+        "message": "Image uploaded successfully",
+        "image_url": image_url
     }
     return jsonify(response_data), 200
 
 
-@admin_bp.route('/delete_property_admin_image/<property_id>', methods=['DELETE'])
-@admin_required
-@handle_route_exceptions
-def delete_property_admin_image_route(property_id):
+@admin_routes.route('/delete_property_document_image', methods=['POST'])
+def delete_property_document_image():
     request_data = request.get_json()
-    if not request_data or 'image_url' not in request_data:
-        raise AppException("Image URL is required", 400)
+    property_id = request_data.get('property_id')
+    image_url = request_data.get('image_url')
     
-    image_url = request_data['image_url']
-    delete_admin_property_image(property_id, image_url)
+    if not property_id or not image_url:
+        raise AppException("Property ID and image URL are required", 400)
+    
+    delete_image_from_r2(image_url)
+    
+    update_property_documents_images(property_id, image_url, action='remove')
     
     response_data = {
         "success": True,

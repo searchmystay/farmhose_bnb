@@ -1,5 +1,5 @@
 // Frontend Configuration Constants
-export const MINIMUM_PROPERTY_ACTIVATION_AMOUNT = 3000;
+export const MINIMUM_PROPERTY_ACTIVATION_AMOUNT = 1000;
 
 // API Endpoints
 export const API_BASE_URL = '/api';
