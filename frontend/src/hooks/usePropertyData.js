@@ -283,11 +283,35 @@ export const useWhatsappContact = () => {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
 
+  const getSearchCriteria = () => {
+    try {
+      const searchCriteria = sessionStorage.getItem('searchCriteria')
+      return searchCriteria ? JSON.parse(searchCriteria) : null
+    } catch (err) {
+      return null
+    }
+  }
+
   const getWhatsappLink = async (propertyId) => {
     try {
       setLoading(true)
       setError(null)
-      const response = await contactViaWhatsapp(propertyId)
+      
+      // Get search criteria for pre-filled message
+      const searchCriteria = getSearchCriteria()
+      let messageData = {}
+      
+      if (searchCriteria) {
+        messageData = {
+          checkInDate: searchCriteria.checkInDate,
+          checkOutDate: searchCriteria.checkOutDate,
+          numberOfAdults: searchCriteria.numberOfAdults || searchCriteria.adults || 0,
+          numberOfChildren: searchCriteria.numberOfChildren || searchCriteria.children || 0,
+          numberOfPets: searchCriteria.numberOfPets || searchCriteria.pets || 0
+        }
+      }
+      
+      const response = await contactViaWhatsapp(propertyId, messageData)
       const whatsappLink = response.backend_data?.whatsapp_link
       
       if (whatsappLink) {

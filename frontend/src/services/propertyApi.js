@@ -151,9 +151,13 @@ export const registerProperty = async (formData) => {
   }
 }
 
-export const contactViaWhatsapp = async (propertyId) => {
+export const contactViaWhatsapp = async (propertyId, messageData = {}) => {
   try {
-    const response = await apiClient.post(`/contact-whatsapp/${propertyId}`)
+    const requestData = {
+      ...messageData
+    }
+    
+    const response = await apiClient.post(`/contact-whatsapp/${propertyId}`, requestData)
     const result = response.data
     return result
   } catch (error) {

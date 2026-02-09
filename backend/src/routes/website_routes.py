@@ -416,7 +416,9 @@ def complete_property_registration_route():
 @website_bp.route('/contact-whatsapp/<farmhouse_id>', methods=['POST'])
 @handle_route_exceptions
 def contact_via_whatsapp(farmhouse_id):
-    contact_result = process_whatsapp_contact(farmhouse_id)
+    # Get message data from frontend
+    message_data = request.get_json() or {}
+    contact_result = process_whatsapp_contact(farmhouse_id, message_data)
     
     response_data = {
         "success": True,

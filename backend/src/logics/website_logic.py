@@ -904,19 +904,72 @@ def complete_property_registration(property_id, property_images, property_docume
     return property_id
 
 @handle_exceptions
-def generate_whatsapp_url(phone_number):
+def generate_whatsapp_url(phone_number, message_data=None):
+    import urllib.parse
+    
     if not phone_number:
         raise AppException("Phone number not avilable")
     
     clean_number = ''.join(filter(str.isdigit, phone_number))
     number = f"91{clean_number}"
     
-    whatsapp_url = f"https://wa.me/{number}"
+    # Create pre-filled message
+    message = "Hi, I found your farmhouse on SearchMyStay.\nI'm looking for a stay"
+    
+    if message_data:
+        check_in_date = message_data.get('checkInDate', '')
+        check_out_date = message_data.get('checkOutDate', '')
+        number_of_adults = message_data.get('numberOfAdults', 0)
+        number_of_children = message_data.get('numberOfChildren', 0) 
+        number_of_pets = message_data.get('numberOfPets', 0)
+        
+        # Format dates if available
+        if check_in_date and check_out_date:
+            message += f" on {check_in_date} to {check_out_date}"
+        elif check_in_date:
+            message += f" on {check_in_date}"
+        
+        # Build guest details with proper grammar
+        guest_details = []
+        
+        if number_of_adults:
+            if number_of_adults == 1:
+                guest_details.append("1 adult")
+            else:
+                guest_details.append(f"{number_of_adults} adults")
+        
+        if number_of_children:
+            if number_of_children == 1:
+                guest_details.append("1 child")
+            else:
+                guest_details.append(f"{number_of_children} children")
+        
+        if number_of_pets:
+            if number_of_pets == 1:
+                guest_details.append("1 pet")
+            else:
+                guest_details.append(f"{number_of_pets} pets")
+        
+        # Add guest details to message
+        if guest_details:
+            if len(guest_details) == 1:
+                message += f" for {guest_details[0]}"
+            elif len(guest_details) == 2:
+                message += f" for {guest_details[0]} and {guest_details[1]}"
+            else:
+                message += f" for {', '.join(guest_details[:-1])} and {guest_details[-1]}"
+    
+    message += ".\nPlease share details."
+    
+    # URL encode the message
+    encoded_message = urllib.parse.quote(message)
+    whatsapp_url = f"https://wa.me/{number}?text={encoded_message}"
+    
     return whatsapp_url
 
 
 @handle_exceptions
-def check_farmhouse_credit_balance(farmhouse_id):
+def check_farmhouse_credit_balance(farmhouse_id, message_data=None):
     query_filter = {"_id": ObjectId(farmhouse_id), "status": "active"}
     projection = {"credit_balance": 1, "phone_number": 1}
     farmhouse_data = db_find_one("farmhouses", query_filter, projection)
@@ -926,16 +979,16 @@ def check_farmhouse_credit_balance(farmhouse_id):
     
     current_balance = farmhouse_data.get("credit_balance", 0)
     phone_number = farmhouse_data.get("phone_number", "")
-    whatsapp_link = generate_whatsapp_url(phone_number)
+    whatsapp_link = generate_whatsapp_url(phone_number, message_data)
     
     return current_balance, whatsapp_link
 
 
 @handle_exceptions
-def deduct_lead_cost_from_farmhouse(farmhouse_id):
+def deduct_lead_cost_from_farmhouse(farmhouse_id, message_data=None):
     from src.logics.payment_logic import trigger_auto_recharge_in_background
     
-    current_balance, whatsapp_link = check_farmhouse_credit_balance(farmhouse_id)
+    current_balance, whatsapp_link = check_farmhouse_credit_balance(farmhouse_id, message_data)
     
     if current_balance < MINIMUM_BALANCE_THRESHOLD:
         deactivate_data = {"$set": {"status": "inactive"}}
@@ -967,8 +1020,8 @@ def deduct_lead_cost_from_farmhouse(farmhouse_id):
 
 
 @handle_exceptions
-def process_whatsapp_contact(farmhouse_id):
-    new_balance, whatsapp_link = deduct_lead_cost_from_farmhouse(farmhouse_id)
+def process_whatsapp_contact(farmhouse_id, message_data=None):
+    new_balance, whatsapp_link = deduct_lead_cost_from_farmhouse(farmhouse_id, message_data)
     
     if not whatsapp_link:
         raise AppException("WhatsApp link not available for this farmhouse")
