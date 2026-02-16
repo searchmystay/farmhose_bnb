@@ -99,6 +99,8 @@ const AISuggestions = ({ onPropertyClick, propertyType = 'both' }) => {
   const [hasSubmitted, setHasSubmitted] = useState(false)
   const [currentIndex, setCurrentIndex] = useState(0)
   const [isTransitioning, setIsTransitioning] = useState(true)
+  const [touchStart, setTouchStart] = useState(0)
+  const [touchEnd, setTouchEnd] = useState(0)
 
   // Restore cached state on component mount
   useEffect(() => {
@@ -117,7 +119,7 @@ const AISuggestions = ({ onPropertyClick, propertyType = 'both' }) => {
     }
     if (window.innerWidth >= 1024) return 4
     if (window.innerWidth >= 768) return 2
-    return 1
+    return 1.3
   }
 
   const [visibleCards, setVisibleCards] = useState(getVisibleCards)
@@ -229,6 +231,21 @@ const AISuggestions = ({ onPropertyClick, propertyType = 'both' }) => {
     return () => window.removeEventListener('resize', handleResize)
   }, [])
 
+  const handleTouchStart = (e) => {
+    setTouchStart(e.targetTouches[0].clientX)
+  }
+
+  const handleTouchMove = (e) => {
+    setTouchEnd(e.targetTouches[0].clientX)
+  }
+
+  const handleTouchEnd = () => {
+    if (!touchStart || !touchEnd) return
+    const distance = touchStart - touchEnd
+    if (distance > 50) setCurrentIndex(prev => prev + 1)
+    if (distance < -50) setCurrentIndex(prev => Math.max(prev - 1, 0))
+  }
+
   const renderContent = () => {
     // Show suggestions if we have them (either fresh or cached)
     if (!hasSubmitted && !hasCachedSuggestions) {
@@ -257,19 +274,23 @@ const AISuggestions = ({ onPropertyClick, propertyType = 'both' }) => {
       <div>
         {shouldEnableCarousel ? (
           <>
-            <div className="relative overflow-hidden">
-              <div
-                className={`flex gap-6 ${isTransitioning ? 'transition-transform duration-700 ease-in-out' : ''}`}
+            <div 
+              className="relative overflow-hidden"
+              onTouchStart={handleTouchStart}
+              onTouchMove={handleTouchMove}
+              onTouchEnd={handleTouchEnd}
+            >
+              <div 
+                className={`flex gap-6 pr-6 ${isTransitioning ? 'transition-transform duration-700 ease-in-out' : ''}`}
                 style={{
-                  transform: `translateX(-${currentIndex * cardWidthPercent}%)`,
-                  width: `${extendedSuggestions.length * cardWidthPercent}%`
+                  transform: `translateX(-${currentIndex * (320 + 24)}px)`,
+                  width: `${extendedSuggestions.length * (320 + 24)}px`
                 }}
               >
                 {extendedSuggestions.map((property, index) => (
                   <div
                     key={`${property._id || index}-${index}`}
-                    className="flex-shrink-0"
-                    style={{ width: `${cardWidthPercent}%` }}
+                    className="w-80 flex-shrink-0"
                   >
                     <SuggestionCard
                       property={property}

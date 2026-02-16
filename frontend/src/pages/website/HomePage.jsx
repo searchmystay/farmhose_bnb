@@ -177,11 +177,13 @@ function FarmhouseCarousel({ title, properties, loading, error, navigateTo }) {
   const navigate = useNavigate()
   const [currentIndex, setCurrentIndex] = useState(0)
   const [isTransitioning, setIsTransitioning] = useState(true)
+  const [touchStart, setTouchStart] = useState(0)
+  const [touchEnd, setTouchEnd] = useState(0)
 
   const getVisibleCards = () => {
     if (window.innerWidth >= 1024) return 4 
     if (window.innerWidth >= 768) return 2
-    return 1
+    return 1.3
   }
 
   const [visibleCards, setVisibleCards] = useState(getVisibleCards)
@@ -228,6 +230,21 @@ function FarmhouseCarousel({ title, properties, loading, error, navigateTo }) {
     return () => window.removeEventListener('resize', handleResize)
   }, [])
 
+  const handleTouchStart = (e) => {
+    setTouchStart(e.targetTouches[0].clientX)
+  }
+
+  const handleTouchMove = (e) => {
+    setTouchEnd(e.targetTouches[0].clientX)
+  }
+
+  const handleTouchEnd = () => {
+    if (!touchStart || !touchEnd) return
+    const distance = touchStart - touchEnd
+    if (distance > 50) setCurrentIndex(prev => prev + 1)
+    if (distance < -50) setCurrentIndex(prev => Math.max(prev - 1, 0))
+  }
+
   return (
     <section className="py-6 bg-gray-50">
       <div className="container mx-auto px-4">
@@ -264,7 +281,12 @@ function FarmhouseCarousel({ title, properties, loading, error, navigateTo }) {
           </div>
         ) : shouldEnableCarousel ? (
           <>
-            <div className="relative overflow-hidden">
+            <div 
+              className="relative overflow-hidden"
+              onTouchStart={handleTouchStart}
+              onTouchMove={handleTouchMove}
+              onTouchEnd={handleTouchEnd}
+            >
               <div 
                 className={`flex gap-6 pr-6 ${isTransitioning ? 'transition-transform duration-700 ease-in-out' : ''}`}
                 style={{
