@@ -169,7 +169,11 @@ def get_date_range(start_date, end_date):
 
 
 @handle_exceptions
-def get_approved_properties_by_type(query_filter, number_of_people=None, number_of_children=None, number_of_pets=None, search_latitude=None, search_longitude=None, max_distance_km=10, check_in_date=None, check_out_date=None):
+def get_approved_properties_by_type(query_filter, number_of_people=None, number_of_children=None, number_of_pets=None, search_latitude=None, search_longitude=None, max_distance_km=None, check_in_date=None, check_out_date=None):
+    from src.config import MAX_SEARCH_DISTANCE_KM
+    if max_distance_km is None:
+        max_distance_km = MAX_SEARCH_DISTANCE_KM
+    
     projection = {
         "_id": 1,
         "name": 1,
@@ -299,21 +303,21 @@ def get_property_details(property_id, lead_email=None, check_in_date=None, check
 
 
 @handle_exceptions
-def get_approved_farmhouses(number_of_people=None, number_of_children=None, number_of_pets=None, search_latitude=None, search_longitude=None, max_distance_km=10, check_in_date=None, check_out_date=None):
+def get_approved_farmhouses(number_of_people=None, number_of_children=None, number_of_pets=None, search_latitude=None, search_longitude=None, max_distance_km=None, check_in_date=None, check_out_date=None):
     query_filter = {"status": "active", "type": "farmhouse"}
     farmhouses_list = get_approved_properties_by_type(query_filter, number_of_people, number_of_children, number_of_pets, search_latitude, search_longitude, max_distance_km, check_in_date, check_out_date)
     return farmhouses_list
 
 
 @handle_exceptions
-def get_approved_bnbs(number_of_people=None, number_of_children=None, number_of_pets=None, search_latitude=None, search_longitude=None, max_distance_km=10, check_in_date=None, check_out_date=None):
+def get_approved_bnbs(number_of_people=None, number_of_children=None, number_of_pets=None, search_latitude=None, search_longitude=None, max_distance_km=None, check_in_date=None, check_out_date=None):
     query_filter = {"status": "active", "type": "bnb"}
     bnbs_list = get_approved_properties_by_type(query_filter, number_of_people, number_of_children, number_of_pets, search_latitude, search_longitude, max_distance_km, check_in_date, check_out_date)
     return bnbs_list
 
 
 @handle_exceptions
-def get_all_approved_properties(number_of_people=None, number_of_children=None, number_of_pets=None, search_latitude=None, search_longitude=None, max_distance_km=10, check_in_date=None, check_out_date=None):
+def get_all_approved_properties(number_of_people=None, number_of_children=None, number_of_pets=None, search_latitude=None, search_longitude=None, max_distance_km=None, check_in_date=None, check_out_date=None):
     query_filter = {"status": "active"}
     properties_list = get_approved_properties_by_type(query_filter, number_of_people, number_of_children, number_of_pets, search_latitude, search_longitude, max_distance_km, check_in_date, check_out_date)
     return properties_list

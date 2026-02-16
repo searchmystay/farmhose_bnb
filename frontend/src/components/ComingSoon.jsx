@@ -80,7 +80,6 @@ const ComingSoon = ({ onAccessGranted }) => {
     <>
       <Helmet>
         <title>Coming Soon - SearchMyStay</title>
-        <meta name="robots" content="noindex, nofollow" />
         <meta name="description" content="SearchMyStay is coming soon. Premium farmhouse and BnB booking platform." />
       </Helmet>
       
