@@ -47,9 +47,12 @@ export const useAISuggestions = () => {
 
   const saveSuggestionsToCache = (suggestions, query) => {
     try {
-      localStorage.setItem(AI_SUGGESTIONS_KEY, JSON.stringify(suggestions))
-      localStorage.setItem(AI_QUERY_KEY, query)
-      localStorage.setItem(AI_TIMESTAMP_KEY, Date.now().toString())
+      // Only save if query is not an error message
+      if (query && !query.includes('No suggestions found') && !query.includes('Try a different query')) {
+        localStorage.setItem(AI_SUGGESTIONS_KEY, JSON.stringify(suggestions))
+        localStorage.setItem(AI_QUERY_KEY, query)
+        localStorage.setItem(AI_TIMESTAMP_KEY, Date.now().toString())
+      }
     } catch (error) {
       console.error('Error saving AI suggestions to cache:', error)
     }

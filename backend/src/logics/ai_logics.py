@@ -135,11 +135,9 @@ def ensure_valid_vector_store():
     
     is_valid = validate_vector_store(current_vector_store_id)
     if is_valid:
-        logger.info(f"Vector store {current_vector_store_id} is valid")
         result = current_vector_store_id
         return result
     
-    logger.info(f"Vector store {current_vector_store_id} is invalid, creating new vector store")
     new_vector_store_id = create_vector_store([])
     update_env_variable("VECTOR_STORE_ID", new_vector_store_id)
     
@@ -291,12 +289,19 @@ def build_property_vector_text(property_data):
     location_text = build_location_summary(property_data.get("location", {}))
     amenities_text = build_amenities_summary(property_data.get("amenities", {}))
     price = property_data.get("per_day_price", 0)
+    max_people = property_data.get('max_people_allowed', 0)
+    max_children = property_data.get('max_children_allowed', 0)
+    max_pets = property_data.get('max_pets_allowed', 0)
+    
     text_parts = [
         f"Property ID: {property_id}",
         f"Name: {name}",
         f"Type: {property_type}",
         f"Location: {location_text}",
         f"Price: {price}",
+        f"Max People: {max_people}",
+        f"Max Children: {max_children}",
+        f"Max Pets: {max_pets}",
         f"Description: {description}",
         f"Amenities: {amenities_text}"
     ]
@@ -433,7 +438,10 @@ def format_search_property(property_data):
         "price": price,
         "location": location_text,
         "image": image_url,
-        "rating": rating
+        "rating": rating,
+        "max_people_allowed": property_data.get("max_people_allowed", 0),
+        "max_children_allowed": property_data.get("max_children_allowed", 0),
+        "max_pets_allowed": property_data.get("max_pets_allowed", 0)
     }
     return result
 
@@ -457,7 +465,10 @@ def build_active_properties_projection():
         "images": 1,
         "review_average": 1,
         "amenities": 1,
-        "tags": 1
+        "tags": 1,
+        "max_people_allowed": 1,
+        "max_children_allowed": 1,
+        "max_pets_allowed": 1
     }
     return projection
 
@@ -482,19 +493,11 @@ def order_properties_by_ids(property_map, property_ids):
 
 
 @handle_exceptions
-def fetch_active_property_docs(property_ids, number_of_people=None, number_of_children=None, number_of_pets=None):
+def fetch_active_property_docs(property_ids):
     if not property_ids:
         result = []
         return result
     query_filter = build_active_properties_filter(property_ids)
-    
-    if number_of_people and not isinstance(number_of_people, str):
-        query_filter["max_people_allowed"] = {"$gte": number_of_people}
-    if number_of_children and not isinstance(number_of_children, str):
-        query_filter["max_children_allowed"] = {"$gte": number_of_children}
-    if number_of_pets and not isinstance(number_of_pets, str):
-        query_filter["max_pets_allowed"] = {"$gte": number_of_pets}
-    
     projection = build_active_properties_projection()
     properties = db_find_many("farmhouses", query_filter, projection)
     property_map = build_property_map(properties)
@@ -546,7 +549,7 @@ def compute_property_score(property_id, vector_score_map):
 
 
 @handle_exceptions
-def search_properties(query_string, number_of_people=None, number_of_children=None, number_of_pets=None):
+def search_properties(query_string):
     if not query_string:
         raise AppException("Search query is required")
     matches = search_vector_store_for_files(query_string)
@@ -564,7 +567,7 @@ def search_properties(query_string, number_of_people=None, number_of_children=No
         if property_id:
             vector_score_map[property_id] = max(score, vector_score_map.get(property_id, 0.0))
 
-    property_docs = fetch_active_property_docs(property_ids, number_of_people, number_of_children, number_of_pets)
+    property_docs = fetch_active_property_docs(property_ids)
     if not property_docs:
         return {"properties": []}
 
