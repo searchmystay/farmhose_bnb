@@ -482,11 +482,19 @@ def order_properties_by_ids(property_map, property_ids):
 
 
 @handle_exceptions
-def fetch_active_property_docs(property_ids):
+def fetch_active_property_docs(property_ids, number_of_people=None, number_of_children=None, number_of_pets=None):
     if not property_ids:
         result = []
         return result
     query_filter = build_active_properties_filter(property_ids)
+    
+    if number_of_people and not isinstance(number_of_people, str):
+        query_filter["max_people_allowed"] = {"$gte": number_of_people}
+    if number_of_children and not isinstance(number_of_children, str):
+        query_filter["max_children_allowed"] = {"$gte": number_of_children}
+    if number_of_pets and not isinstance(number_of_pets, str):
+        query_filter["max_pets_allowed"] = {"$gte": number_of_pets}
+    
     projection = build_active_properties_projection()
     properties = db_find_many("farmhouses", query_filter, projection)
     property_map = build_property_map(properties)
@@ -538,7 +546,7 @@ def compute_property_score(property_id, vector_score_map):
 
 
 @handle_exceptions
-def search_properties(query_string):
+def search_properties(query_string, number_of_people=None, number_of_children=None, number_of_pets=None):
     if not query_string:
         raise AppException("Search query is required")
     matches = search_vector_store_for_files(query_string)
@@ -556,7 +564,7 @@ def search_properties(query_string):
         if property_id:
             vector_score_map[property_id] = max(score, vector_score_map.get(property_id, 0.0))
 
-    property_docs = fetch_active_property_docs(property_ids)
+    property_docs = fetch_active_property_docs(property_ids, number_of_people, number_of_children, number_of_pets)
     if not property_docs:
         return {"properties": []}
 

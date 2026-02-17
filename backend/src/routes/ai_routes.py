@@ -19,10 +19,14 @@ def ai_search():
     request_data = request.get_json() or {}
     query_text = request_data.get('query', '')
     property_type = request_data.get('propertyType', '')
+    number_of_people = request_data.get('numberOfAdults', 0) or 0
+    number_of_children = request_data.get('numberOfChildren', 0) or 0
+    number_of_pets = request_data.get('numberOfPets', 0) or 0
+    
     final_query = build_search_query(query_text, property_type)
     if not final_query:
         raise AppException('Search query is required')
-    search_result = search_properties(final_query)
+    search_result = search_properties(final_query, number_of_people, number_of_children, number_of_pets)
     properties = search_result.get('properties', [])
     response_data = {
         'success': True,
