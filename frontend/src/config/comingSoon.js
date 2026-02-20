@@ -1,6 +1,6 @@
 // Coming Soon Configuration
 // Set to true to show coming soon page, false to show normal website
-export const COMING_SOON_ENABLED = true
+// Coming Soon functionality completely removed
 
 // Password for accessing the website (stored on frontend)
 export const ACCESS_PASSWORD = 'searchmystay2024'

@@ -5,8 +5,6 @@ import { useState, useEffect } from 'react'
 import React from 'react'
 import { checkAuthStatus } from './services/adminApi'
 import { checkOwnerAuthStatus } from './services/ownerApi'
-import { COMING_SOON_ENABLED } from './config/comingSoon'
-import ComingSoon from './components/ComingSoon'
 import HomePage from './pages/website/HomePage'
 import SearchPage from './pages/website/SearchPage'
 import PropertiesPage from './pages/website/PropertiesPage'
@@ -85,30 +83,6 @@ function OwnerProtectedRoute({ children }) {
 }
 
 function App() {
-  const [showComingSoon, setShowComingSoon] = useState(true)
-
-  useEffect(() => {
-    // Check if Coming Soon is enabled and if user has access
-    if (COMING_SOON_ENABLED) {
-      const hasAccess = localStorage.getItem('sms_access_granted') === 'true'
-      setShowComingSoon(!hasAccess)
-    } else {
-      setShowComingSoon(false)
-    }
-  }, [])
-
-  const handleAccessGranted = () => {
-    setShowComingSoon(false)
-  }
-
-  // Show Coming Soon page if enabled and user doesn't have access
-  if (COMING_SOON_ENABLED && showComingSoon) {
-    return (
-      <HelmetProvider>
-        <ComingSoon onAccessGranted={handleAccessGranted} />
-      </HelmetProvider>
-    )
-  }
 
   return (
     <HelmetProvider>

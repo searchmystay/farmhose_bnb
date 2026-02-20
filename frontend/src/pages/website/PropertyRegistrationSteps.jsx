@@ -285,8 +285,8 @@ export const Step3EssentialAmenities = ({
 
       <div className="grid grid-cols-3 gap-4 p-4 bg-green-50 rounded-lg">
         <NumberInput name="max_people_allowed" value={essentialAmenities.max_people_allowed} onChange={onNumberChange} label="Max Adults" min={1} max={50} centered required />
-        <NumberInput name="max_children_allowed" value={essentialAmenities.max_children_allowed} onChange={onNumberChange} label="Max Children" min={0} max={20} centered />
-        <NumberInput name="max_pets_allowed" value={essentialAmenities.max_pets_allowed} onChange={onNumberChange} label="Max Pets" min={0} max={10} centered />
+        <NumberInput name="max_children_allowed" value={essentialAmenities.max_children_allowed} onChange={onNumberChange} label="Max Children" placeholder="Enter 0 if not allowed" min={0} max={20} centered required />
+        <NumberInput name="max_pets_allowed" value={essentialAmenities.max_pets_allowed} onChange={onNumberChange} label="Max Pets" placeholder="Enter 0 if not allowed" min={0} max={10} centered required />
       </div>
     </div>
 

@@ -323,6 +323,15 @@ const PropertyRegistrationForm = () => {
 
   const handleNumberChange = (e) => {
     const { name, value } = e.target;
+    
+    // Track when user interacts with children/pets fields
+    if (name === 'max_children_allowed') {
+      localStorage.setItem('childrenFieldTouched', 'true');
+    }
+    if (name === 'max_pets_allowed') {
+      localStorage.setItem('petsFieldTouched', 'true');
+    }
+    
     setEssentialAmenities(prev => {
       const updated = {
         ...prev,
@@ -618,6 +627,20 @@ const PropertyRegistrationForm = () => {
     
     if (essentialAmenities.max_people_allowed < 1) {
       toast.error('Max Adults must be at least 1. Properties must allow guests to stay.');
+      return;
+    }
+    
+    // Check if user has interacted with these fields (not default values)
+    const childrenTouched = localStorage.getItem('childrenFieldTouched');
+    const petsTouched = localStorage.getItem('petsFieldTouched');
+    
+    if (!childrenTouched) {
+      toast.error('Max Children is required. Enter 0 if you don\'t allow children.');
+      return;
+    }
+    
+    if (!petsTouched) {
+      toast.error('Max Pets is required. Enter 0 if you don\'t allow pets.');
       return;
     }
     
