@@ -42,3 +42,29 @@
   /* Option 8: Poppins - Friendly & Modern Sans-Serif */
   /* font-family: 'Poppins', sans-serif; */
 }
+
+/* 
+  ====================================
+  BOOKING CTA PREMIUM ANIMATIONS
+  ====================================
+*/
+
+
+
+@keyframes text-zoom {
+  0%, 100% {
+    transform: scale(0.96);
+  }
+  50% {
+    transform: scale(1.08);
+  }
+}
+
+
+
+
+
+.animate-text-zoom {
+  display: inline-block;
+  animation: text-zoom 2s infinite ease-in-out;
+}

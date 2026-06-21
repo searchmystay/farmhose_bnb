@@ -12,7 +12,7 @@ function ReviewsCarousel({ reviews }) {
   const [isTransitioning, setIsTransitioning] = useState(true)
 
   const getVisibleCards = () => {
-    if (window.innerWidth >= 1024) return 4 
+    if (window.innerWidth >= 1024) return 4
     if (window.innerWidth >= 768) return 2
     return 1
   }
@@ -95,9 +95,8 @@ function ReviewsCarousel({ reviews }) {
                       {[...Array(5)].map((_, i) => (
                         <svg
                           key={i}
-                          className={`w-3 h-3 md:w-4 md:h-4 ${
-                            i < review.rating ? 'text-yellow-400' : 'text-gray-300'
-                          }`}
+                          className={`w-3 h-3 md:w-4 md:h-4 ${i < review.rating ? 'text-yellow-400' : 'text-gray-300'
+                            }`}
                           fill="currentColor"
                           viewBox="0 0 20 20"
                         >
@@ -122,7 +121,7 @@ function ReviewsCarousel({ reviews }) {
     return (
       <>
         <div className="overflow-hidden">
-          <div 
+          <div
             className={`flex gap-6 ${isTransitioning ? 'transition-transform duration-700 ease-in-out' : ''}`}
             style={{
               transform: `translateX(-${currentIndex * (cardWidth + cardGap)}px)`,
@@ -147,9 +146,8 @@ function ReviewsCarousel({ reviews }) {
                           {[...Array(5)].map((_, i) => (
                             <svg
                               key={i}
-                              className={`w-3 h-3 md:w-4 md:h-4 ${
-                                i < review.rating ? 'text-yellow-400' : 'text-gray-300'
-                              }`}
+                              className={`w-3 h-3 md:w-4 md:h-4 ${i < review.rating ? 'text-yellow-400' : 'text-gray-300'
+                                }`}
                               fill="currentColor"
                               viewBox="0 0 20 20"
                             >
@@ -174,11 +172,10 @@ function ReviewsCarousel({ reviews }) {
             <button
               key={index}
               onClick={() => setCurrentIndex(startIndex + index)}
-              className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                (currentIndex - startIndex) % reviews.length === index
-                  ? 'bg-green-600 scale-125' 
-                  : 'bg-gray-300 hover:bg-gray-400'
-              }`}
+              className={`w-2 h-2 rounded-full transition-all duration-300 ${(currentIndex - startIndex) % reviews.length === index
+                ? 'bg-green-600 scale-125'
+                : 'bg-gray-300 hover:bg-gray-400'
+                }`}
             />
           ))}
         </div>
@@ -189,6 +186,21 @@ function ReviewsCarousel({ reviews }) {
   return (
     <div className="relative">
       {shouldEnableCarousel ? renderCarouselReviews() : renderStaticReviews()}
+    </div>
+  )
+}
+
+function CheckAvailabilityCTA({ onNavigate }) {
+  return (
+    <div className="w-full mt-2 mb-6">
+      <button
+        onClick={onNavigate}
+        className="w-full py-2.5 px-4 rounded-xl font-bold text-sm md:text-base text-white bg-green-600 hover:bg-green-700 shadow-md hover:shadow-lg transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer"
+      >
+        <span className="animate-text-zoom tracking-wide uppercase">
+          Fill form to check availability !!
+        </span>
+      </button>
     </div>
   )
 }
@@ -214,7 +226,7 @@ function PropertyDetailPage() {
   const handleWishlistClick = () => {
     const visitorInfo = getLeadInfo()
     const hasEmail = visitorInfo?.email
-    
+
     if (hasEmail) {
       navigate('/wishlist')
     } else {
@@ -226,17 +238,17 @@ function PropertyDetailPage() {
     const visitorInfo = getLeadInfo()
     const hasEmail = visitorInfo?.email
 
-    if(!hasEmail) {
+    if (!hasEmail) {
       setShowVisitorPopup(true)
       return
     }
-    
+
     const result = await handleToggleWishlist(visitorInfo.email, propertyId)
-    
+
     if (result.success) {
       const action = result.data.backend_data?.action || (isInWishlist ? 'removed' : 'added')
       setIsInWishlist(!isInWishlist)
-      
+
       if (action === 'added') {
         toast.success('Property added to wishlist!')
       } else {
@@ -250,7 +262,7 @@ function PropertyDetailPage() {
   const handleVisitorSubmit = async (visitorData) => {
     try {
       const result = await handleLeadInfo(visitorData)
-      
+
       if (result.success) {
         setShowVisitorPopup(false)
         await refetch()
@@ -303,7 +315,7 @@ function PropertyDetailPage() {
 
   const handleTouchEnd = () => {
     if (!touchStart || !touchEnd) return
-    
+
     const distance = touchStart - touchEnd
     const isLeftSwipe = distance > 50
     const isRightSwipe = distance < -50
@@ -336,18 +348,16 @@ function PropertyDetailPage() {
             onTouchMove={handleTouchMove}
             onTouchEnd={handleTouchEnd}
           />
-          
+
           {/* Wishlist Button */}
           <button
             onClick={handleAddToWishlist}
             disabled={wishlistLoading}
-            className={`absolute top-3 right-3 ${
-              isInWishlist 
-                ? 'bg-red-50 border-red-300 text-red-700 hover:bg-red-100' 
-                : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
-            } ${
-              wishlistLoading ? 'opacity-50 cursor-not-allowed' : ''
-            } p-2 rounded-full border-2 transition-all duration-200 shadow-lg z-10`}
+            className={`absolute top-3 right-3 ${isInWishlist
+              ? 'bg-red-50 border-red-300 text-red-700 hover:bg-red-100'
+              : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
+              } ${wishlistLoading ? 'opacity-50 cursor-not-allowed' : ''
+              } p-2 rounded-full border-2 transition-all duration-200 shadow-lg z-10`}
           >
             {wishlistLoading ? (
               <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
@@ -369,7 +379,7 @@ function PropertyDetailPage() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                 </svg>
               </button>
-              
+
               <button
                 onClick={nextImage}
                 className="absolute right-3 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full transition-all duration-200 opacity-0 group-hover:opacity-100"
@@ -387,9 +397,8 @@ function PropertyDetailPage() {
               <button
                 key={index}
                 onClick={() => goToImage(index)}
-                className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                  index === currentImageIndex ? 'bg-white scale-125' : 'bg-white/50 hover:bg-white/75'
-                }`}
+                className={`w-2 h-2 rounded-full transition-all duration-300 ${index === currentImageIndex ? 'bg-white scale-125' : 'bg-white/50 hover:bg-white/75'
+                  }`}
               />
             ))}
           </div>
@@ -400,9 +409,8 @@ function PropertyDetailPage() {
             <button
               key={index}
               onClick={() => goToImage(index)}
-              className={`relative overflow-hidden rounded-md aspect-square transition-all duration-200 ${
-                index === currentImageIndex ? 'ring-2 ring-green-500' : 'opacity-70 hover:opacity-100'
-              }`}
+              className={`relative overflow-hidden rounded-md aspect-square transition-all duration-200 ${index === currentImageIndex ? 'ring-2 ring-green-500' : 'opacity-70 hover:opacity-100'
+                }`}
             >
               <img
                 src={image}
@@ -427,7 +435,7 @@ function PropertyDetailPage() {
 
     const getAvailableAmenities = (categoryData) => {
       if (!categoryData) return []
-      
+
       return Object.entries(categoryData)
         .filter(([key, value]) => {
           if (typeof value === 'boolean') return value === true
@@ -445,7 +453,7 @@ function PropertyDetailPage() {
         <h3 className="text-xl font-semibold text-gray-900 mb-4">Amenities</h3>
         {amenityCategories.map((category) => {
           const availableAmenities = getAvailableAmenities(category.data)
-          
+
           if (availableAmenities.length === 0) return null
 
           return (
@@ -465,7 +473,7 @@ function PropertyDetailPage() {
                   </svg>
                 )}
               </button>
-              
+
               {openDropdown === category.key && (
                 <div className="px-4 pb-4 border-t border-gray-100">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mt-3">
@@ -494,15 +502,15 @@ function PropertyDetailPage() {
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between">
             <div onClick={() => navigate('/')} className="cursor-pointer">
-              <img 
-                src="/search_my_stay_logo.svg" 
-                alt="Search My Stay" 
+              <img
+                src="/search_my_stay_logo.svg"
+                alt="Search My Stay"
                 className="h-6 md:h-8 w-auto"
                 style={{ filter: 'brightness(0)' }}
               />
             </div>
 
-            <button 
+            <button
               onClick={handleWishlistClick}
               className="bg-white border border-gray-300 text-gray-700 px-4 py-2 md:px-6 md:py-3 rounded-full text-sm md:text-base font-medium hover:bg-gray-50 hover:border-gray-400 transition-all duration-200 flex items-center gap-2"
             >
@@ -531,7 +539,7 @@ function PropertyDetailPage() {
         <>
           <button className="bg-gray-100 text-gray-500 p-2 md:px-4 md:py-2 rounded-full flex items-center justify-center md:gap-2 cursor-not-allowed">
             <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.148.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
+              <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.148.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z" />
             </svg>
             <span className="hidden md:inline text-sm font-medium">Check Availability First</span>
           </button>
@@ -543,7 +551,7 @@ function PropertyDetailPage() {
       return (
         <button className="bg-gray-100 text-gray-500 p-2 md:px-4 md:py-2 rounded-full flex items-center justify-center md:gap-2 cursor-not-allowed">
           <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M6 18L18 6M6 6l12 12"/>
+            <path d="M6 18L18 6M6 6l12 12" />
           </svg>
           <span className="hidden md:inline text-sm font-medium">Not Available</span>
         </button>
@@ -551,23 +559,22 @@ function PropertyDetailPage() {
     }
 
     return (
-      <button 
+      <button
         onClick={handleWhatsappContact}
         disabled={whatsappLoading}
-        className={`${
-          whatsappLoading 
-            ? 'bg-gray-400 cursor-not-allowed' 
-            : 'bg-green-600 hover:bg-green-700'
-        } text-white p-2 md:px-4 md:py-2 rounded-full flex items-center justify-center md:gap-2 transition-all duration-200`}
+        className={`${whatsappLoading
+          ? 'bg-gray-400 cursor-not-allowed'
+          : 'bg-green-600 hover:bg-green-700'
+          } text-white p-2 md:px-4 md:py-2 rounded-full flex items-center justify-center md:gap-2 transition-all duration-200`}
       >
         {whatsappLoading ? (
           <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
         ) : (
           <svg className="w-4 h-4 md:w-5 md:h-5" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.148.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347zm-5.421 7.403c-1.877 0-3.71-.5-5.32-1.448l-.380-.225-3.958 1.039 1.057-3.867-.248-.396c-1.002-1.594-1.532-3.431-1.532-5.339 0-5.518 4.491-10.01 10.011-10.01 2.676 0 5.19 1.042 7.078 2.931 1.889 1.888 2.931 4.403 2.931 7.079-.007 5.519-4.498 10.01-10.009 10.01z"/>
+            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.148.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347zm-5.421 7.403c-1.877 0-3.71-.5-5.32-1.448l-.380-.225-3.958 1.039 1.057-3.867-.248-.396c-1.002-1.594-1.532-3.431-1.532-5.339 0-5.518 4.491-10.01 10.011-10.01 2.676 0 5.19 1.042 7.078 2.931 1.889 1.888 2.931 4.403 2.931 7.079-.007 5.519-4.498 10.01-10.009 10.01z" />
           </svg>
         )}
-        <span className="text-sm font-medium">
+        <span className="text-sm font-medium animate-text-zoom">
           {whatsappLoading ? 'Connecting...' : 'Connect with Owner'}
         </span>
       </button>
@@ -594,7 +601,7 @@ function PropertyDetailPage() {
 
     return (
       <div className="flex items-center">
-        <button 
+        <button
           onClick={() => setShowOwnerDetailsPopup(true)}
           className="flex items-center text-gray-700 hover:text-green-600 transition-colors"
         >
@@ -634,7 +641,7 @@ function PropertyDetailPage() {
         </div>
       )
     }
-    
+
     return null
   }
 
@@ -642,8 +649,8 @@ function PropertyDetailPage() {
     const maxLength = 1000
     const description = property.description || ''
     const shouldTruncate = description.length > maxLength
-    const displayDescription = showFullDescription || !shouldTruncate 
-      ? description 
+    const displayDescription = showFullDescription || !shouldTruncate
+      ? description
       : description.substring(0, maxLength) + '...'
 
     return (
@@ -654,18 +661,9 @@ function PropertyDetailPage() {
             <h2 className="text-base md:text-2xl font-bold text-gray-900 leading-tight flex-1">{property.name}</h2>
             <div className="flex flex-col items-end gap-2 flex-shrink-0 mr-3 md:mr-0">
               {renderContactButton()}
-              
-              {!hasSearchCriteria && (
-                <button 
-                  onClick={() => navigate('/search')}
-                  className="text-xs text-green-600 hover:text-green-700 font-medium underline"
-                >
-                  Fill form to check availability
-                </button>
-              )}
             </div>
           </div>
-          <div className="text-gray-600 leading-relaxed">
+          <div className="text-gray-600 leading-relaxed mb-4">
             <p className="text-sm md:text-base">{displayDescription}</p>
             {shouldTruncate && (
               <button
@@ -678,6 +676,10 @@ function PropertyDetailPage() {
           </div>
         </div>
 
+        {!hasSearchCriteria && (
+          <CheckAvailabilityCTA onNavigate={() => navigate('/search')} />
+        )}
+
         <div className="space-y-4">
           {property.per_day_price > 0 && (
             <div className="flex items-center text-gray-700">
@@ -689,7 +691,7 @@ function PropertyDetailPage() {
               </span>
             </div>
           )}
-          
+
           <div className="flex items-start text-gray-700">
             <svg className="w-4 h-4 md:w-5 md:h-5 mr-3 text-green-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
@@ -710,6 +712,33 @@ function PropertyDetailPage() {
         </div>
 
         {renderAmenitiesDropdown()}
+
+        {/* Below Amenities CTA Area */}
+        <div className=" border-t border-gray-100">
+          {!hasSearchCriteria ? (
+            <CheckAvailabilityCTA onNavigate={() => navigate('/search')} />
+          ) : (
+            property.availability !== false && (
+              <div className="w-full  mb-4">
+                <button
+                  onClick={handleWhatsappContact}
+                  disabled={whatsappLoading}
+                  className={`w-full py-2.5 px-4 rounded-xl font-bold text-sm md:text-base text-white bg-green-600 hover:bg-green-700 shadow-md hover:shadow-lg transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer ${whatsappLoading ? 'opacity-80 cursor-not-allowed' : ''
+                    }`}
+                >
+                  {whatsappLoading ? (
+                    <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  ) : (
+                    <svg className="w-6 h-6 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.148.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347zm-5.421 7.403c-1.877 0-3.71-.5-5.32-1.448l-.380-.225-3.958 1.039 1.057-3.867-.248-.396c-1.002-1.594-1.532-3.431-1.532-5.339 0-5.518 4.491-10.01 10.011-10.01 2.676 0 5.19 1.042 7.078 2.931 1.889 1.888 2.931 4.403 2.931 7.079-.007 5.519-4.498 10.01-10.009 10.01z" />
+                    </svg>
+                  )}
+                  <span className=' animate-text-zoom'>{whatsappLoading ? 'Connecting...' : 'Connect with Owner'}</span>
+                </button>
+              </div>
+            )
+          )}
+        </div>
       </div>
     )
   }
@@ -775,14 +804,14 @@ function PropertyDetailPage() {
 
       <div className="min-h-screen bg-gray-50">
         <SimpleNavbar />
-        
+
         <div className="container mx-auto px-4 py-8">
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-8 mb-8">
             <div className="order-1 lg:order-1">
               {renderImageGallery()}
             </div>
-            
+
             <div className="order-2 lg:order-2">
               {renderPropertyInfo()}
             </div>
@@ -792,17 +821,17 @@ function PropertyDetailPage() {
             {renderReviewsSection()}
           </div>
         </div>
-        
+
         <Footer />
       </div>
 
-      <VisitorLoginPopup 
+      <VisitorLoginPopup
         isOpen={showVisitorPopup}
         onClose={handlePopupClose}
         onSubmit={handleVisitorSubmit}
       />
 
-      <OwnerDetailsPopup 
+      <OwnerDetailsPopup
         isOpen={showOwnerDetailsPopup}
         onClose={() => setShowOwnerDetailsPopup(false)}
         ownerDetails={property?.owner_details}
