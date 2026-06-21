@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
-import { adminLogin, fetchPendingReviews, acceptReview, rejectReview, fetchPendingProperties, approveProperty, rejectProperty, fetchAdminPropertyDetails, fetchAllProperties, markPropertyAsFavourite, togglePropertyStatus, adminLogout, updatePropertyField } from '../services/adminApi'
+import { adminLogin, fetchPendingReviews, acceptReview, rejectReview, fetchPendingProperties, approveProperty, rejectProperty, fetchAdminPropertyDetails, fetchAllProperties, markPropertyAsFavourite, togglePropertyStatus, adminLogout, updatePropertyField, fetchUsers } from '../services/adminApi'
 
 export const useAdminAuth = () => {
   const [isLoading, setIsLoading] = useState(false)
@@ -298,4 +298,38 @@ export const useAllProperties = () => {
   }, [])
 
   return {allProperties, isLoading, error, actionLoading, refetch: fetchProperties, handleToggleFavourite, handleToggleStatus}
+}
+
+export const useAdminUsers = (initialPage = 1) => {
+  const [users, setUsers] = useState([])
+  const [totalCount, setTotalCount] = useState(0)
+  const [page, setPage] = useState(initialPage)
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState(null)
+
+  const fetchUsersList = async (pageNumber) => {
+    setIsLoading(true)
+    setError(null)
+    try {
+      const result = await fetchUsers(pageNumber, 25)
+      if (result.success && result.backend_data) {
+        setUsers(result.backend_data.users || [])
+        setTotalCount(result.backend_data.total_count || 0)
+      } else {
+        setUsers([])
+        setTotalCount(0)
+      }
+    } catch (err) {
+      setError(err.message || 'Failed to fetch users')
+      toast.error(err.message || 'Failed to fetch users')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    fetchUsersList(page)
+  }, [page])
+
+  return { users, totalCount, page, setPage, isLoading, error, refetch: () => fetchUsersList(page) }
 }

@@ -8,6 +8,7 @@ from ..database.db_admin_kpi_operations import (
     get_current_month_stats_live,
     get_last_5_saved_months
 )
+from ..database import db
 from ..utils.exception_handler import handle_exceptions
 
 
@@ -93,4 +94,25 @@ def get_admin_dashboard_kpis():
     kpis = build_kpis_response(counts_data, revenue_data, engagement_data, top_properties, current_month, graph_data, total_money)
     
     return kpis
+
+
+@handle_exceptions
+def get_paginated_users(page, limit=25):
+    skip = (page - 1) * limit
+    total_count = db.leads.count_documents({})
+    cursor = db.leads.find({}, {"name": 1, "email": 1, "mobile_number": 1}).sort("_id", -1).skip(skip).limit(limit)
+    users = [
+        {
+            "id": str(doc.get("_id")),
+            "name": doc.get("name", ""),
+            "email": doc.get("email", ""),
+            "mobile_number": doc.get("mobile_number", "")
+        }
+        for doc in cursor
+    ]
+    result_data = {
+        "users": users,
+        "total_count": total_count
+    }
+    return result_data
 

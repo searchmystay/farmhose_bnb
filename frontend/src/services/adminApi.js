@@ -280,3 +280,17 @@ export const deletePropertyAdminImage = async (propertyId, imageUrl) => {
     throw new Error('Failed to delete image, Network error')
   }
 }
+
+export const fetchUsers = async (page = 1, limit = 25) => {
+  try {
+    const response = await adminApiClient.get(`/users?page=${page}&limit=${limit}`)
+    const result = response.data
+    return result
+  } catch (error) {
+    if (error.response && error.response.data) {
+      const backendError = error.response.data
+      throw new Error(backendError.message || 'Failed to fetch users')
+    }
+    throw new Error('Failed to fetch users, Network error')
+  }
+}
