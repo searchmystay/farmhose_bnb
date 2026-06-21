@@ -5,6 +5,7 @@ from src.utils.exception_handler import handle_route_exceptions, AppException
 from src.config import MAX_SEARCH_DISTANCE_KM
 from bson import ObjectId
 import json
+from src.logics.admin_auth import admin_required
 
 website_bp = Blueprint('website', __name__)
 
@@ -123,6 +124,7 @@ def get_property_detail(property_id):
 
 
 @website_bp.route('/save-basic-info', methods=['POST'])
+@admin_required
 @handle_route_exceptions
 def save_basic_info_route():
     data = request.get_json() or {}
@@ -165,6 +167,7 @@ def save_basic_info_route():
 
 
 @website_bp.route('/save-essential-amenities', methods=['POST'])
+@admin_required
 @handle_route_exceptions
 def save_essential_amenities_route():
     data = request.get_json() or {}
@@ -218,6 +221,7 @@ def save_essential_amenities_route():
 
 
 @website_bp.route('/save-experience-amenities', methods=['POST'])
+@admin_required
 @handle_route_exceptions
 def save_experience_amenities_route():
     data = request.get_json() or {}
@@ -275,6 +279,7 @@ def save_experience_amenities_route():
 
 
 @website_bp.route('/save-additional-amenities', methods=['POST'])
+@admin_required
 @handle_route_exceptions
 def save_additional_amenities_route():
     data = request.get_json() or {}
@@ -329,6 +334,7 @@ def save_additional_amenities_route():
 
 
 @website_bp.route('/save-owner-details', methods=['POST'])
+@admin_required
 @handle_route_exceptions
 def save_owner_details_route():
     data = request.get_json() or {}
@@ -356,6 +362,7 @@ def save_owner_details_route():
 
 
 @website_bp.route('/upload-owner-photo', methods=['POST'])
+@admin_required
 @handle_route_exceptions
 def upload_owner_photo_route():
     property_id = request.form.get('propertyId')
@@ -379,6 +386,7 @@ def upload_owner_photo_route():
 
 
 @website_bp.route('/complete-property-registration', methods=['POST'])
+@admin_required
 @handle_route_exceptions
 def complete_property_registration_route():
     property_id = request.form.get('propertyId')
@@ -555,6 +563,7 @@ def get_farmhouse_name_route(farmhouse_id):
 
 
 @website_bp.route('/verify-otp', methods=['POST'])
+@admin_required
 @handle_route_exceptions
 def verify_otp_route():
     data = request.get_json() or {}

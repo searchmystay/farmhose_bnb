@@ -95,7 +95,11 @@ function App() {
             <Route path="/bnb" element={<PropertiesPage propertyType="bnb" />} />
             <Route path="/properties" element={<PropertiesPage propertyType="both" />} />
             <Route path="/property/:propertyId" element={<PropertyDetailPage />} />
-            <Route path="/register-property" element={<PropertyRegistrationForm />} />
+            <Route path="/register-property" element={
+              <ProtectedRoute>
+                <PropertyRegistrationForm />
+              </ProtectedRoute>
+            } />
             <Route path="/wishlist" element={<WishlistPage />} />
             <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
             <Route path="/terms-conditions" element={<TermsConditionsPage />} />

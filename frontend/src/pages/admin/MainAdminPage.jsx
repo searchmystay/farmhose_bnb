@@ -8,6 +8,7 @@ import IncompletePropertiesPage from './IncompletePropertiesPage'
 import PendingPropertiesPage from './PendingPropertiesPage'
 import PendingReviewsPage from './PendingReviewsPage'
 import PropertyDetailsPage from './PropertyDetailsPage'
+import PropertyRegistrationForm from '../website/PropertyRegistrationForm'
 
 function MainAdminPage() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
@@ -21,6 +22,7 @@ function MainAdminPage() {
   const menuItems = [
     { id: 'dashboard', name: 'Dashboard', icon: '▦' },
     { id: 'all', name: 'All Properties', icon: '⚏' },
+    { id: 'register', name: 'Register Property', icon: '➕' },
     { id: 'incomplete', name: 'Incomplete Properties', icon: '📝' },
     { id: 'pending', name: 'Pending Properties', icon: '⋯' },
     { id: 'reviews', name: 'Pending Reviews', icon: '💬' }
@@ -156,6 +158,9 @@ function MainAdminPage() {
       case 'reviews':
         return <PendingReviewsPage />
       
+      case 'register':
+        return <PropertyRegistrationForm />
+      
       default:
         return <div>Select a menu item</div>
     }
@@ -164,6 +169,9 @@ function MainAdminPage() {
   const getPageTitle = () => {
     if (viewingPropertyDetails) {
       return 'Property Details'
+    }
+    if (activeTab === 'register') {
+      return 'Register New Property'
     }
     return menuItems.find(item => item.id === activeTab)?.name || 'Dashboard'
   }

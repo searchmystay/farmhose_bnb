@@ -49,12 +49,12 @@ function HeroSection({ onWishlistClick }) {
 
       <div className="absolute top-3 right-3 md:top-8 md:right-8 z-20">
         <div className="flex gap-1 md:gap-4">
-          <button 
+          {/* <button 
             onClick={() => navigate('/register-property')}
             className="bg-white/10 backdrop-blur text-white border border-white/30 px-2 py-1.5 md:px-6 md:py-3 rounded-full text-xs md:text-base font-medium hover:bg-white/20 transition-all duration-200"
           >
             Register
-          </button>
+          </button> */}
           <button 
             onClick={onWishlistClick}
             className="bg-white/10 backdrop-blur text-white border border-white/30 px-2 py-1.5 md:px-6 md:py-3 rounded-full text-xs md:text-base font-medium hover:bg-white/20 transition-all duration-200"
