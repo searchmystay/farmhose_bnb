@@ -4,9 +4,11 @@ import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 import Footer from '../../components/Footer'
 import GooglePlacesAutocomplete from '../../components/common/GooglePlacesAutocomplete'
+import { useSaveSearchLead } from '../../hooks/usePropertyData'
 
 function SearchPage() {
   const navigate = useNavigate()
+  const { handleSaveSearchLead, loading: saveLoading } = useSaveSearchLead()
   const [formData, setFormData] = useState({
     checkIn: '',
     checkOut: '',
@@ -16,7 +18,8 @@ function SearchPage() {
     searchLongitude: null,
     numberOfAdults: '',
     numberOfChildren: '',
-    numberOfPets: ''
+    numberOfPets: '',
+    mobileNumber: ''
   })
   const [isAddressSelectedFromGoogle, setIsAddressSelectedFromGoogle] = useState(false)
 
@@ -31,7 +34,8 @@ function SearchPage() {
         address: parsedData.address || '',
         numberOfAdults: parsedData.numberOfAdults || '',
         numberOfChildren: parsedData.numberOfChildren || '',
-        numberOfPets: parsedData.numberOfPets || ''
+        numberOfPets: parsedData.numberOfPets || '',
+        mobileNumber: parsedData.mobileNumber || ''
       })
     }
   }, [])
@@ -80,7 +84,7 @@ function SearchPage() {
     setIsAddressSelectedFromGoogle(true)
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
     
     // Date validation on submit
@@ -122,6 +126,16 @@ function SearchPage() {
       toast.error('Maximum 20 pets allowed per property')
       return
     }
+
+    if (!formData.mobileNumber) {
+      toast.error('Mobile number is required')
+      return
+    }
+
+    if (!/^[6-9]\d{9}$/.test(formData.mobileNumber.trim())) {
+      toast.error('Please enter a valid 10-digit mobile number')
+      return
+    }
     
     const searchData = {
       checkInDate: formData.checkIn,
@@ -132,7 +146,14 @@ function SearchPage() {
       searchLongitude: formData.searchLongitude,
       numberOfAdults: adults,
       numberOfChildren: children,
-      numberOfPets: pets
+      numberOfPets: pets,
+      mobileNumber: formData.mobileNumber.trim()
+    }
+
+    const result = await handleSaveSearchLead(searchData)
+    if (!result.success) {
+      toast.error(result.error || 'Failed to save enquiry details')
+      return
     }
     
     sessionStorage.setItem('searchCriteria', JSON.stringify(searchData))
@@ -155,7 +176,8 @@ function SearchPage() {
       address: '',
       numberOfAdults: '',
       numberOfChildren: '',
-      numberOfPets: ''
+      numberOfPets: '',
+      mobileNumber: ''
     })
   }
 
@@ -286,6 +308,23 @@ function SearchPage() {
           />
         </div>
       </div>
+
+      <div>
+        <label htmlFor="mobileNumber" className="block text-sm font-medium text-gray-700 mb-2">
+          Mobile Number *
+        </label>
+        <input
+          type="tel"
+          id="mobileNumber"
+          name="mobileNumber"
+          value={formData.mobileNumber}
+          onChange={handleInputChange}
+          placeholder="Enter your 10-digit mobile number"
+          maxLength={10}
+          required
+          className="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm md:text-base focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors duration-200"
+        />
+      </div>
     </div>
   )
 
@@ -322,8 +361,15 @@ function SearchPage() {
                 {renderGuestDetails()}
                 
                 <div className="pt-4 space-y-3">
-                  <button type="submit" className="w-full bg-green-600 text-white py-3 md:py-4 px-6 rounded-lg font-medium text-base md:text-lg hover:bg-green-700 focus:ring-4 focus:ring-green-200 transition-all duration-200 transform hover:scale-[1.02]">
-                    Search Properties
+                  <button type="submit" disabled={saveLoading} className={`w-full bg-green-600 text-white py-3 md:py-4 px-6 rounded-lg font-medium text-base md:text-lg hover:bg-green-700 focus:ring-4 focus:ring-green-200 transition-all duration-200 transform hover:scale-[1.02] flex items-center justify-center gap-2 cursor-pointer ${saveLoading ? 'opacity-80 cursor-not-allowed' : ''}`}>
+                    {saveLoading ? (
+                      <>
+                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                        <span>Saving Enquiry...</span>
+                      </>
+                    ) : (
+                      'Search Properties'
+                    )}
                   </button>
                   <button type="button" onClick={handleClearSearch} className="w-full bg-gray-100 text-gray-700 py-3 md:py-4 px-6 rounded-lg font-medium text-base md:text-lg hover:bg-gray-200 focus:ring-4 focus:ring-gray-200 transition-all duration-200 border border-gray-300">
                     Clear Search Details

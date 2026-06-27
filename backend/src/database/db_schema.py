@@ -915,6 +915,60 @@ def get_admin_analysis_schema():
     return schema
 
 
+def get_search_lead_schema() -> Dict:
+    return {
+        "bsonType": "object",
+        "required": ["mobile_number", "created_at"],
+        "properties": {
+            "_id": {
+                "bsonType": "objectId",
+                "description": "Unique identifier for the search lead"
+            },
+            "mobile_number": {
+                "bsonType": "string",
+                "description": "10-digit mobile number of the user",
+                "pattern": "^[0-9]{10}$"
+            },
+            "check_in_date": {
+                "bsonType": "string",
+                "description": "Selected check-in date (YYYY-MM-DD)"
+            },
+            "check_out_date": {
+                "bsonType": "string",
+                "description": "Selected check-out date (YYYY-MM-DD)"
+            },
+            "property_type": {
+                "bsonType": "string",
+                "description": "Selected property type filters",
+                "enum": ["farmhouse", "bnb", "both"]
+            },
+            "location_name": {
+                "bsonType": "string",
+                "description": "Textual search location name"
+            },
+            "number_of_adults": {
+                "bsonType": "int",
+                "description": "Number of adults selected",
+                "minimum": 0
+            },
+            "number_of_children": {
+                "bsonType": "int",
+                "description": "Number of children selected",
+                "minimum": 0
+            },
+            "number_of_pets": {
+                "bsonType": "int",
+                "description": "Number of pets selected",
+                "minimum": 0
+            },
+            "created_at": {
+                "bsonType": "date",
+                "description": "Timestamp when this search lead was recorded"
+            }
+        }
+    }
+
+
 def create_geospatial_indexes(db):
     """
     Create geospatial indexes for location-based queries.

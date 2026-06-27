@@ -584,3 +584,17 @@ def verify_otp_route():
     }
     
     return jsonify(response_data), 200
+
+
+@website_bp.route('/search-lead', methods=['POST'])
+@handle_route_exceptions
+def create_search_lead_route():
+    data = request.get_json() or {}
+    if not data.get("mobileNumber"):
+        raise AppException("Mobile number is required", 400)
+    create_search_lead(data)
+    response_data = {
+        "success": True,
+        "message": "Enquiry registered successfully"
+    }
+    return jsonify(response_data), 200

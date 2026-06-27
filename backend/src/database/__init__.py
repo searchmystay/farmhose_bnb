@@ -1,6 +1,6 @@
 from pymongo import MongoClient
 from src.config import MONGODB_URI, DATABASE_NAME
-from src.database.db_schema import get_farmhouse_schema, get_payment_schema, get_farmhouse_analysis_schema, get_lead_schema, get_pending_reviews_schema
+from src.database.db_schema import get_farmhouse_schema, get_payment_schema, get_farmhouse_analysis_schema, get_lead_schema, get_pending_reviews_schema, get_search_lead_schema
 from src.utils.exception_handler import AppException, handle_exceptions
 
 client = MongoClient(MONGODB_URI)
@@ -10,6 +10,7 @@ payments_collection = db.payments
 farmhouse_analysis_collection = db.farmhouse_analysis
 leads_collection = db.leads
 pending_reviews_collection = db.pending_reviews
+search_leads_collection = db.search_leads
 
 @handle_exceptions
 def setup_farmhouses_collection():
@@ -115,12 +116,30 @@ def setup_pending_reviews_collection():
 
 
 @handle_exceptions
+def setup_search_leads_collection():
+    search_lead_schema = get_search_lead_schema()
+    existing_collections = db.list_collection_names()
+    
+    if 'search_leads' not in existing_collections:
+        validator = {"$jsonSchema": search_lead_schema}
+        collection_result = db.create_collection('search_leads', validator=validator)
+        creation_success = True
+    else:
+        validator = {"$jsonSchema": search_lead_schema}
+        update_result = db.command("collMod", "search_leads", validator=validator)
+        creation_success = True
+    
+    return creation_success
+
+
+@handle_exceptions
 def initialize_database():
     farmhouses_setup = setup_farmhouses_collection()
     payments_setup = setup_payments_collection()
     farmhouse_analysis_setup = setup_farmhouse_analysis_collection()
     leads_setup = setup_leads_collection()
     pending_reviews_setup = setup_pending_reviews_collection()
+    search_leads_setup = setup_search_leads_collection()
     geospatial_indexes_setup = setup_geospatial_indexes()
     
     if not farmhouses_setup:
@@ -137,6 +156,9 @@ def initialize_database():
     
     if not pending_reviews_setup:
         raise AppException("Failed to setup pending_reviews collection")
+        
+    if not search_leads_setup:
+        raise AppException("Failed to setup search_leads collection")
     
     if not geospatial_indexes_setup:
         raise AppException("Failed to setup geospatial indexes")
