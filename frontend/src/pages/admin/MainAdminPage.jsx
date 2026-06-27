@@ -10,6 +10,7 @@ import PendingReviewsPage from './PendingReviewsPage'
 import PropertyDetailsPage from './PropertyDetailsPage'
 import PropertyRegistrationForm from '../website/PropertyRegistrationForm'
 import LoggedInUsersPage from './LoggedInUsersPage'
+import SearchLeadsPage from './SearchLeadsPage'
 
 function MainAdminPage() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
@@ -27,7 +28,8 @@ function MainAdminPage() {
     { id: 'incomplete', name: 'Incomplete Properties', icon: '📝' },
     { id: 'pending', name: 'Pending Properties', icon: '⋯' },
     { id: 'reviews', name: 'Pending Reviews', icon: '💬' },
-    { id: 'users', name: 'Log In Users', icon: '👤' }
+    { id: 'users', name: 'Log In Users', icon: '👤' },
+    { id: 'searchLeads', name: 'Search Leads', icon: '🔍' }
   ]
 
   const toggleSidebar = () => {
@@ -165,6 +167,9 @@ function MainAdminPage() {
       
       case 'users':
         return <LoggedInUsersPage />
+      
+      case 'searchLeads':
+        return <SearchLeadsPage />
       
       default:
         return <div>Select a menu item</div>

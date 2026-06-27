@@ -294,3 +294,17 @@ export const fetchUsers = async (page = 1, limit = 25) => {
     throw new Error('Failed to fetch users, Network error')
   }
 }
+
+export const fetchSearchLeads = async (page = 1, limit = 25) => {
+  try {
+    const response = await adminApiClient.get(`/search-leads?page=${page}&limit=${limit}`)
+    const result = response.data
+    return result
+  } catch (error) {
+    if (error.response && error.response.data) {
+      const backendError = error.response.data
+      throw new Error(backendError.message || 'Failed to fetch search leads')
+    }
+    throw new Error('Failed to fetch search leads, Network error')
+  }
+}
