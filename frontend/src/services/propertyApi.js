@@ -403,3 +403,17 @@ export const completePropertyRegistration = async (propertyId, propertyImages, p
     throw new Error('Failed to complete registration, Network error')
   }
 }
+
+export const saveSearchLead = async (searchLeadData) => {
+  try {
+    const response = await apiClient.post('/search-lead', searchLeadData)
+    const result = response.data
+    return result
+  } catch (error) {
+    if (error.response && error.response.data) {
+      const backendError = error.response.data
+      throw new Error(backendError.message || 'Failed to save search lead')
+    }
+    throw new Error('Failed to save search lead, Network error')
+  }
+}

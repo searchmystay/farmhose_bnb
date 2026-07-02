@@ -1266,3 +1266,22 @@ def verify_otp_and_update_phone(property_id, entered_otp):
     # Update using the same query filter (phone_number + status: incomplete)
     db_update_one("farmhouses", query_filter, update_data)
     return True
+
+
+@handle_exceptions
+def create_search_lead(search_lead_data):
+    ist_tz = pytz.timezone('Asia/Kolkata')
+    current_time = datetime.now(ist_tz).replace(tzinfo=None)
+    db_record = {
+        "mobile_number": search_lead_data.get("mobileNumber"),
+        "check_in_date": search_lead_data.get("checkInDate"),
+        "check_out_date": search_lead_data.get("checkOutDate"),
+        "property_type": search_lead_data.get("propertyType"),
+        "location_name": search_lead_data.get("address"),
+        "number_of_adults": safe_int_conversion(search_lead_data.get("numberOfAdults")),
+        "number_of_children": safe_int_conversion(search_lead_data.get("numberOfChildren")),
+        "number_of_pets": safe_int_conversion(search_lead_data.get("numberOfPets")),
+        "created_at": current_time
+    }
+    db_insert_one("search_leads", db_record)
+    return True

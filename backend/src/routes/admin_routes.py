@@ -1,7 +1,7 @@
 from flask import Blueprint, jsonify, request, make_response
 from src.logics.admin_logics import *
 from src.logics.admin_auth import admin_required
-from src.logics.admin_kpi_logic import get_admin_dashboard_kpis
+from src.logics.admin_kpi_logic import get_admin_dashboard_kpis, get_paginated_users, get_paginated_search_leads
 from src.utils.exception_handler import handle_route_exceptions, AppException
 from src.logics.property_edit_logic import update_property_field
 
@@ -327,5 +327,33 @@ def delete_property_admin_image_route(property_id):
     response_data = {
         "success": True,
         "message": "Image deleted successfully"
+    }
+    return jsonify(response_data), 200
+
+
+@admin_bp.route('/users', methods=['GET'])
+@admin_required
+@handle_route_exceptions
+def get_users_route():
+    page = int(request.args.get('page', 1))
+    limit = int(request.args.get('limit', 25))
+    users_data = get_paginated_users(page, limit)
+    response_data = {
+        "success": True,
+        "backend_data": users_data
+    }
+    return jsonify(response_data), 200
+
+
+@admin_bp.route('/search-leads', methods=['GET'])
+@admin_required
+@handle_route_exceptions
+def get_search_leads_route():
+    page = int(request.args.get('page', 1))
+    limit = int(request.args.get('limit', 25))
+    leads_data = get_paginated_search_leads(page, limit)
+    response_data = {
+        "success": True,
+        "backend_data": leads_data
     }
     return jsonify(response_data), 200

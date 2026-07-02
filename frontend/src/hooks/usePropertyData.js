@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { fetchFarmhouseList, fetchBnbList, fetchPropertyList, fetchTopProperties, fetchPropertyDetail, registerProperty, contactViaWhatsapp, toggleWishlist, createLead, getUserWishlist, submitReview, getFarmhouseName } from '../services/propertyApi'
+import { fetchFarmhouseList, fetchBnbList, fetchPropertyList, fetchTopProperties, fetchPropertyDetail, registerProperty, contactViaWhatsapp, toggleWishlist, createLead, getUserWishlist, submitReview, getFarmhouseName, saveSearchLead } from '../services/propertyApi'
 
 export const useFarmhouseList = (shouldFetch = false) => {
   const [farmhouses, setFarmhouses] = useState([])
@@ -540,4 +540,26 @@ export const useReviewSubmission = () => {
   }
 
   return { handleSubmitReview, loading, error, success, resetState }
+}
+
+export const useSaveSearchLead = () => {
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState(null)
+
+  const handleSaveSearchLead = async (searchLeadData) => {
+    setLoading(true)
+    setError(null)
+    try {
+      const result = await saveSearchLead(searchLeadData)
+      setLoading(false)
+      return { success: true, data: result }
+    } catch (err) {
+      const errorMessage = err.message || 'Failed to save search lead'
+      setError(errorMessage)
+      setLoading(false)
+      return { success: false, error: errorMessage }
+    }
+  }
+
+  return { handleSaveSearchLead, loading, error }
 }

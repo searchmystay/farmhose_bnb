@@ -8,6 +8,7 @@ from ..database.db_admin_kpi_operations import (
     get_current_month_stats_live,
     get_last_5_saved_months
 )
+from ..database import db
 from ..utils.exception_handler import handle_exceptions
 
 
@@ -93,4 +94,42 @@ def get_admin_dashboard_kpis():
     kpis = build_kpis_response(counts_data, revenue_data, engagement_data, top_properties, current_month, graph_data, total_money)
     
     return kpis
+
+
+@handle_exceptions
+def get_paginated_users(page, limit=25):
+    skip = (page - 1) * limit
+    total_count = db.leads.count_documents({})
+    cursor = db.leads.find({}, {"name": 1, "email": 1, "mobile_number": 1}).sort("_id", -1).skip(skip).limit(limit)
+    users = [
+        {
+            "id": str(doc.get("_id")),
+            "name": doc.get("name", ""),
+            "email": doc.get("email", ""),
+            "mobile_number": doc.get("mobile_number", "")
+        }
+        for doc in cursor
+    ]
+    result_data = {
+        "users": users,
+        "total_count": total_count
+    }
+    return result_data
+
+
+@handle_exceptions
+def get_paginated_search_leads(page, limit=25):
+    skip = (page - 1) * limit
+    total_count = db.search_leads.count_documents({})
+    cursor = db.search_leads.find({}).sort("_id", -1).skip(skip).limit(limit)
+    leads = [{
+        "id": str(doc.get("_id")), "mobile_number": doc.get("mobile_number", ""),
+        "check_in_date": doc.get("check_in_date", ""), "check_out_date": doc.get("check_out_date", ""),
+        "property_type": doc.get("property_type", ""), "location_name": doc.get("location_name", ""),
+        "number_of_adults": doc.get("number_of_adults", 0), "number_of_children": doc.get("number_of_children", 0),
+        "number_of_pets": doc.get("number_of_pets", 0),
+        "created_at": doc.get("created_at").strftime("%Y-%m-%d %H:%M:%S") if doc.get("created_at") else ""
+    } for doc in cursor]
+    result_data = {"leads": leads, "total_count": total_count}
+    return result_data
 
