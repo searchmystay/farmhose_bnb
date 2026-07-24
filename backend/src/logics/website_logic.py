@@ -990,37 +990,37 @@ def check_farmhouse_credit_balance(farmhouse_id, message_data=None):
 
 @handle_exceptions
 def deduct_lead_cost_from_farmhouse(farmhouse_id, message_data=None):
-    from src.logics.payment_logic import trigger_auto_recharge_in_background
+    # from src.logics.payment_logic import trigger_auto_recharge_in_background
     
     current_balance, whatsapp_link = check_farmhouse_credit_balance(farmhouse_id, message_data)
     
-    if current_balance < MINIMUM_BALANCE_THRESHOLD:
-        deactivate_data = {"$set": {"status": "inactive"}}
-        query_filter = {"_id": ObjectId(farmhouse_id)}
-        db_update_one("farmhouses", query_filter, deactivate_data)
-        raise AppException("Contact information is currently unavailable for this farmhouse")
+    # if current_balance < MINIMUM_BALANCE_THRESHOLD:
+    #     deactivate_data = {"$set": {"status": "inactive"}}
+    #     query_filter = {"_id": ObjectId(farmhouse_id)}
+    #     db_update_one("farmhouses", query_filter, deactivate_data)
+    #     raise AppException("Contact information is currently unavailable for this farmhouse")
     
-    new_balance = current_balance - LEAD_COST_RUPEES
+    # new_balance = current_balance - LEAD_COST_RUPEES
 
-    if new_balance <= MINIMUM_BALANCE_THRESHOLD:
-        update_data = {
-            "$set": {
-                "credit_balance": new_balance,
-                "status": "inactive"
-            }
-        }
-    else:
-        update_data = {
-            "$set": {"credit_balance": new_balance},
-        }
+    # if new_balance <= MINIMUM_BALANCE_THRESHOLD:
+    #     update_data = {
+    #         "$set": {
+    #             "credit_balance": new_balance,
+    #             "status": "inactive"
+    #         }
+    #     }
+    # else:
+    #     update_data = {
+    #         "$set": {"credit_balance": new_balance},
+    #     }
     
-    query_filter = {"_id": ObjectId(farmhouse_id)}
-    db_update_one("farmhouses", query_filter, update_data)
+    # query_filter = {"_id": ObjectId(farmhouse_id)}
+    # db_update_one("farmhouses", query_filter, update_data)
     
-    if new_balance < AUTO_PAYMENT_THRESHOLD:
-        trigger_auto_recharge_in_background(farmhouse_id)
-    
-    return new_balance, whatsapp_link
+    # if new_balance < AUTO_PAYMENT_THRESHOLD:
+    #     trigger_auto_recharge_in_background(farmhouse_id)
+    # return new_balance, whatsapp_link
+    return current_balance, whatsapp_link
 
 
 @handle_exceptions

@@ -852,10 +852,14 @@ const PropertyRegistrationForm = () => {
         uploadData.aadhaarCard,
         uploadData.panCard
       );
-      
-      toast.success('Documents uploaded successfully! Now add credits to activate your property.');
-      setDocumentsUploaded(true);
-      setCurrentStep(8);
+      // toast.success('Documents uploaded successfully! Now add credits to activate your property.');
+      // setDocumentsUploaded(true);
+      // setCurrentStep(8);
+      toast.success('Registration completed successfully! Your property will be active after admin approval.');
+      clearAllStates();
+      setPropertyId(null);
+      clearFormData();
+      setIsRegistrationComplete(true);
     } catch (error) {
       toast.error(error.message || 'Failed to upload documents. Please try again.');
     } finally {
@@ -901,7 +905,7 @@ const PropertyRegistrationForm = () => {
               </div>
 
               <ProcessExplanation />
-              <ProgressIndicator currentStep={currentStep} />
+              <ProgressIndicator currentStep={currentStep} totalSteps={7} />
               
               {currentStep === 1 && (
                 <Step1BasicInfo
