@@ -638,7 +638,7 @@ export const Step7DocumentUpload = ({
 
       <StepNavigation 
         onPrevious={onPrevious} 
-        nextLabel="Continue to Payment" 
+        nextLabel="Submit Registration" 
         loading={loading}
         nextButtonColor="green"
       />
